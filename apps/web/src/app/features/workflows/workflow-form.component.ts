@@ -2,16 +2,15 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { WorkflowService } from './workflow.service';
 
 @Component({
@@ -19,99 +18,103 @@ import { WorkflowService } from './workflow.service';
     standalone: true,
     imports: [
         CommonModule, RouterLink, ReactiveFormsModule,
-        MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-        MatButtonModule, MatIconModule, MatDatepickerModule, MatNativeDateModule,
-        MatSnackBarModule, MatProgressSpinnerModule,
+        NzCardModule, NzFormModule, NzInputModule, NzSelectModule,
+        NzButtonModule, NzIconModule, NzDatePickerModule, NzSpinModule,
     ],
     template: `
-        <div class="workflow-form-container">
-            <div class="header">
-                <a mat-button routerLink="/workflows">
-                    <mat-icon>arrow_back</mat-icon> 一覧に戻る
-                </a>
-                <h1>{{ isEditMode ? '申請編集' : '新規申請' }}</h1>
+        <div class="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+            <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                <button nz-button nzShape="circle" routerLink="/workflows">
+                    <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-900 m-0">{{ isEditMode ? '申請編集' : '新規申請' }}</h1>
             </div>
 
-            <mat-card data-testid="workflow-form">
-                <mat-card-content>
-                    <form [formGroup]="form" class="form-grid">
-                        <mat-form-field appearance="outline">
-                            <mat-label>申請種別</mat-label>
-                            <mat-select formControlName="type" data-testid="type-select">
-                                <mat-option value="expense">経費</mat-option>
-                                <mat-option value="leave">休暇</mat-option>
-                                <mat-option value="purchase">購買</mat-option>
-                                <mat-option value="other">その他</mat-option>
-                            </mat-select>
-                            <mat-error>申請種別を選択してください</mat-error>
-                        </mat-form-field>
+            <nz-card data-testid="workflow-form">
+                <form nz-form [formGroup]="form" nzLayout="vertical">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                        <nz-form-item>
+                            <nz-form-label nzRequired nzFor="type">申請種別</nz-form-label>
+                            <nz-form-control nzErrorTip="申請種別を選択してください">
+                                <nz-select formControlName="type"
+                                           nzPlaceHolder="種別を選択"
+                                           id="type"
+                                           data-testid="type-select">
+                                    <nz-option nzValue="expense" nzLabel="経費"></nz-option>
+                                    <nz-option nzValue="leave" nzLabel="休暇"></nz-option>
+                                    <nz-option nzValue="purchase" nzLabel="購買"></nz-option>
+                                    <nz-option nzValue="other" nzLabel="その他"></nz-option>
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
 
-                        <mat-form-field appearance="outline">
-                            <mat-label>タイトル</mat-label>
-                            <input matInput formControlName="title"
-                                   maxlength="100"
-                                   data-testid="title-input">
-                            <mat-error>タイトルを入力してください（100文字以内）</mat-error>
-                        </mat-form-field>
+                        <nz-form-item>
+                            <nz-form-label nzRequired nzFor="title">タイトル</nz-form-label>
+                            <nz-form-control nzErrorTip="タイトルを入力してください（100文字以内）">
+                                <input nz-input formControlName="title" id="title"
+                                       maxlength="100" placeholder="タイトルを入力"
+                                       data-testid="title-input" />
+                            </nz-form-control>
+                        </nz-form-item>
 
-                        <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>説明</mat-label>
-                            <textarea matInput formControlName="description"
-                                      rows="4" maxlength="2000"
-                                      data-testid="description-input"></textarea>
-                        </mat-form-field>
+                        <nz-form-item class="md:col-span-2">
+                            <nz-form-label nzFor="description">説明</nz-form-label>
+                            <nz-form-control>
+                                <nz-textarea-count [nzMaxCharacterCount]="2000">
+                                    <textarea nz-input formControlName="description" id="description"
+                                              rows="4" placeholder="詳細を入力"
+                                              data-testid="description-input"></textarea>
+                                </nz-textarea-count>
+                            </nz-form-control>
+                        </nz-form-item>
 
-                        <mat-form-field appearance="outline">
-                            <mat-label>金額</mat-label>
-                            <input matInput type="number" formControlName="amount"
-                                   data-testid="amount-input">
-                            <span matPrefix>¥&nbsp;</span>
-                        </mat-form-field>
+                        <nz-form-item>
+                            <nz-form-label nzFor="amount">金額</nz-form-label>
+                            <nz-form-control>
+                                <nz-input-group nzPrefix="¥">
+                                    <input nz-input type="number" formControlName="amount" id="amount"
+                                           placeholder="金額を入力"
+                                           data-testid="amount-input" />
+                                </nz-input-group>
+                            </nz-form-control>
+                        </nz-form-item>
 
-                        <mat-form-field appearance="outline">
-                            <mat-label>承認者ID</mat-label>
-                            <input matInput formControlName="approverId"
-                                   data-testid="approver-input">
-                            <mat-error>承認者を選択してください</mat-error>
-                        </mat-form-field>
-                    </form>
-                </mat-card-content>
+                        <nz-form-item>
+                            <nz-form-label nzRequired nzFor="approverId">承認者ID</nz-form-label>
+                            <nz-form-control nzErrorTip="承認者を選択してください">
+                                <input nz-input formControlName="approverId" id="approverId"
+                                       placeholder="承認者IDを入力"
+                                       data-testid="approver-input" />
+                            </nz-form-control>
+                        </nz-form-item>
+                    </div>
 
-                <mat-card-actions align="end">
-                    <button mat-button routerLink="/workflows" data-testid="cancel-btn">
-                        キャンセル
-                    </button>
-                    <button mat-stroked-button
-                            (click)="onSaveDraft()"
-                            [disabled]="isSubmitting"
-                            data-testid="save-draft-btn">
-                        下書き保存
-                    </button>
-                    <button mat-raised-button color="primary"
-                            (click)="onSubmit()"
-                            [disabled]="form.invalid || isSubmitting"
-                            data-testid="submit-btn">
-                        <mat-icon>send</mat-icon> 送信
-                    </button>
-                </mat-card-actions>
-            </mat-card>
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                        <button nz-button routerLink="/workflows" data-testid="cancel-btn">
+                            キャンセル
+                        </button>
+                        <button nz-button
+                                (click)="onSaveDraft()" [disabled]="isSubmitting" data-testid="save-draft-btn">
+                            下書き保存
+                        </button>
+                        <button nz-button nzType="primary"
+                                (click)="onSubmit()" [disabled]="form.invalid || isSubmitting" data-testid="submit-btn">
+                            <span nz-icon nzType="send" nzTheme="outline"></span>
+                            送信する
+                        </button>
+                    </div>
+                </form>
+            </nz-card>
         </div>
     `,
-    styles: [`
-        .workflow-form-container { padding: 24px; max-width: 700px; margin: 0 auto; }
-        .header { margin-bottom: 16px; }
-        .header h1 { margin: 8px 0 0; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 0; }
-        .full-width { grid-column: span 2; }
-        mat-card-actions { padding: 16px; }
-    `],
+    styles: [],
 })
 export class WorkflowFormComponent implements OnInit {
     private fb = inject(FormBuilder);
     private workflowService = inject(WorkflowService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
 
     form: FormGroup;
     isEditMode = false;
@@ -152,7 +155,7 @@ export class WorkflowFormComponent implements OnInit {
         if (this.isEditMode && this.editId) {
             this.workflowService.update(this.editId, this.form.value).subscribe({
                 next: () => {
-                    this.snackBar.open('下書きを保存しました', '閉じる', { duration: 3000 });
+                    this.message.success('下書きを保存しました');
                     this.router.navigate(['/workflows']);
                 },
                 error: () => { this.isSubmitting = false; },
@@ -160,7 +163,7 @@ export class WorkflowFormComponent implements OnInit {
         } else {
             this.workflowService.create({ ...this.form.value, action: 'draft' }).subscribe({
                 next: () => {
-                    this.snackBar.open('下書きを保存しました', '閉じる', { duration: 3000 });
+                    this.message.success('下書きを保存しました');
                     this.router.navigate(['/workflows']);
                 },
                 error: () => { this.isSubmitting = false; },
@@ -178,7 +181,7 @@ export class WorkflowFormComponent implements OnInit {
                 next: () => {
                     this.workflowService.submit(this.editId!).subscribe({
                         next: () => {
-                            this.snackBar.open('申請を送信しました', '閉じる', { duration: 3000 });
+                            this.message.success('申請を送信しました');
                             this.router.navigate(['/workflows']);
                         },
                         error: () => { this.isSubmitting = false; },
@@ -189,7 +192,7 @@ export class WorkflowFormComponent implements OnInit {
         } else {
             this.workflowService.create({ ...this.form.value, action: 'submit' }).subscribe({
                 next: () => {
-                    this.snackBar.open('申請を送信しました', '閉じる', { duration: 3000 });
+                    this.message.success('申請を送信しました');
                     this.router.navigate(['/workflows']);
                 },
                 error: () => { this.isSubmitting = false; },

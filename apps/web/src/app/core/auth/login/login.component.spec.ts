@@ -2,7 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideNzIcons } from 'ng-zorro-antd/icon';
+import {
+    MailOutline, LockOutline, EyeOutline, EyeInvisibleOutline,
+} from '@ant-design/icons-angular/icons';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../auth.service';
 import { signal } from '@angular/core';
@@ -26,12 +30,14 @@ describe('LoginComponent', () => {
         };
 
         await TestBed.configureTestingModule({
-            imports: [LoginComponent, NoopAnimationsModule],
+            imports: [LoginComponent],
             providers: [
                 { provide: AuthService, useValue: authServiceMock },
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([{ path: 'dashboard', component: LoginComponent }]),
+                provideNoopAnimations(),
+                provideNzIcons([MailOutline, LockOutline, EyeOutline, EyeInvisibleOutline]),
             ],
         }).compileComponents();
 

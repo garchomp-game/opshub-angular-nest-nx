@@ -7,20 +7,15 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import {
     TimesheetService,
     TimesheetEntry,
@@ -50,220 +45,183 @@ interface ProjectOption {
     imports: [
         CommonModule,
         FormsModule,
-        MatTableModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatCardModule,
-        MatToolbarModule,
-        MatTooltipModule,
+        NzTableModule,
+        NzInputNumberModule,
+        NzSelectModule,
+        NzButtonModule,
+        NzIconModule,
+        NzSpinModule,
+        NzCardModule,
+        NzTooltipModule,
     ],
     template: `
-        <mat-card data-testid="timesheet-grid">
-            <mat-card-header>
-                <mat-card-title>工数入力</mat-card-title>
-                <mat-card-subtitle>
-                    {{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}
-                </mat-card-subtitle>
-            </mat-card-header>
+        <div class="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+            <nz-card [nzBordered]="true" data-testid="timesheet-grid"
+                     class="!rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 -mx-6 -mt-6 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 m-0 flex items-center">
+                            <span nz-icon nzType="clock-circle" nzTheme="outline" class="mr-2 text-primary-600"></span>
+                            工数入力
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1 mb-0">{{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}</p>
+                    </div>
+                </div>
 
-            <mat-card-content>
                 <!-- Week navigation -->
-                <div class="week-nav">
-                    <button mat-icon-button (click)="prevWeek()" matTooltip="前の週"
-                        data-testid="timesheet-prev-week">
-                        <mat-icon>chevron_left</mat-icon>
+                <div class="flex items-center gap-2 mb-6 bg-gray-50 rounded-lg p-2 max-w-fit mx-auto border border-gray-100">
+                    <button nz-button nzType="text" nzShape="circle" (click)="prevWeek()"
+                            nz-tooltip nzTooltipTitle="前の週"
+                            data-testid="timesheet-prev-week">
+                        <span nz-icon nzType="left" nzTheme="outline"></span>
                     </button>
 
-                    <span class="week-label">
+                    <span class="text-base font-bold text-gray-900 px-6 min-w-[200px] text-center tracking-wide">
                         {{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}
                     </span>
 
-                    <button mat-icon-button (click)="nextWeek()" matTooltip="次の週"
-                        data-testid="timesheet-next-week">
-                        <mat-icon>chevron_right</mat-icon>
+                    <button nz-button nzType="text" nzShape="circle" (click)="nextWeek()"
+                            nz-tooltip nzTooltipTitle="次の週"
+                            data-testid="timesheet-next-week">
+                        <span nz-icon nzType="right" nzTheme="outline"></span>
                     </button>
 
-                    <button mat-stroked-button (click)="goToCurrentWeek()"
-                        data-testid="timesheet-current-week">
+                    <div class="w-px h-6 bg-gray-200 mx-2"></div>
+
+                    <button nz-button nzType="default" (click)="goToCurrentWeek()"
+                            data-testid="timesheet-current-week">
                         今週
                     </button>
                 </div>
 
                 @if (timesheetService.isLoading()) {
-                    <div class="loading-container" data-testid="loading">
-                        <mat-progress-spinner mode="indeterminate" diameter="40" />
+                    <div class="flex justify-center py-16" data-testid="loading">
+                        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
                     </div>
                 } @else {
-                    <!-- Grid table -->
-                    <table mat-table [dataSource]="rows()" class="timesheet-table">
-                        <!-- Project Column -->
-                        <ng-container matColumnDef="project">
-                            <th mat-header-cell *matHeaderCellDef>プロジェクト</th>
-                            <td mat-cell *matCellDef="let row" data-testid="timesheet-row">
-                                @if (row.isNew) {
-                                    <mat-form-field appearance="outline" class="project-select">
-                                        <mat-select [(value)]="row.projectId"
-                                            placeholder="プロジェクト選択"
-                                            (selectionChange)="onProjectChange(row, $event.value)">
-                                            @for (p of projects(); track p.id) {
-                                                <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                    <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <nz-table #weeklyTable
+                                [nzData]="rows()"
+                                [nzShowPagination]="false"
+                                [nzBordered]="false"
+                                [nzSize]="'middle'"
+                                nzTableLayout="fixed"
+                                [nzNoResult]="emptyTpl">
+                                <thead>
+                                    <tr>
+                                        <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase min-w-[200px] border-r border-gray-100">プロジェクト</th>
+                                        @for (day of weekDays(); track day.date) {
+                                            <th class="!bg-gray-50 !text-center min-w-[70px] border-r border-gray-100">
+                                                <div class="flex flex-col items-center justify-center space-y-1">
+                                                    <span class="text-xs font-bold text-gray-400">{{ day.label }}</span>
+                                                    <span class="text-[13px] font-medium text-gray-900">{{ day.dateShort }}</span>
+                                                </div>
+                                            </th>
+                                        }
+                                        <th class="!bg-primary-50 !text-primary-800 font-bold text-xs tracking-wider uppercase text-center min-w-[80px]">合計</th>
+                                        <th class="!bg-gray-50 w-12"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of rows(); track row.projectId; let i = $index) {
+                                        <tr class="hover:bg-blue-50/30 transition-colors" data-testid="timesheet-row">
+                                            <td class="border-b border-gray-100 !py-3 border-r pr-2">
+                                                @if (row.isNew) {
+                                                    <nz-select [(ngModel)]="row.projectId"
+                                                        nzPlaceHolder="プロジェクト選択"
+                                                        nzShowSearch
+                                                        class="w-full"
+                                                        (ngModelChange)="onProjectChange(row, $event)">
+                                                        @for (p of projects(); track p.id) {
+                                                            <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
+                                                        }
+                                                    </nz-select>
+                                                } @else {
+                                                    <span class="font-medium text-gray-900 block truncate"
+                                                          nz-tooltip [nzTooltipTitle]="row.projectName">{{ row.projectName }}</span>
+                                                }
+                                            </td>
+                                            @for (day of weekDays(); track day.date) {
+                                                <td class="!text-center border-b border-gray-100 !p-2 border-r">
+                                                    <input type="number"
+                                                        [value]="row.days[day.date] || ''"
+                                                        (change)="onHoursChange(row, day.date, $event)"
+                                                        min="0" max="24" step="0.25"
+                                                        class="w-14 text-center border border-gray-200 rounded-md py-1.5 px-1 text-sm text-gray-900 font-medium focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all outline-none hover:border-gray-300"
+                                                        [attr.data-testid]="'timesheet-hours-' + day.date">
+                                                </td>
                                             }
-                                        </mat-select>
-                                    </mat-form-field>
-                                } @else {
-                                    {{ row.projectName }}
-                                }
-                            </td>
-                            <td mat-footer-cell *matFooterCellDef><strong>合計</strong></td>
-                        </ng-container>
-
-                        <!-- Day Columns (Mon-Sun) -->
-                        @for (day of weekDays(); track day.date) {
-                            <ng-container [matColumnDef]="day.date">
-                                <th mat-header-cell *matHeaderCellDef class="day-header">
-                                    {{ day.label }}<br>
-                                    <small>{{ day.dateShort }}</small>
-                                </th>
-                                <td mat-cell *matCellDef="let row" class="day-cell">
-                                    <input type="number"
-                                        [value]="row.days[day.date] || ''"
-                                        (change)="onHoursChange(row, day.date, $event)"
-                                        min="0" max="24" step="0.25"
-                                        class="hours-input"
-                                        [attr.data-testid]="'timesheet-hours-' + day.date">
-                                </td>
-                                <td mat-footer-cell *matFooterCellDef class="day-cell">
-                                    <strong>{{ dayTotal(day.date) }}</strong>
-                                </td>
-                            </ng-container>
-                        }
-
-                        <!-- Total Column -->
-                        <ng-container matColumnDef="total">
-                            <th mat-header-cell *matHeaderCellDef class="total-header">合計</th>
-                            <td mat-cell *matCellDef="let row" class="total-cell">
-                                <strong>{{ rowTotal(row) }}</strong>
-                            </td>
-                            <td mat-footer-cell *matFooterCellDef class="total-cell">
-                                <strong>{{ grandTotal() }}</strong>
-                            </td>
-                        </ng-container>
-
-                        <!-- Actions Column -->
-                        <ng-container matColumnDef="actions">
-                            <th mat-header-cell *matHeaderCellDef></th>
-                            <td mat-cell *matCellDef="let row; let i = index">
-                                <button mat-icon-button color="warn" (click)="removeRow(i)"
-                                    matTooltip="行を削除">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </td>
-                            <td mat-footer-cell *matFooterCellDef></td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
-                        <tr mat-footer-row *matFooterRowDef="displayedColumns()"></tr>
-                    </table>
+                                            <td class="border-b border-gray-100 !py-3 !text-center bg-gray-50/30">
+                                                <span class="font-bold text-lg text-gray-900">{{ rowTotal(row) || '-' }}</span>
+                                            </td>
+                                            <td class="border-b border-gray-100 !py-3 !text-center">
+                                                <button nz-button nzType="text" nzDanger nzShape="circle"
+                                                        (click)="removeRow(i)"
+                                                        nz-tooltip nzTooltipTitle="行を削除"
+                                                        class="!opacity-30 hover:!opacity-100 transition-opacity">
+                                                    <span nz-icon nzType="close" nzTheme="outline"></span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                    <!-- Footer row -->
+                                    @if (rows().length > 0) {
+                                        <tr class="!bg-gray-50 border-t-2 border-gray-200">
+                                            <td class="border-r border-gray-100">
+                                                <span class="font-bold text-gray-700 uppercase tracking-wider text-xs">合計</span>
+                                            </td>
+                                            @for (day of weekDays(); track day.date) {
+                                                <td class="!text-center border-r border-gray-100">
+                                                    <span class="font-bold text-gray-900 text-base">{{ dayTotal(day.date) || '-' }}</span>
+                                                </td>
+                                            }
+                                            <td class="!text-center !bg-primary-50 border-t-2 border-primary-200">
+                                                <span class="font-black text-xl text-primary-700">{{ grandTotal() || '0' }}</span>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <ng-template #emptyTpl>
+                                    <div class="flex flex-col items-center justify-center py-12 text-center bg-gray-50/50">
+                                        <p class="text-gray-500 font-medium mb-4 text-sm mt-0">入力項目がありません</p>
+                                        <button nz-button nzType="default" (click)="addRow()">
+                                            <span nz-icon nzType="plus" nzTheme="outline"></span>
+                                            最初の行を追加
+                                        </button>
+                                    </div>
+                                </ng-template>
+                            </nz-table>
+                        </div>
+                    </div>
 
                     <!-- Actions -->
-                    <div class="actions-bar">
-                        <button mat-stroked-button (click)="addRow()"
-                            data-testid="timesheet-add-row-btn">
-                            <mat-icon>add</mat-icon>
+                    <div class="flex justify-between items-center mt-6">
+                        <button nz-button nzType="default" (click)="addRow()"
+                                data-testid="timesheet-add-row-btn">
+                            <span nz-icon nzType="plus" nzTheme="outline"></span>
                             行を追加
                         </button>
 
-                        <button mat-raised-button color="primary" (click)="save()"
-                            [disabled]="!isDirty()"
-                            data-testid="timesheet-save-btn">
-                            <mat-icon>save</mat-icon>
+                        <button nz-button nzType="primary" (click)="save()"
+                                [disabled]="!isDirty()"
+                                data-testid="timesheet-save-btn"
+                                class="!rounded-lg !px-8 shadow-sm">
+                            <span nz-icon nzType="save" nzTheme="outline"></span>
                             保存
                         </button>
                     </div>
                 }
-            </mat-card-content>
-        </mat-card>
+            </nz-card>
+        </div>
     `,
-    styles: [`
-        :host { display: block; padding: 16px; }
-
-        .week-nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .week-label {
-            font-size: 16px;
-            font-weight: 500;
-            flex: 1;
-            text-align: center;
-        }
-
-        .loading-container {
-            display: flex;
-            justify-content: center;
-            padding: 48px;
-        }
-
-        .timesheet-table {
-            width: 100%;
-        }
-
-        .project-select {
-            width: 200px;
-        }
-
-        .day-header {
-            text-align: center;
-            min-width: 80px;
-        }
-
-        .day-cell, .total-cell {
-            text-align: center;
-        }
-
-        .total-header {
-            text-align: center;
-            min-width: 60px;
-        }
-
-        .hours-input {
-            width: 60px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 4px;
-            font-size: 14px;
-        }
-
-        .hours-input:focus {
-            border-color: #3f51b5;
-            outline: none;
-        }
-
-        .actions-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 16px;
-            padding: 8px 0;
-        }
-    `],
+    styles: [],
 })
 export class TimesheetWeeklyComponent implements OnInit {
     timesheetService = inject(TimesheetService);
     private http = inject(HttpClient);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
 
     // ─── State ───
     private _rows = signal<GridRow[]>([]);
@@ -438,16 +396,14 @@ export class TimesheetWeeklyComponent implements OnInit {
 
         this.timesheetService.upsert(request).subscribe({
             next: () => {
-                this.snackBar.open('保存しました', '閉じる', {
-                    duration: 3000,
-                });
+                this.message.success('保存しました');
                 this._isDirty.set(false);
                 this._deletedIds.set([]);
             },
             error: (err) => {
-                const message =
+                const msg =
                     err.error?.error?.message || '保存に失敗しました';
-                this.snackBar.open(message, '閉じる', { duration: 5000 });
+                this.message.error(msg);
             },
         });
     }

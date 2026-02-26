@@ -1,17 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { DatePipe } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule, DatePipe } from '@angular/common';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { FormsModule } from '@angular/forms';
 import { AdminAuditLogsService } from '../services/audit-logs.service';
 
 const ACTION_LABELS: Record<string, string> = {
@@ -32,115 +30,141 @@ const ACTION_LABELS: Record<string, string> = {
     selector: 'app-audit-log-viewer',
     standalone: true,
     imports: [
+        CommonModule,
         ReactiveFormsModule,
+        FormsModule,
         DatePipe,
-        MatTableModule,
-        MatPaginatorModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatChipsModule,
-        MatButtonModule,
-        MatProgressSpinnerModule,
+        NzTableModule,
+        NzCardModule,
+        NzSelectModule,
+        NzButtonModule,
+        NzIconModule,
+        NzTagModule,
+        NzSpinModule,
+        NzDatePickerModule,
     ],
     template: `
-    <div class="audit-log-viewer" data-testid="audit-log-viewer">
-      <h2>監査ログ</h2>
+    <div class="min-h-[calc(100vh-64px)] bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto" data-testid="audit-log-viewer">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 m-0 tracking-tight">監査ログ</h1>
+                <p class="text-gray-500 mt-1 mb-0 text-sm">システム内で行われたユーザーの操作履歴を確認できます。</p>
+            </div>
+        </div>
 
-      <mat-card class="filter-card">
-        <mat-card-content>
-          <div class="filter-row">
-            <mat-form-field>
-              <mat-label>アクション種別</mat-label>
-              <mat-select (selectionChange)="onFilterChange()" [(value)]="selectedAction" data-testid="filter-action">
-                <mat-option value="">すべて</mat-option>
-                @for (action of actionOptions; track action.value) {
-                  <mat-option [value]="action.value">{{ action.label }}</mat-option>
+        <!-- Filter Card -->
+        <nz-card [nzBordered]="true" class="rounded-2xl shadow-sm mb-6" nzTitle="絞り込み">
+            <div class="flex flex-wrap items-end gap-4">
+                <div class="w-full sm:w-64">
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">アクション種別</label>
+                    <nz-select [(ngModel)]="selectedAction"
+                               (ngModelChange)="onFilterChange()"
+                               nzPlaceHolder="すべて"
+                               nzAllowClear
+                               class="w-full"
+                               data-testid="filter-action">
+                        @for (action of actionOptions; track action.value) {
+                            <nz-option [nzValue]="action.value" [nzLabel]="action.label"></nz-option>
+                        }
+                    </nz-select>
+                </div>
+
+                <div class="w-full sm:w-64">
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">リソース種別</label>
+                    <nz-select [(ngModel)]="selectedResourceType"
+                               (ngModelChange)="onFilterChange()"
+                               nzPlaceHolder="すべて"
+                               nzAllowClear
+                               class="w-full"
+                               data-testid="filter-resource">
+                        <nz-option nzValue="workflow" nzLabel="ワークフロー"></nz-option>
+                        <nz-option nzValue="project" nzLabel="プロジェクト"></nz-option>
+                        <nz-option nzValue="task" nzLabel="タスク"></nz-option>
+                        <nz-option nzValue="user" nzLabel="ユーザー"></nz-option>
+                        <nz-option nzValue="tenant" nzLabel="テナント"></nz-option>
+                    </nz-select>
+                </div>
+
+                <button nz-button nzType="default" (click)="onReset()" data-testid="filter-reset-btn">
+                    <span nz-icon nzType="reload" nzTheme="outline"></span>
+                    リセット
+                </button>
+            </div>
+        </nz-card>
+
+        <!-- Content Card -->
+        <nz-card [nzBordered]="true" class="rounded-2xl shadow-sm overflow-hidden" [nzBodyStyle]="{ padding: '0' }">
+            @if (auditLogsService.loading()) {
+                <div class="flex justify-center items-center py-24" data-testid="loading">
+                    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+                </div>
+            } @else {
+                @if (auditLogsService.logs().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-16 text-center bg-gray-50/30">
+                        <span nz-icon nzType="history" nzTheme="outline" class="text-5xl text-gray-300 mb-4"></span>
+                        <p class="text-lg font-bold text-gray-900 mb-1">ログが見つかりません</p>
+                        <p class="text-gray-500 text-sm m-0">条件に一致する監査ログはありません。</p>
+                    </div>
+                } @else {
+                    <nz-table #auditTable
+                              [nzData]="auditLogsService.logs()"
+                              [nzFrontPagination]="false"
+                              [nzTotal]="auditLogsService.meta().total"
+                              [nzPageSize]="auditLogsService.meta().limit"
+                              [nzPageIndex]="currentPage"
+                              (nzPageIndexChange)="onPageIndexChange($event)"
+                              (nzPageSizeChange)="onPageSizeChange($event)"
+                              [nzPageSizeOptions]="[10, 20, 50, 100]"
+                              nzShowSizeChanger
+                              nzSize="middle"
+                              data-testid="audit-logs-table">
+                        <thead>
+                            <tr>
+                                <th nzWidth="180px">日時</th>
+                                <th>操作者</th>
+                                <th>アクション</th>
+                                <th>リソース種別</th>
+                                <th>リソースID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (log of auditTable.data; track log.id) {
+                                <tr class="hover:bg-gray-50/50 transition-colors" data-testid="audit-log-row">
+                                    <td>
+                                        <span class="text-gray-900 font-mono text-sm">{{ log.createdAt | date:'yyyy/MM/dd HH:mm:ss' }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="font-medium text-gray-900">{{ log.userName }}</span>
+                                    </td>
+                                    <td>
+                                        <nz-tag nzColor="blue">{{ getActionLabel(log.action) }}</nz-tag>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-600">{{ log.resourceType }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-gray-500 font-mono text-xs">{{ log.resourceId?.substring(0, 8) }}…</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </nz-table>
                 }
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field>
-              <mat-label>リソース種別</mat-label>
-              <mat-select (selectionChange)="onFilterChange()" [(value)]="selectedResourceType" data-testid="filter-resource">
-                <mat-option value="">すべて</mat-option>
-                <mat-option value="workflow">ワークフロー</mat-option>
-                <mat-option value="project">プロジェクト</mat-option>
-                <mat-option value="task">タスク</mat-option>
-                <mat-option value="user">ユーザー</mat-option>
-                <mat-option value="tenant">テナント</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <button mat-stroked-button (click)="onReset()" data-testid="filter-reset-btn">
-              リセット
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      @if (auditLogsService.loading()) {
-        <mat-progress-spinner mode="indeterminate" diameter="40" data-testid="loading"></mat-progress-spinner>
-      } @else {
-        <table mat-table [dataSource]="auditLogsService.logs()" class="full-width" data-testid="audit-logs-table">
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef>日時</th>
-            <td mat-cell *matCellDef="let log">{{ log.createdAt | date:'yyyy/MM/dd HH:mm:ss' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="userName">
-            <th mat-header-cell *matHeaderCellDef>操作者</th>
-            <td mat-cell *matCellDef="let log">{{ log.userName }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef>アクション</th>
-            <td mat-cell *matCellDef="let log">
-              <mat-chip>{{ getActionLabel(log.action) }}</mat-chip>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="resourceType">
-            <th mat-header-cell *matHeaderCellDef>リソース種別</th>
-            <td mat-cell *matCellDef="let log">{{ log.resourceType }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="resourceId">
-            <th mat-header-cell *matHeaderCellDef>リソースID</th>
-            <td mat-cell *matCellDef="let log">{{ log.resourceId?.substring(0, 8) }}…</td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" data-testid="audit-log-row"></tr>
-        </table>
-
-        <mat-paginator
-          [length]="auditLogsService.meta().total"
-          [pageSize]="auditLogsService.meta().limit"
-          [pageSizeOptions]="[10, 20, 50, 100]"
-          (page)="onPageChange($event)"
-          data-testid="audit-paginator">
-        </mat-paginator>
-      }
+            }
+        </nz-card>
+      </div>
     </div>
   `,
-    styles: [`
-    .filter-card { margin-bottom: 16px; }
-    .filter-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-    .full-width { width: 100%; }
-    mat-chip { font-size: 12px; }
-  `],
+    styles: [],
 })
 export class AuditLogViewerComponent implements OnInit {
     auditLogsService = inject(AdminAuditLogsService);
 
-    displayedColumns = ['createdAt', 'userName', 'action', 'resourceType', 'resourceId'];
-
-    selectedAction = '';
-    selectedResourceType = '';
+    selectedAction: string | null = null;
+    selectedResourceType: string | null = null;
+    currentPage = 1;
 
     actionOptions = Object.entries(ACTION_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -153,6 +177,7 @@ export class AuditLogViewerComponent implements OnInit {
     }
 
     onFilterChange(): void {
+        this.currentPage = 1;
         this.auditLogsService.loadLogs({
             action: this.selectedAction || undefined,
             resourceType: this.selectedResourceType || undefined,
@@ -160,15 +185,27 @@ export class AuditLogViewerComponent implements OnInit {
     }
 
     onReset(): void {
-        this.selectedAction = '';
-        this.selectedResourceType = '';
+        this.selectedAction = null;
+        this.selectedResourceType = null;
+        this.currentPage = 1;
         this.auditLogsService.loadLogs();
     }
 
-    onPageChange(event: PageEvent): void {
+    onPageIndexChange(pageIndex: number): void {
+        this.currentPage = pageIndex;
         this.auditLogsService.loadLogs({
-            page: event.pageIndex + 1,
-            limit: event.pageSize,
+            page: pageIndex,
+            limit: this.auditLogsService.meta().limit,
+            action: this.selectedAction || undefined,
+            resourceType: this.selectedResourceType || undefined,
+        });
+    }
+
+    onPageSizeChange(pageSize: number): void {
+        this.currentPage = 1;
+        this.auditLogsService.loadLogs({
+            page: 1,
+            limit: pageSize,
             action: this.selectedAction || undefined,
             resourceType: this.selectedResourceType || undefined,
         });

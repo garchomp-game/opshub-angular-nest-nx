@@ -2,16 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
+import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzCardModule } from 'ng-zorro-antd/card';
 import { InvoicesService, Invoice } from './invoices.service';
 import { INVOICE_STATUS_LABELS, INVOICE_STATUS_COLORS } from '@shared/types';
 
@@ -20,127 +17,146 @@ import { INVOICE_STATUS_LABELS, INVOICE_STATUS_COLORS } from '@shared/types';
     standalone: true,
     imports: [
         CommonModule, RouterLink, FormsModule,
-        MatTableModule, MatSortModule, MatPaginatorModule,
-        MatSelectModule, MatFormFieldModule, MatButtonModule,
-        MatIconModule, MatChipsModule, MatProgressSpinnerModule,
-        MatCardModule,
+        NzTableModule, NzSelectModule, NzButtonModule,
+        NzIconModule, NzTagModule, NzSpinModule,
+        NzCardModule,
     ],
     template: `
-        <div class="invoice-list-container">
-            <div class="header">
-                <h1>請求書一覧</h1>
-                <a mat-raised-button color="primary" routerLink="new"
+        <div class="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-6 flex flex-col min-h-full">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 m-0 tracking-tight">請求書一覧</h1>
+                    <p class="text-gray-500 mt-1 mb-0 text-sm">取引先への請求書の作成と管理を行います。</p>
+                </div>
+                <a nz-button nzType="primary" routerLink="new"
+                   class="!rounded-lg shadow-sm font-bold"
                    data-testid="create-invoice-btn">
-                    <mat-icon>add</mat-icon> 新規請求書
+                    <span nz-icon nzType="plus" nzTheme="outline" class="mr-1"></span>
+                    新規請求書
                 </a>
             </div>
 
-            <!-- Filters -->
-            <mat-card class="filter-card" data-testid="invoice-filters">
-                <mat-card-content>
-                    <div class="filters">
-                        <mat-form-field>
-                            <mat-label>ステータス</mat-label>
-                            <mat-select [(value)]="statusFilter"
-                                        (selectionChange)="onFilterChange()"
-                                        data-testid="status-filter">
-                                <mat-option value="">すべて</mat-option>
-                                <mat-option value="draft">下書き</mat-option>
-                                <mat-option value="sent">送付済</mat-option>
-                                <mat-option value="paid">入金済</mat-option>
-                                <mat-option value="cancelled">キャンセル</mat-option>
-                            </mat-select>
-                        </mat-form-field>
+            <nz-card class="!rounded-xl shadow-sm border border-gray-200 flex flex-col flex-1" [nzBordered]="false">
+                <!-- Filters -->
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50" data-testid="invoice-filters">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <nz-select [(ngModel)]="statusFilter"
+                                   (ngModelChange)="onFilterChange()"
+                                   nzPlaceHolder="ステータス"
+                                   nzAllowClear
+                                   class="w-full sm:w-64"
+                                   data-testid="status-filter">
+                            <nz-option nzValue="" nzLabel="すべて"></nz-option>
+                            <nz-option nzValue="draft" nzLabel="下書き"></nz-option>
+                            <nz-option nzValue="sent" nzLabel="送付済"></nz-option>
+                            <nz-option nzValue="paid" nzLabel="入金済"></nz-option>
+                            <nz-option nzValue="cancelled" nzLabel="キャンセル"></nz-option>
+                        </nz-select>
                     </div>
-                </mat-card-content>
-            </mat-card>
-
-            <!-- Loading -->
-            @if (invoicesService.isLoading()) {
-                <div class="loading-container" data-testid="loading">
-                    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
                 </div>
-            }
 
-            <!-- Table -->
-            @if (!invoicesService.isLoading()) {
-                @if (invoicesService.invoices().length === 0) {
-                    <div class="empty-state" data-testid="empty-state">
-                        <mat-icon>receipt_long</mat-icon>
-                        <p>請求書がありません</p>
+                <!-- Loading -->
+                @if (invoicesService.isLoading()) {
+                    <div class="flex justify-center items-center flex-1 py-24" data-testid="loading">
+                        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
                     </div>
                 } @else {
-                    <table mat-table [dataSource]="invoicesService.invoices()"
-                           matSort class="invoice-table" data-testid="invoice-table">
-                        <ng-container matColumnDef="invoiceNumber">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>請求番号</th>
-                            <td mat-cell *matCellDef="let row">{{ row.invoiceNumber }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="clientName">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>取引先</th>
-                            <td mat-cell *matCellDef="let row">{{ row.clientName }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="totalAmount">
-                            <th mat-header-cell *matHeaderCellDef>合計金額</th>
-                            <td mat-cell *matCellDef="let row" class="text-right">
-                                ¥{{ row.totalAmount | number }}
-                            </td>
-                        </ng-container>
-                        <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef>ステータス</th>
-                            <td mat-cell *matCellDef="let row">
-                                <mat-chip [color]="getStatusColor(row.status)">
-                                    {{ getStatusLabel(row.status) }}
-                                </mat-chip>
-                            </td>
-                        </ng-container>
-                        <ng-container matColumnDef="issuedDate">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>発行日</th>
-                            <td mat-cell *matCellDef="let row">{{ row.issuedDate | date:'yyyy/MM/dd' }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="dueDate">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>支払期限</th>
-                            <td mat-cell *matCellDef="let row">{{ row.dueDate | date:'yyyy/MM/dd' }}</td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                            (click)="onRowClick(row)"
-                            class="clickable-row"
-                            data-testid="invoice-row"></tr>
-                    </table>
-
-                    <mat-paginator
-                        [length]="invoicesService.totalCount()"
-                        [pageSize]="20"
-                        [pageSizeOptions]="[10, 20, 50]"
-                        (page)="onPageChange($event)"
-                        data-testid="invoice-paginator">
-                    </mat-paginator>
+                    @if (invoicesService.invoices().length === 0) {
+                        <div class="flex flex-col items-center justify-center py-24 text-center" data-testid="empty-state">
+                            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                <span nz-icon nzType="file-done" nzTheme="outline" class="text-3xl text-gray-400"></span>
+                            </div>
+                            <p class="text-lg font-bold text-gray-900 mb-1">請求書がありません</p>
+                            <p class="text-gray-500 text-sm max-w-sm mb-6">条件に一致する請求書が見つからないか、まだ登録されていません。</p>
+                            <a nz-button routerLink="new" class="!border-primary-200">
+                                <span nz-icon nzType="plus" nzTheme="outline"></span>
+                                最初の請求書を作成
+                            </a>
+                        </div>
+                    } @else {
+                        <nz-table
+                            #invoiceTable
+                            [nzData]="invoicesService.invoices()"
+                            [nzFrontPagination]="false"
+                            [nzTotal]="invoicesService.totalCount()"
+                            [nzPageSize]="pageSize"
+                            [nzPageIndex]="pageIndex"
+                            (nzPageIndexChange)="onPageIndexChange($event)"
+                            (nzPageSizeChange)="onPageSizeChange($event)"
+                            [nzPageSizeOptions]="[10, 20, 50]"
+                            nzShowSizeChanger
+                            [nzShowTotal]="totalTemplate"
+                            nzSize="middle"
+                            data-testid="invoice-table">
+                            <ng-template #totalTemplate let-total>
+                                合計 {{ total }} 件
+                            </ng-template>
+                            <thead>
+                                <tr>
+                                    <th>請求番号</th>
+                                    <th>取引先</th>
+                                    <th nzAlign="right" nzWidth="140px">合計金額</th>
+                                    <th nzWidth="120px">ステータス</th>
+                                    <th nzWidth="130px">発行日</th>
+                                    <th nzWidth="130px">支払期限</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of invoiceTable.data; track row.id) {
+                                    <tr (click)="onRowClick(row)"
+                                        class="cursor-pointer"
+                                        data-testid="invoice-row">
+                                        <td>
+                                            <span class="font-mono font-medium text-gray-900">{{ row.invoiceNumber }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                                                    {{ row.clientName.charAt(0) }}
+                                                </div>
+                                                <span class="font-medium text-gray-900">{{ row.clientName }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-right">
+                                            <span class="font-bold text-gray-900 text-base">¥{{ row.totalAmount | number }}</span>
+                                        </td>
+                                        <td>
+                                            <nz-tag [nzColor]="getTagColor(row.status)">
+                                                {{ getStatusLabel(row.status) }}
+                                            </nz-tag>
+                                        </td>
+                                        <td>
+                                            <span class="text-gray-600">{{ row.issuedDate | date:'yyyy/MM/dd' }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center gap-1.5" [class.text-red-600]="isOverdue(row)">
+                                                @if (isOverdue(row)) {
+                                                    <span nz-icon nzType="warning" nzTheme="outline" class="text-sm"></span>
+                                                }
+                                                <span [class.font-bold]="isOverdue(row)" [class.text-gray-600]="!isOverdue(row)">
+                                                    {{ row.dueDate | date:'yyyy/MM/dd' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </nz-table>
+                    }
                 }
-            }
+            </nz-card>
         </div>
     `,
-    styles: [`
-        .invoice-list-container { padding: 24px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .filter-card { margin-bottom: 16px; }
-        .filters { display: flex; gap: 16px; flex-wrap: wrap; }
-        .loading-container { display: flex; justify-content: center; padding: 48px; }
-        .empty-state { text-align: center; padding: 48px; color: #666; }
-        .empty-state mat-icon { font-size: 48px; width: 48px; height: 48px; }
-        .invoice-table { width: 100%; }
-        .clickable-row { cursor: pointer; }
-        .clickable-row:hover { background-color: rgba(0, 0, 0, 0.04); }
-        .text-right { text-align: right; }
-    `],
+    styles: [],
 })
 export class InvoiceListComponent implements OnInit {
     invoicesService = inject(InvoicesService);
     private router = inject(Router);
 
-    displayedColumns = ['invoiceNumber', 'clientName', 'totalAmount', 'status', 'issuedDate', 'dueDate'];
     statusFilter = '';
+    pageIndex = 1;
+    pageSize = 20;
 
     ngOnInit(): void {
         this.loadData();
@@ -154,20 +170,49 @@ export class InvoiceListComponent implements OnInit {
         return (INVOICE_STATUS_COLORS as any)[status] ?? '';
     }
 
+    getTagColor(status: string): string {
+        switch (status) {
+            case 'draft': return 'default';
+            case 'sent': return 'processing';
+            case 'paid': return 'success';
+            case 'cancelled': return 'error';
+            default: return 'default';
+        }
+    }
+
     onFilterChange(): void {
+        this.pageIndex = 1;
         this.loadData();
     }
 
-    onPageChange(event: PageEvent): void {
+    onPageIndexChange(pageIndex: number): void {
+        this.pageIndex = pageIndex;
         this.invoicesService.loadAll({
             status: this.statusFilter || undefined,
-            page: event.pageIndex + 1,
-            limit: event.pageSize,
+            page: pageIndex,
+            limit: this.pageSize,
+        });
+    }
+
+    onPageSizeChange(pageSize: number): void {
+        this.pageSize = pageSize;
+        this.pageIndex = 1;
+        this.invoicesService.loadAll({
+            status: this.statusFilter || undefined,
+            page: 1,
+            limit: pageSize,
         });
     }
 
     onRowClick(invoice: Invoice): void {
         this.router.navigate(['/invoices', invoice.id]);
+    }
+
+    isOverdue(invoice: Invoice): boolean {
+        if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+            return false;
+        }
+        return new Date(invoice.dueDate).getTime() < new Date().setHours(0, 0, 0, 0);
     }
 
     private loadData(): void {

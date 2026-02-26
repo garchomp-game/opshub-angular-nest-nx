@@ -1,72 +1,57 @@
 import { Component, input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
-    selector: 'app-kpi-card',
-    standalone: true,
-    imports: [MatCardModule, MatIconModule],
-    template: `
-    <mat-card class="kpi-card" [style.border-left-color]="color()" data-testid="kpi-card">
-      <mat-card-content class="kpi-content">
-        <div class="kpi-icon" [style.background-color]="color() + '20'" [style.color]="color()">
-          <mat-icon>{{ icon() }}</mat-icon>
-        </div>
-        <div class="kpi-info">
-          <span class="kpi-value" data-testid="kpi-value">{{ value() }}</span>
-          <span class="kpi-title">{{ title() }}</span>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  selector: 'app-kpi-card',
+  standalone: true,
+  imports: [NzCardModule, NzStatisticModule, NzIconModule],
+  template: `
+    <nz-card [nzBordered]="true"
+             class="kpi-card group"
+             [style.borderLeftWidth.px]="4"
+             [style.borderLeftColor]="color()"
+             data-testid="kpi-card">
+      <nz-statistic
+        [nzValue]="value()"
+        [nzTitle]="title()"
+        [nzPrefix]="prefixTpl"
+        [nzValueStyle]="{ color: color(), 'font-weight': '700', 'font-size': '28px' }">
+      </nz-statistic>
+      <ng-template #prefixTpl>
+        <span nz-icon [nzType]="icon()" nzTheme="outline"
+              [style.color]="color()" class="text-xl"></span>
+      </ng-template>
+    </nz-card>
   `,
-    styles: [`
+  styles: [`
+    :host {
+      display: block;
+    }
     .kpi-card {
-      border-left: 4px solid transparent;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
     }
     .kpi-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .kpi-content {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 0;
+    ::ng-deep .kpi-card .ant-card-body {
+      padding: 20px 24px;
     }
-    .kpi-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .kpi-icon mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-    .kpi-info {
-      display: flex;
-      flex-direction: column;
-    }
-    .kpi-value {
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .kpi-title {
+    ::ng-deep .kpi-card .ant-statistic-title {
       font-size: 13px;
-      color: rgba(0, 0, 0, 0.54);
-      margin-top: 2px;
+      color: #6b7280;
+      font-weight: 500;
+      margin-bottom: 4px;
     }
   `],
 })
 export class KpiCardComponent {
-    title = input.required<string>();
-    value = input.required<number>();
-    icon = input.required<string>();
-    color = input<string>('#1976d2');
+  title = input.required<string>();
+  value = input.required<number>();
+  icon = input.required<string>();
+  color = input<string>('#1976d2');
 }

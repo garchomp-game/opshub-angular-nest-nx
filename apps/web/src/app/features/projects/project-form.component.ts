@@ -1,15 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { ProjectStatus, PROJECT_STATUS_LABELS } from '@shared/types';
 import { ProjectService } from './project.service';
 
@@ -18,93 +15,85 @@ import { ProjectService } from './project.service';
     standalone: true,
     imports: [
         RouterLink, ReactiveFormsModule,
-        MatButtonModule, MatIconModule, MatFormFieldModule,
-        MatInputModule, MatSelectModule, MatDatepickerModule,
-        MatNativeDateModule, MatSnackBarModule, MatProgressSpinnerModule,
+        NzFormModule, NzInputModule, NzButtonModule,
+        NzIconModule, NzDatePickerModule,
     ],
     template: `
-        <div class="project-form-container">
-            <div class="header">
-                <a mat-button routerLink="/projects" data-testid="back-btn">
-                    <mat-icon>arrow_back</mat-icon> 一覧に戻る
-                </a>
-                <h1>{{ isEdit() ? 'プロジェクト編集' : 'プロジェクト新規作成' }}</h1>
+        <div class="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+            <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                <button nz-button nzType="default" nzShape="circle" routerLink="/projects" data-testid="back-btn">
+                    <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-900 m-0">{{ isEdit() ? 'プロジェクト編集' : 'プロジェクト新規作成' }}</h1>
             </div>
 
-            <form [formGroup]="form" (ngSubmit)="onSubmit()"
-                  class="form-content" data-testid="project-form">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()"
+                      nzLayout="vertical" class="p-6 md:p-8" data-testid="project-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        <nz-form-item class="md:col-span-2">
+                            <nz-form-label nzFor="name" nzRequired>プロジェクト名</nz-form-label>
+                            <nz-form-control nzErrorTip="プロジェクト名は必須です">
+                                <input nz-input formControlName="name" id="name"
+                                       placeholder="プロジェクト名を入力" data-testid="name-input" />
+                            </nz-form-control>
+                        </nz-form-item>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>プロジェクト名</mat-label>
-                    <input matInput formControlName="name"
-                           data-testid="name-input">
-                    @if (form.get('name')?.hasError('required')) {
-                        <mat-error>プロジェクト名は必須です</mat-error>
-                    }
-                </mat-form-field>
+                        <nz-form-item class="md:col-span-2">
+                            <nz-form-label nzFor="description">説明</nz-form-label>
+                            <nz-form-control>
+                                <textarea nz-input formControlName="description" id="description"
+                                          [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+                                          placeholder="プロジェクトの説明"
+                                          data-testid="description-input"></textarea>
+                            </nz-form-control>
+                        </nz-form-item>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>説明</mat-label>
-                    <textarea matInput formControlName="description"
-                              rows="4" data-testid="description-input"></textarea>
-                </mat-form-field>
+                        <nz-form-item class="md:col-span-2">
+                            <nz-form-label nzFor="pmId" nzRequired>PM ユーザーID</nz-form-label>
+                            <nz-form-control nzErrorTip="PM は必須です">
+                                <input nz-input formControlName="pmId" id="pmId"
+                                       placeholder="PM ユーザーIDを入力" data-testid="pm-input" />
+                            </nz-form-control>
+                        </nz-form-item>
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>PM ユーザーID</mat-label>
-                    <input matInput formControlName="pmId"
-                           data-testid="pm-input">
-                    @if (form.get('pmId')?.hasError('required')) {
-                        <mat-error>PM は必須です</mat-error>
-                    }
-                </mat-form-field>
+                        <nz-form-item>
+                            <nz-form-label nzFor="startDate">開始日</nz-form-label>
+                            <nz-form-control>
+                                <nz-date-picker formControlName="startDate"
+                                                class="w-full"
+                                                nzPlaceHolder="開始日を選択"
+                                                data-testid="start-date-input"></nz-date-picker>
+                            </nz-form-control>
+                        </nz-form-item>
 
-                <div class="date-row">
-                    <mat-form-field appearance="outline">
-                        <mat-label>開始日</mat-label>
-                        <input matInput [matDatepicker]="startPicker"
-                               formControlName="startDate"
-                               data-testid="start-date-input">
-                        <mat-datepicker-toggle matSuffix [for]="startPicker" />
-                        <mat-datepicker #startPicker />
-                    </mat-form-field>
+                        <nz-form-item>
+                            <nz-form-label nzFor="endDate">終了日</nz-form-label>
+                            <nz-form-control>
+                                <nz-date-picker formControlName="endDate"
+                                                class="w-full"
+                                                nzPlaceHolder="終了日を選択"
+                                                data-testid="end-date-input"></nz-date-picker>
+                            </nz-form-control>
+                        </nz-form-item>
+                    </div>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>終了日</mat-label>
-                        <input matInput [matDatepicker]="endPicker"
-                               formControlName="endDate"
-                               data-testid="end-date-input">
-                        <mat-datepicker-toggle matSuffix [for]="endPicker" />
-                        <mat-datepicker #endPicker />
-                    </mat-form-field>
-                </div>
-
-                <div class="actions">
-                    <a mat-button routerLink="/projects">キャンセル</a>
-                    <button mat-raised-button color="primary"
-                            type="submit"
-                            [disabled]="form.invalid || submitting()"
-                            data-testid="submit-btn">
-                        @if (submitting()) {
-                            <mat-progress-spinner mode="indeterminate"
-                                                  diameter="20" />
-                        } @else {
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                        <a nz-button nzType="default" routerLink="/projects">キャンセル</a>
+                        <button nz-button nzType="primary" type="submit"
+                                [disabled]="form.invalid || submitting()"
+                                [nzLoading]="submitting()"
+                                data-testid="submit-btn">
                             {{ isEdit() ? '更新' : '作成' }}
-                        }
-                    </button>
-                </div>
-            </form>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     `,
     styles: [`
-        .project-form-container { padding: 24px; max-width: 640px; }
-        .header { margin-bottom: 24px; }
-        .form-content { display: flex; flex-direction: column; gap: 8px; }
-        .full-width { width: 100%; }
-        .date-row { display: flex; gap: 16px; }
-        .date-row mat-form-field { flex: 1; }
-        .actions {
-            display: flex; justify-content: flex-end;
-            gap: 8px; margin-top: 16px;
+        ::ng-deep .ant-form-vertical .ant-form-item {
+            margin-bottom: 16px;
         }
     `],
 })
@@ -112,7 +101,7 @@ export class ProjectFormComponent implements OnInit {
     private fb = inject(FormBuilder);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
     private projectService = inject(ProjectService);
 
     isEdit = signal(false);
@@ -168,10 +157,8 @@ export class ProjectFormComponent implements OnInit {
 
         obs.subscribe({
             next: () => {
-                this.snackBar.open(
+                this.message.success(
                     this.isEdit() ? '更新しました' : '作成しました',
-                    '閉じる',
-                    { duration: 3000 },
                 );
                 this.router.navigate(['/projects']);
             },

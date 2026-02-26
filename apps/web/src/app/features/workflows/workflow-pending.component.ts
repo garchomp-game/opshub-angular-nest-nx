@@ -1,101 +1,112 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { WorkflowService, Workflow } from './workflow.service';
 import { WORKFLOW_STATUS_LABELS } from '@shared/types';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 
 @Component({
     selector: 'app-workflow-pending',
     standalone: true,
     imports: [
         CommonModule,
-        MatTableModule, MatButtonModule, MatIconModule, MatChipsModule,
-        MatProgressSpinnerModule, MatSnackBarModule, MatDialogModule,
+        NzTableModule, NzButtonModule, NzIconModule, NzTagModule,
+        NzSpinModule, NzPopconfirmModule, NzTooltipModule,
     ],
     template: `
-        <div class="pending-container">
-            <h1>承認待ち一覧</h1>
+        <div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+            <h1 class="text-2xl font-bold text-gray-900 m-0">承認待ち一覧</h1>
 
             @if (workflowService.isLoading()) {
-                <div class="loading" data-testid="loading">
-                    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+                <div class="flex justify-center py-20" data-testid="loading">
+                    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
                 </div>
-            }
-
-            @if (!workflowService.isLoading()) {
-                @if (workflowService.pendingWorkflows().length === 0) {
-                    <div class="empty-state" data-testid="empty-state">
-                        <mat-icon>check_circle</mat-icon>
-                        <p>承認待ちの申請はありません</p>
-                    </div>
-                } @else {
-                    <table mat-table [dataSource]="workflowService.pendingWorkflows()"
-                           class="pending-table" data-testid="pending-table">
-                        <ng-container matColumnDef="workflowNumber">
-                            <th mat-header-cell *matHeaderCellDef>申請番号</th>
-                            <td mat-cell *matCellDef="let row">{{ row.workflowNumber }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="title">
-                            <th mat-header-cell *matHeaderCellDef>タイトル</th>
-                            <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="creator">
-                            <th mat-header-cell *matHeaderCellDef>申請者</th>
-                            <td mat-cell *matCellDef="let row">
-                                {{ row.creator?.profile?.displayName ?? '-' }}
-                            </td>
-                        </ng-container>
-                        <ng-container matColumnDef="createdAt">
-                            <th mat-header-cell *matHeaderCellDef>申請日</th>
-                            <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'yyyy/MM/dd' }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="actions">
-                            <th mat-header-cell *matHeaderCellDef>操作</th>
-                            <td mat-cell *matCellDef="let row">
-                                <button mat-icon-button color="primary"
-                                        (click)="onApprove(row, $event)"
-                                        matTooltip="承認"
-                                        data-testid="approve-btn">
-                                    <mat-icon>check</mat-icon>
-                                </button>
-                                <button mat-icon-button color="warn"
-                                        (click)="onView(row)"
-                                        matTooltip="詳細"
-                                        data-testid="view-btn">
-                                    <mat-icon>visibility</mat-icon>
-                                </button>
-                            </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                            data-testid="pending-row"></tr>
-                    </table>
-                }
+            } @else {
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    @if (workflowService.pendingWorkflows().length === 0) {
+                        <div class="flex flex-col items-center justify-center py-20 text-gray-400" data-testid="empty-state">
+                            <span nz-icon nzType="check-circle" nzTheme="outline" class="text-5xl mb-4 text-green-500 opacity-80"></span>
+                            <p class="text-base text-gray-500 font-medium">承認待ちの申請はありません</p>
+                            <p class="text-sm text-gray-400 mt-1">すべての申請の確認が完了しています</p>
+                        </div>
+                    } @else {
+                        <nz-table #pendingTable
+                                  [nzData]="workflowService.pendingWorkflows()"
+                                  [nzFrontPagination]="false"
+                                  nzSize="middle"
+                                  [nzShowPagination]="false"
+                                  [nzScroll]="{ x: '700px' }"
+                                  data-testid="pending-table">
+                            <thead>
+                                <tr>
+                                    <th nzWidth="130px" class="whitespace-nowrap">申請番号</th>
+                                    <th nzWidth="200px">タイトル</th>
+                                    <th nzWidth="150px">申請者</th>
+                                    <th nzWidth="150px">申請日</th>
+                                    <th nzWidth="120px" nzRight class="text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of pendingTable.data; track row.id) {
+                                    <tr class="hover:bg-blue-50/30 transition-colors"
+                                        data-testid="pending-row">
+                                        <td class="font-medium text-gray-900">{{ row.workflowNumber }}</td>
+                                        <td class="text-gray-900 font-medium">{{ row.title }}</td>
+                                        <td>
+                                            <div class="flex items-center text-gray-700">
+                                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold mr-2 uppercase">
+                                                    {{ (row.creator?.profile?.displayName ?? 'U').charAt(0) }}
+                                                </div>
+                                                {{ row.creator?.profile?.displayName ?? '-' }}
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500 whitespace-nowrap">{{ row.createdAt | date:'yyyy/MM/dd HH:mm' }}</td>
+                                        <td nzRight class="text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <button nz-button
+                                                        nzType="primary"
+                                                        nzSize="small"
+                                                        nz-popconfirm
+                                                        nzPopconfirmTitle="この申請を承認しますか？"
+                                                        nzOkText="承認"
+                                                        nzCancelText="キャンセル"
+                                                        (nzOnConfirm)="onApproveConfirm(row)"
+                                                        (click)="$event.stopPropagation()"
+                                                        nz-tooltip nzTooltipTitle="承認"
+                                                        data-testid="approve-btn">
+                                                    <span nz-icon nzType="check" nzTheme="outline"></span>
+                                                </button>
+                                                <button nz-button
+                                                        nzSize="small"
+                                                        (click)="onView(row)"
+                                                        nz-tooltip nzTooltipTitle="詳細を見る"
+                                                        data-testid="view-btn">
+                                                    <span nz-icon nzType="right" nzTheme="outline"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </nz-table>
+                    }
+                </div>
             }
         </div>
     `,
-    styles: [`
-        .pending-container { padding: 24px; }
-        .loading { display: flex; justify-content: center; padding: 48px; }
-        .empty-state { text-align: center; padding: 48px; color: #666; }
-        .empty-state mat-icon { font-size: 48px; width: 48px; height: 48px; color: #4caf50; }
-        .pending-table { width: 100%; }
-    `],
+    styles: [],
 })
 export class WorkflowPendingComponent implements OnInit {
     workflowService = inject(WorkflowService);
     private router = inject(Router);
-    private dialog = inject(MatDialog);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
 
     displayedColumns = ['workflowNumber', 'title', 'creator', 'createdAt', 'actions'];
 
@@ -103,20 +114,12 @@ export class WorkflowPendingComponent implements OnInit {
         this.workflowService.loadPending();
     }
 
-    onApprove(wf: Workflow, event: Event): void {
-        event.stopPropagation();
-        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-            data: { title: '承認確認', message: `「${wf.title}」を承認しますか？`, color: 'primary', confirmText: '承認' },
-        });
-        dialogRef.afterClosed().subscribe((confirmed) => {
-            if (confirmed) {
-                this.workflowService.approve(wf.id).subscribe({
-                    next: () => {
-                        this.snackBar.open('承認しました', '閉じる', { duration: 3000 });
-                        this.workflowService.loadPending();
-                    },
-                });
-            }
+    onApproveConfirm(wf: Workflow): void {
+        this.workflowService.approve(wf.id).subscribe({
+            next: () => {
+                this.message.success('承認しました');
+                this.workflowService.loadPending();
+            },
         });
     }
 

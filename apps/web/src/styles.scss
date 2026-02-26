@@ -1,28 +1,16 @@
-@use '@angular/material' as mat;
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// ─── Angular Material テーマ ───
-html {
-  @include mat.theme((color: (primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-        theme-type: light,
-      ),
-      typography: Roboto,
-      density: 0,
-    ));
-}
+/* NG-ZORRO Ant Design テーマ */
+@import 'ng-zorro-antd/ng-zorro-antd.min.css';
 
-// ─── Global Reset (Tailwind base で大部分カバー) ───
+/* Global Reset */
+html,
 body {
-  @apply h-full font-sans bg-gray-50 text-gray-900 antialiased;
-}
-
-html {
-  @apply h-full;
-}
-
-a {
-  @apply text-inherit no-underline;
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: rgba(0, 0, 0, 0.88);
 }

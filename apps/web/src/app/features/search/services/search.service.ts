@@ -50,7 +50,7 @@ export class SearchService {
 
     // ─── Search ───
 
-    search(query: string, category: string = 'all', page: number = 1): void {
+    search(query: string, category = 'all', page = 1): void {
         if (!query.trim()) {
             this._results.set([]);
             this._counts.set({ workflows: 0, projects: 0, tasks: 0, expenses: 0, total: 0 });
@@ -60,7 +60,7 @@ export class SearchService {
         this._isLoading.set(true);
         this._error.set(null);
 
-        let params = new HttpParams()
+        const params = new HttpParams()
             .set('q', query)
             .set('category', category)
             .set('page', page.toString());

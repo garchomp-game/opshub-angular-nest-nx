@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { WorkflowListComponent } from './workflow-list.component';
 import { WorkflowService } from './workflow.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -32,9 +33,11 @@ describe('WorkflowListComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [WorkflowListComponent, NoopAnimationsModule],
+            imports: [WorkflowListComponent],
             providers: [
                 provideRouter([]),
+                provideNoopAnimations(),
+                provideHttpClient(),
                 { provide: WorkflowService, useValue: mockWorkflowService },
                 { provide: AuthService, useValue: mockAuthService },
             ],
@@ -62,7 +65,7 @@ describe('WorkflowListComponent', () => {
         mockWorkflowService.isLoading.set(true);
         fixture.detectChanges();
 
-        const spinner = fixture.nativeElement.querySelector('mat-progress-spinner');
+        const spinner = fixture.nativeElement.querySelector('nz-spin');
         expect(spinner).toBeTruthy();
     });
 

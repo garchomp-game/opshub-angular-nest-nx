@@ -62,7 +62,7 @@ export class AuthService {
     }
 
     logout(): void {
-        this.http.post('/api/auth/logout', {}).subscribe({ error: () => { } });
+        this.http.post('/api/auth/logout', {}).subscribe({ error: () => { /* ignore */ } });
         this.clearState();
         this.router.navigate(['/login']);
     }

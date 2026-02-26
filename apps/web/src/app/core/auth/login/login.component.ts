@@ -1,125 +1,142 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { AuthService } from '../auth.service';
 
 @Component({
-    selector: 'app-login',
-    standalone: true,
-    imports: [
-        ReactiveFormsModule,
-        MatCardModule, MatFormFieldModule, MatInputModule,
-        MatButtonModule, MatIconModule, MatProgressSpinnerModule,
-    ],
-    template: `
-    <div class="login-container">
-      <mat-card class="login-card">
-        <mat-card-header>
-          <mat-card-title>OpsHub ログイン</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>メールアドレス</mat-label>
-              <input matInput formControlName="email" type="email" data-testid="email-input" />
-              @if (form.get('email')?.hasError('required')) {
-                <mat-error>メールアドレスは必須です</mat-error>
-              }
-              @if (form.get('email')?.hasError('email')) {
-                <mat-error>有効なメールアドレスを入力してください</mat-error>
-              }
-            </mat-form-field>
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NzCardModule, NzFormModule, NzInputModule,
+    NzButtonModule, NzIconModule, NzAlertModule, NzSpinModule,
+  ],
+  template: `
+    <div class="min-h-screen flex items-center justify-center p-4"
+         style="background: linear-gradient(135deg, #001529 0%, #003a6b 50%, #005ba1 100%);">
+      <nz-card class="w-full max-w-md" [nzBordered]="false"
+               style="border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">OpsHub</h1>
+          <p class="text-gray-500 mt-2 text-sm">システムにログインしてください</p>
+        </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>パスワード</mat-label>
-              <input matInput formControlName="password"
-                     [type]="hidePassword() ? 'password' : 'text'"
-                     data-testid="password-input" />
-              <button mat-icon-button matSuffix type="button"
-                      (click)="hidePassword.set(!hidePassword())">
-                <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-              @if (form.get('password')?.hasError('required')) {
-                <mat-error>パスワードは必須です</mat-error>
-              }
-            </mat-form-field>
+        <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="login-form"
+              nzLayout="vertical" class="space-y-1">
+          <nz-form-item>
+            <nz-form-label nzFor="email">メールアドレス</nz-form-label>
+            <nz-form-control [nzErrorTip]="emailErrorTpl">
+              <nz-input-group nzPrefixIcon="mail" nzSize="large">
+                <input nz-input formControlName="email" type="email"
+                       id="email" placeholder="you@example.com"
+                       data-testid="email-input" />
+              </nz-input-group>
+              <ng-template #emailErrorTpl let-control>
+                @if (control.hasError('required')) {
+                  メールアドレスは必須です
+                } @else if (control.hasError('email')) {
+                  有効なメールアドレスを入力してください
+                }
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
 
-            @if (errorMessage()) {
-              <p class="error-message" data-testid="error-message">{{ errorMessage() }}</p>
-            }
+          <nz-form-item>
+            <nz-form-label nzFor="password">パスワード</nz-form-label>
+            <nz-form-control nzErrorTip="パスワードは必須です">
+              <nz-input-group nzPrefixIcon="lock" [nzSuffix]="suffixTpl" nzSize="large">
+                <input nz-input formControlName="password"
+                       [type]="hidePassword() ? 'password' : 'text'"
+                       id="password" placeholder="パスワード"
+                       data-testid="password-input" />
+              </nz-input-group>
+              <ng-template #suffixTpl>
+                <span nz-icon
+                      [nzType]="hidePassword() ? 'eye-invisible' : 'eye'"
+                      class="cursor-pointer text-gray-400 hover:text-gray-600"
+                      (click)="hidePassword.set(!hidePassword())"></span>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
 
-            <button mat-raised-button color="primary"
-                    type="submit" class="full-width"
+          @if (errorMessage()) {
+            <nz-alert nzType="error" [nzMessage]="errorMessage()"
+                      nzShowIcon data-testid="error-message"
+                      class="mb-4"></nz-alert>
+          }
+
+          <nz-form-item class="mb-0 pt-2">
+            <button nz-button nzType="primary" nzBlock nzSize="large"
+                    type="submit"
                     [disabled]="form.invalid || auth.loading()"
-                    data-testid="login-button">
-              @if (auth.loading()) {
-                <mat-spinner diameter="20"></mat-spinner>
-              } @else {
-                ログイン
-              }
+                    [nzLoading]="auth.loading()"
+                    data-testid="login-button"
+                    style="height: 48px; border-radius: 10px; font-size: 16px; font-weight: 500;">
+              ログイン
             </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
+          </nz-form-item>
+        </form>
+
+        <div class="mt-8 pt-4 border-t border-gray-100 text-center text-xs text-gray-400">
+          &copy; {{ currentYear }} OpsHub Inc. All rights reserved.
+        </div>
+      </nz-card>
     </div>
   `,
-    styles: [`
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #f5f5f5;
+  styles: [`
+    :host {
+      display: block;
     }
-    .login-card {
-      width: 400px;
-      padding: 24px;
-    }
-    .full-width { width: 100%; }
-    .error-message {
-      color: #f44336;
-      font-size: 14px;
+    /* NG-ZORRO form spacing adjustment */
+    ::ng-deep .ant-form-vertical .ant-form-item {
       margin-bottom: 16px;
     }
-    mat-form-field { margin-bottom: 8px; }
+    ::ng-deep .ant-card-body {
+      padding: 40px;
+    }
+    ::ng-deep .ant-input-affix-wrapper {
+      border-radius: 10px;
+    }
   `],
 })
 export class LoginComponent {
-    auth = inject(AuthService);
-    private fb = inject(FormBuilder);
-    private router = inject(Router);
+  auth = inject(AuthService);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
 
-    hidePassword = signal(true);
-    errorMessage = signal('');
+  hidePassword = signal(true);
+  errorMessage = signal('');
+  currentYear = new Date().getFullYear();
 
-    form = this.fb.group({
-        email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required]],
+  form = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+  });
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    const { email, password } = this.form.value;
+    this.errorMessage.set('');
+
+    this.auth.login(email!, password!).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.router.navigate(['/dashboard']);
+        }
+      },
+      error: (err) => {
+        this.errorMessage.set(
+          err.error?.error?.message ?? 'ログインに失敗しました',
+        );
+      },
     });
-
-    onSubmit(): void {
-        if (this.form.invalid) return;
-
-        const { email, password } = this.form.value;
-        this.errorMessage.set('');
-
-        this.auth.login(email!, password!).subscribe({
-            next: (res) => {
-                if (res.success) {
-                    this.router.navigate(['/dashboard']);
-                }
-            },
-            error: (err) => {
-                this.errorMessage.set(
-                    err.error?.error?.message ?? 'ログインに失敗しました',
-                );
-            },
-        });
-    }
+  }
 }
