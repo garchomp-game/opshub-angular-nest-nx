@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { ja_JP, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { TimesheetWeeklyComponent } from './timesheet-weekly.component';
 import { TimesheetService } from './timesheet.service';
 
@@ -23,11 +25,14 @@ describe('TimesheetWeeklyComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TimesheetWeeklyComponent, NoopAnimationsModule],
+            imports: [TimesheetWeeklyComponent],
             providers: [
                 provideRouter([]),
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideNoopAnimations(),
+                provideNzI18n(ja_JP),
+                provideNzIcons([]),
                 { provide: TimesheetService, useValue: mockTimesheetService },
             ],
         }).compileComponents();
@@ -66,7 +71,7 @@ describe('TimesheetWeeklyComponent', () => {
         mockTimesheetService.isLoading.set(true);
         fixture.detectChanges();
 
-        const spinner = fixture.nativeElement.querySelector('mat-progress-spinner');
+        const spinner = fixture.nativeElement.querySelector('nz-spin');
         expect(spinner).toBeTruthy();
     });
 

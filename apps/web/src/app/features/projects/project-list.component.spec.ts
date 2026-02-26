@@ -3,6 +3,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { IconDefinition } from '@ant-design/icons-angular';
+import * as AllIcons from '@ant-design/icons-angular/icons';
+
+const antDesignIcons = Object.keys(AllIcons).reduce((acc, key) => {
+    const icon = (AllIcons as any)[key] as IconDefinition;
+    if (icon?.name) acc.push(icon);
+    return acc;
+}, [] as IconDefinition[]);
 import { ProjectListComponent } from './project-list.component';
 import { ProjectService } from './project.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -34,6 +43,7 @@ describe('ProjectListComponent', () => {
             imports: [ProjectListComponent, NoopAnimationsModule],
             providers: [
                 provideRouter([]),
+                provideNzIcons(antDesignIcons),
                 { provide: ProjectService, useValue: mockProjectService },
                 { provide: AuthService, useValue: mockAuthService },
             ],

@@ -33,10 +33,10 @@ describe('SearchResultsComponent', () => {
     });
 
     it('should return correct type icons', () => {
-        expect(component.getTypeIcon('workflow')).toBe('description');
+        expect(component.getTypeIcon('workflow')).toBe('file-text');
         expect(component.getTypeIcon('project')).toBe('folder');
-        expect(component.getTypeIcon('task')).toBe('check_circle');
-        expect(component.getTypeIcon('expense')).toBe('payments');
+        expect(component.getTypeIcon('task')).toBe('check-circle');
+        expect(component.getTypeIcon('expense')).toBe('pay-circle');
     });
 
     it('should return correct type labels', () => {

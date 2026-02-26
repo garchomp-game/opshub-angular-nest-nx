@@ -5,19 +5,16 @@ import {
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import {
     TimesheetService,
     ProjectSummary,
@@ -31,161 +28,199 @@ import {
     imports: [
         CommonModule,
         FormsModule,
-        ReactiveFormsModule,
-        MatTableModule,
-        MatTabsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatCardModule,
-        MatSnackBarModule,
+        NzTableModule,
+        NzTabsModule,
+        NzDatePickerModule,
+        NzButtonModule,
+        NzIconModule,
+        NzSpinModule,
+        NzCardModule,
+        NzStatisticModule,
     ],
     template: `
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>工数レポート</mat-card-title>
-            </mat-card-header>
+        <div class="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-6 flex flex-col min-h-full">
+            <nz-card [nzBordered]="true"
+                     class="!rounded-xl shadow-sm border border-gray-200 flex flex-col flex-1">
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50 -mx-6 -mt-6 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-600">
+                        <span nz-icon nzType="bar-chart" nzTheme="outline" class="text-xl"></span>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900 m-0">工数レポート</h2>
+                </div>
 
-            <mat-card-content>
                 <!-- Filters -->
-                <div class="filter-bar" data-testid="report-filter-period">
-                    <mat-form-field appearance="outline">
-                        <mat-label>開始日</mat-label>
-                        <input matInput [matDatepicker]="startPicker"
-                            [(ngModel)]="filterDateFrom">
-                        <mat-datepicker-toggle matSuffix [for]="startPicker" />
-                        <mat-datepicker #startPicker />
-                    </mat-form-field>
+                <div class="p-6 border-b border-gray-100 bg-white -mx-6 mb-6" data-testid="report-filter-period">
+                    <div class="flex flex-wrap items-center gap-4 px-6">
+                        <div class="w-full sm:w-48">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">開始日</label>
+                            <nz-date-picker
+                                [(ngModel)]="filterDateFrom"
+                                nzFormat="yyyy/MM/dd"
+                                class="w-full"
+                                nzPlaceHolder="開始日">
+                            </nz-date-picker>
+                        </div>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>終了日</mat-label>
-                        <input matInput [matDatepicker]="endPicker"
-                            [(ngModel)]="filterDateTo">
-                        <mat-datepicker-toggle matSuffix [for]="endPicker" />
-                        <mat-datepicker #endPicker />
-                    </mat-form-field>
+                        <span class="text-gray-400 font-medium hidden sm:block mt-4">〜</span>
 
-                    <button mat-raised-button color="primary" (click)="applyFilter()"
-                        data-testid="report-apply-btn">
-                        <mat-icon>filter_list</mat-icon>
-                        適用
-                    </button>
+                        <div class="w-full sm:w-48">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">終了日</label>
+                            <nz-date-picker
+                                [(ngModel)]="filterDateTo"
+                                nzFormat="yyyy/MM/dd"
+                                class="w-full"
+                                nzPlaceHolder="終了日">
+                            </nz-date-picker>
+                        </div>
 
-                    <button mat-raised-button (click)="downloadCsv()"
-                        data-testid="report-csv-btn">
-                        <mat-icon>download</mat-icon>
-                        CSV出力
-                    </button>
+                        <div class="flex gap-2 ml-auto sm:ml-4 w-full sm:w-auto mt-4 sm:mt-auto">
+                            <button nz-button nzType="primary" (click)="applyFilter()"
+                                    class="!rounded-lg shadow-sm font-medium flex-1 sm:flex-none"
+                                    data-testid="report-apply-btn">
+                                <span nz-icon nzType="filter" nzTheme="outline"></span>
+                                適用
+                            </button>
+
+                            <button nz-button nzType="default" (click)="downloadCsv()"
+                                    class="font-medium flex-1 sm:flex-none group"
+                                    data-testid="report-csv-btn">
+                                <span nz-icon nzType="download" nzTheme="outline" class="text-gray-500 group-hover:text-primary-600 transition-colors"></span>
+                                CSV出力
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 @if (isLoading()) {
-                    <div class="loading-container" data-testid="loading">
-                        <mat-progress-spinner mode="indeterminate" diameter="40" />
+                    <div class="flex justify-center items-center flex-1 py-24" data-testid="loading">
+                        <div class="flex flex-col items-center gap-4">
+                            <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+                            <span class="text-gray-500 font-medium">データを集計中...</span>
+                        </div>
                     </div>
                 } @else {
-                    <mat-tab-group>
+                    <nz-tabs class="min-h-[400px]">
                         <!-- Project Summary Tab -->
-                        <mat-tab label="プロジェクト別">
-                            <table mat-table [dataSource]="projectSummary()"
-                                class="summary-table" data-testid="report-table">
-                                <ng-container matColumnDef="projectName">
-                                    <th mat-header-cell *matHeaderCellDef>プロジェクト</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.projectName }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="totalHours">
-                                    <th mat-header-cell *matHeaderCellDef>合計工数(h)</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.totalHours }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="entryCount">
-                                    <th mat-header-cell *matHeaderCellDef>エントリ数</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.entryCount }}</td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="projectColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: projectColumns"
-                                    data-testid="report-project-row"></tr>
-                            </table>
-
-                            @if (projectSummary().length === 0) {
-                                <div class="empty-state" data-testid="empty-state">
-                                    データがありません
+                        <nz-tab>
+                            <ng-template nzTabLink>
+                                <div class="flex items-center gap-2 px-2 py-1">
+                                    <span nz-icon nzType="folder" nzTheme="outline" class="text-primary-600"></span>
+                                    <span class="font-bold">プロジェクト別</span>
                                 </div>
-                            }
-                        </mat-tab>
+                            </ng-template>
+
+                            <div class="p-6">
+                                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <nz-table #projectTable
+                                        [nzData]="projectSummary()"
+                                        [nzShowPagination]="false"
+                                        [nzBordered]="false"
+                                        [nzSize]="'middle'"
+                                        [nzNoResult]="projectEmptyTpl"
+                                        data-testid="report-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase">プロジェクト</th>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase text-right" nzWidth="130px">合計工数 (h)</th>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase text-right" nzWidth="130px">エントリ数</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (row of projectSummary(); track row.projectId) {
+                                                <tr class="hover:bg-gray-50/50 transition-colors" data-testid="report-project-row">
+                                                    <td class="border-b border-gray-100 !py-4">
+                                                        <span class="font-medium text-gray-900">{{ row.projectName }}</span>
+                                                    </td>
+                                                    <td class="border-b border-gray-100 !py-4 text-right">
+                                                        <span class="font-bold text-primary-700 bg-primary-50 px-3 py-1 rounded-full text-base">{{ row.totalHours | number:'1.1-2' }}</span>
+                                                    </td>
+                                                    <td class="border-b border-gray-100 !py-4 text-right pr-6">
+                                                        <span class="text-gray-600 font-medium font-mono">{{ row.entryCount }}</span>件
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </nz-table>
+                                    <ng-template #projectEmptyTpl>
+                                        <div class="flex flex-col items-center justify-center py-24 text-center bg-gray-50/30" data-testid="empty-state">
+                                            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                                <span nz-icon nzType="bar-chart" nzTheme="outline" class="text-3xl text-gray-400"></span>
+                                            </div>
+                                            <p class="text-lg font-bold text-gray-900 mb-1">データがありません</p>
+                                            <p class="text-gray-500 text-sm">指定した期間内の工数データは見つかりませんでした</p>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                            </div>
+                        </nz-tab>
 
                         <!-- User Summary Tab -->
-                        <mat-tab label="メンバー別">
-                            <table mat-table [dataSource]="userSummary()" class="summary-table">
-                                <ng-container matColumnDef="userName">
-                                    <th mat-header-cell *matHeaderCellDef>メンバー</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.userName }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="totalHours">
-                                    <th mat-header-cell *matHeaderCellDef>合計工数(h)</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.totalHours }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="entryCount">
-                                    <th mat-header-cell *matHeaderCellDef>エントリ数</th>
-                                    <td mat-cell *matCellDef="let row">{{ row.entryCount }}</td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: userColumns"
-                                    data-testid="report-user-row"></tr>
-                            </table>
-
-                            @if (userSummary().length === 0) {
-                                <div class="empty-state" data-testid="empty-state">
-                                    データがありません
+                        <nz-tab>
+                            <ng-template nz-tab-link>
+                                <div class="flex items-center gap-2 px-2 py-1">
+                                    <span nz-icon nzType="team" nzTheme="outline" class="text-teal-600"></span>
+                                    <span class="font-bold">メンバー別</span>
                                 </div>
-                            }
-                        </mat-tab>
-                    </mat-tab-group>
+                            </ng-template>
+
+                            <div class="p-6">
+                                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <nz-table #userTable
+                                        [nzData]="userSummary()"
+                                        [nzShowPagination]="false"
+                                        [nzBordered]="false"
+                                        [nzSize]="'middle'"
+                                        [nzNoResult]="userEmptyTpl">
+                                        <thead>
+                                            <tr>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase">メンバー</th>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase text-right" nzWidth="130px">合計工数 (h)</th>
+                                                <th class="!bg-gray-50 !text-gray-500 font-medium text-xs tracking-wider uppercase text-right" nzWidth="130px">エントリ数</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (row of userSummary(); track row.userId) {
+                                                <tr class="hover:bg-gray-50/50 transition-colors" data-testid="report-user-row">
+                                                    <td class="border-b border-gray-100 !py-4">
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="w-8 h-8 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                                                                {{ (row.userName || 'U').charAt(0) }}
+                                                            </div>
+                                                            <span class="font-medium text-gray-900">{{ row.userName }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-b border-gray-100 !py-4 text-right">
+                                                        <span class="font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full text-base">{{ row.totalHours | number:'1.1-2' }}</span>
+                                                    </td>
+                                                    <td class="border-b border-gray-100 !py-4 text-right pr-6">
+                                                        <span class="text-gray-600 font-medium font-mono">{{ row.entryCount }}</span>件
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </nz-table>
+                                    <ng-template #userEmptyTpl>
+                                        <div class="flex flex-col items-center justify-center py-24 text-center bg-gray-50/30" data-testid="empty-state">
+                                            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                                <span nz-icon nzType="team" nzTheme="outline" class="text-3xl text-gray-400"></span>
+                                            </div>
+                                            <p class="text-lg font-bold text-gray-900 mb-1">データがありません</p>
+                                            <p class="text-gray-500 text-sm">指定した期間内のメンバーデータは見つかりませんでした</p>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                            </div>
+                        </nz-tab>
+                    </nz-tabs>
                 }
-            </mat-card-content>
-        </mat-card>
+            </nz-card>
+        </div>
     `,
-    styles: [`
-        :host { display: block; padding: 16px; }
-
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .loading-container {
-            display: flex;
-            justify-content: center;
-            padding: 48px;
-        }
-
-        .summary-table {
-            width: 100%;
-            margin-top: 16px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 48px;
-            color: rgba(0, 0, 0, 0.54);
-        }
-    `],
+    styles: [],
 })
 export class TimesheetReportComponent implements OnInit {
     private timesheetService = inject(TimesheetService);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
 
     // ─── State ───
     filterDateFrom: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -212,7 +247,7 @@ export class TimesheetReportComponent implements OnInit {
 
         this.timesheetService.getProjectSummary(query).subscribe({
             next: (data) => this.projectSummary.set(data),
-            error: () => this.snackBar.open('データの取得に失敗しました', '閉じる', { duration: 3000 }),
+            error: () => this.message.error('データの取得に失敗しました'),
         });
 
         this.timesheetService.getUserSummary(query).subscribe({
@@ -222,7 +257,7 @@ export class TimesheetReportComponent implements OnInit {
             },
             error: () => {
                 this.isLoading.set(false);
-                this.snackBar.open('データの取得に失敗しました', '閉じる', { duration: 3000 });
+                this.message.error('データの取得に失敗しました');
             },
         });
     }

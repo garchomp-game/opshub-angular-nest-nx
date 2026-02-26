@@ -2,16 +2,17 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExpenseService } from './expense.service';
 import { EXPENSE_CATEGORIES } from '@shared/types';
 import { HttpClient } from '@angular/common/http';
@@ -32,151 +33,206 @@ interface ApproverItem {
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatButtonModule,
-        MatIconModule,
-        MatCardModule,
-        MatSnackBarModule,
-        MatProgressSpinnerModule,
+        NzFormModule,
+        NzInputModule,
+        NzInputNumberModule,
+        NzSelectModule,
+        NzDatePickerModule,
+        NzButtonModule,
+        NzIconModule,
+        NzCardModule,
+        NzUploadModule,
+        NzSpinModule,
     ],
     template: `
-        <div class="form-container">
-            <div class="header">
-                <button mat-button (click)="goBack()" data-testid="back-btn">
-                    <mat-icon>arrow_back</mat-icon>
-                    戻る
-                </button>
-                <h1>経費申請</h1>
+        <div class="min-h-[calc(100vh-64px)] bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6">
+                    <button nz-button nzType="text" (click)="goBack()"
+                            data-testid="back-btn"
+                            class="!text-gray-500 hover:!text-gray-900 !px-2 mb-4 transition-colors">
+                        <span nz-icon nzType="arrow-left" nzTheme="outline" class="mr-1"></span>
+                        戻る
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shadow-sm">
+                            <span nz-icon nzType="file-add" nzTheme="outline" class="text-2xl"></span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 m-0 tracking-tight">経費申請</h1>
+                            <p class="text-gray-500 mt-1 mb-0 text-sm">交通費、交際費、その他の経費を申請します</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form nz-form [formGroup]="form" nzLayout="vertical" class="space-y-6">
+                    <!-- 基本情報セクション -->
+                    <nz-card [nzBordered]="true"
+                             class="!rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="bg-gray-50/50 px-6 py-4 border-b border-gray-100 -mx-6 -mt-6 mb-6">
+                            <h2 class="text-base font-bold text-gray-900 m-0">申請内容</h2>
+                        </div>
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- 日付 -->
+                                <nz-form-item>
+                                    <nz-form-label nzFor="expenseDate">日付</nz-form-label>
+                                    <nz-form-control nzErrorTip="日付は必須です">
+                                        <nz-date-picker formControlName="expenseDate"
+                                            nzFormat="yyyy/MM/dd"
+                                            class="w-full"
+                                            id="expenseDate"
+                                            data-testid="input-date">
+                                        </nz-date-picker>
+                                    </nz-form-control>
+                                </nz-form-item>
+
+                                <!-- カテゴリ -->
+                                <nz-form-item>
+                                    <nz-form-label nzFor="category">カテゴリ</nz-form-label>
+                                    <nz-form-control nzErrorTip="カテゴリを選択してください">
+                                        <nz-select formControlName="category"
+                                            nzPlaceHolder="カテゴリを選択"
+                                            id="category"
+                                            data-testid="select-category">
+                                            @for (cat of categories; track cat) {
+                                                <nz-option [nzValue]="cat" [nzLabel]="cat"></nz-option>
+                                            }
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <!-- 金額 -->
+                            <nz-form-item>
+                                <nz-form-label nzFor="amount">金額 (円)</nz-form-label>
+                                <nz-form-control [nzErrorTip]="amountErrorTpl">
+                                    <nz-input-group nzPrefix="¥" nzSize="large">
+                                        <input nz-input type="number"
+                                            formControlName="amount"
+                                            id="amount"
+                                            data-testid="input-amount"
+                                            placeholder="0"
+                                            class="text-right font-bold text-lg">
+                                    </nz-input-group>
+                                    <ng-template #amountErrorTpl let-control>
+                                        @if (control.hasError('required')) {
+                                            金額は必須です
+                                        } @else if (control.hasError('min')) {
+                                            1円以上を入力してください
+                                        } @else if (control.hasError('max')) {
+                                            10,000,000円以下で入力してください
+                                        }
+                                    </ng-template>
+                                </nz-form-control>
+                            </nz-form-item>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- プロジェクト -->
+                                <nz-form-item>
+                                    <nz-form-label nzFor="projectId">関連プロジェクト</nz-form-label>
+                                    <nz-form-control nzErrorTip="プロジェクトを選択してください">
+                                        <nz-select formControlName="projectId"
+                                            nzPlaceHolder="プロジェクトを選択"
+                                            nzShowSearch
+                                            id="projectId"
+                                            data-testid="select-project">
+                                            @for (p of projects; track p.id) {
+                                                <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
+                                            }
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+
+                                <!-- 承認者 -->
+                                <nz-form-item>
+                                    <nz-form-label nzFor="approverId">承認者</nz-form-label>
+                                    <nz-form-control nzErrorTip="承認者を選択してください">
+                                        <nz-select formControlName="approverId"
+                                            nzPlaceHolder="承認者を選択"
+                                            nzShowSearch
+                                            id="approverId"
+                                            data-testid="select-approver">
+                                            @for (a of approvers; track a.id) {
+                                                <nz-option [nzValue]="a.id" [nzLabel]="a.displayName"></nz-option>
+                                            }
+                                        </nz-select>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <!-- 説明 -->
+                            <nz-form-item>
+                                <nz-form-label nzFor="description">説明・備考</nz-form-label>
+                                <nz-form-control>
+                                    <textarea nz-input formControlName="description"
+                                        [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+                                        id="description"
+                                        data-testid="input-description"
+                                        placeholder="交通機関の区間や、交際費の詳細などを入力してください"></textarea>
+                                </nz-form-control>
+                            </nz-form-item>
+
+                            <!-- レシート添付 -->
+                            <nz-form-item>
+                                <nz-form-label>レシート添付</nz-form-label>
+                                <nz-form-control>
+                                    <nz-upload
+                                        nzAction="/api/uploads"
+                                        nzListType="picture-card"
+                                        [nzLimit]="3"
+                                        nzAccept="image/*,.pdf"
+                                        data-testid="upload-receipt">
+                                        <div>
+                                            <span nz-icon nzType="plus" nzTheme="outline"></span>
+                                            <div class="mt-2 text-xs text-gray-500">アップロード</div>
+                                        </div>
+                                    </nz-upload>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </div>
+                    </nz-card>
+
+                    <!-- アクションボタン -->
+                    <div class="flex items-center justify-end gap-3 pt-4">
+                        <button nz-button nzType="text" type="button" (click)="goBack()"
+                                data-testid="cancel-btn"
+                                class="!px-6 !text-gray-600 hover:!bg-gray-100">
+                            キャンセル
+                        </button>
+                        <button nz-button nzType="default" type="button"
+                                (click)="submit('draft')"
+                                [disabled]="submitting"
+                                data-testid="save-draft-btn"
+                                class="!px-6">
+                            下書き保存
+                        </button>
+                        <button nz-button nzType="primary" type="button"
+                                (click)="submit('submitted')"
+                                [disabled]="form.invalid || submitting"
+                                [nzLoading]="submitting"
+                                data-testid="submit-btn"
+                                class="!px-8 !rounded-lg shadow-sm font-bold min-w-[120px]">
+                            申請を送信
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <mat-card>
-                <mat-card-content>
-                    <form [formGroup]="form" class="expense-form">
-                        <!-- 日付 -->
-                        <mat-form-field appearance="outline">
-                            <mat-label>日付</mat-label>
-                            <input matInput [matDatepicker]="datePicker" formControlName="expenseDate" data-testid="input-date">
-                            <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
-                            <mat-datepicker #datePicker></mat-datepicker>
-                            @if (form.get('expenseDate')?.hasError('required')) {
-                                <mat-error>日付は必須です</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <!-- カテゴリ -->
-                        <mat-form-field appearance="outline">
-                            <mat-label>カテゴリ</mat-label>
-                            <mat-select formControlName="category" data-testid="select-category">
-                                @for (cat of categories; track cat) {
-                                    <mat-option [value]="cat">{{ cat }}</mat-option>
-                                }
-                            </mat-select>
-                            @if (form.get('category')?.hasError('required')) {
-                                <mat-error>カテゴリを選択してください</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <!-- 金額 -->
-                        <mat-form-field appearance="outline">
-                            <mat-label>金額 (円)</mat-label>
-                            <input matInput type="number" formControlName="amount" data-testid="input-amount">
-                            <span matPrefix>¥&nbsp;</span>
-                            @if (form.get('amount')?.hasError('required')) {
-                                <mat-error>金額は必須です</mat-error>
-                            }
-                            @if (form.get('amount')?.hasError('min')) {
-                                <mat-error>1円以上を入力してください</mat-error>
-                            }
-                            @if (form.get('amount')?.hasError('max')) {
-                                <mat-error>10,000,000円以下で入力してください</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <!-- プロジェクト -->
-                        <mat-form-field appearance="outline">
-                            <mat-label>プロジェクト</mat-label>
-                            <mat-select formControlName="projectId" data-testid="select-project">
-                                @for (p of projects; track p.id) {
-                                    <mat-option [value]="p.id">{{ p.name }}</mat-option>
-                                }
-                            </mat-select>
-                            @if (form.get('projectId')?.hasError('required')) {
-                                <mat-error>プロジェクトを選択してください</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <!-- 承認者 -->
-                        <mat-form-field appearance="outline">
-                            <mat-label>承認者</mat-label>
-                            <mat-select formControlName="approverId" data-testid="select-approver">
-                                @for (a of approvers; track a.id) {
-                                    <mat-option [value]="a.id">{{ a.displayName }}</mat-option>
-                                }
-                            </mat-select>
-                            @if (form.get('approverId')?.hasError('required')) {
-                                <mat-error>承認者を選択してください</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <!-- 説明 -->
-                        <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>説明</mat-label>
-                            <textarea matInput formControlName="description" rows="3" data-testid="input-description"></textarea>
-                        </mat-form-field>
-                    </form>
-                </mat-card-content>
-
-                <mat-card-actions align="end">
-                    <button mat-button (click)="goBack()" data-testid="cancel-btn">
-                        キャンセル
-                    </button>
-                    <button
-                        mat-stroked-button
-                        (click)="submit('draft')"
-                        [disabled]="submitting"
-                        data-testid="save-draft-btn"
-                    >
-                        下書き保存
-                    </button>
-                    <button
-                        mat-raised-button
-                        color="primary"
-                        (click)="submit('submitted')"
-                        [disabled]="form.invalid || submitting"
-                        data-testid="submit-btn"
-                    >
-                        @if (submitting) { <mat-spinner diameter="20"></mat-spinner> }
-                        送信
-                    </button>
-                </mat-card-actions>
-            </mat-card>
         </div>
     `,
     styles: [`
-        .form-container { padding: 24px; max-width: 640px; }
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
+        :host {
+            display: block;
         }
-        .header h1 { margin: 0; font-size: 24px; }
-        .expense-form {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        ::ng-deep .ant-form-vertical .ant-form-item {
+            margin-bottom: 0;
         }
-        .full-width { width: 100%; }
     `],
 })
 export class ExpenseFormComponent implements OnInit {
     private fb = inject(FormBuilder);
     private router = inject(Router);
-    private snackBar = inject(MatSnackBar);
+    private message = inject(NzMessageService);
     private expenseService = inject(ExpenseService);
     private http = inject(HttpClient);
 
@@ -220,19 +276,15 @@ export class ExpenseFormComponent implements OnInit {
         this.expenseService.create(dto).subscribe({
             next: () => {
                 this.submitting = false;
-                this.snackBar.open(
+                this.message.success(
                     status === 'submitted' ? '経費申請を送信しました' : '下書きを保存しました',
-                    '閉じる',
-                    { duration: 3000 },
                 );
                 this.router.navigate(['/expenses']);
             },
             error: (err) => {
                 this.submitting = false;
-                this.snackBar.open(
+                this.message.error(
                     err.error?.message || '送信に失敗しました',
-                    '閉じる',
-                    { duration: 5000 },
                 );
             },
         });

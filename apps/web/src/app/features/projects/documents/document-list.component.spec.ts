@@ -4,10 +4,20 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { IconDefinition } from '@ant-design/icons-angular';
+import * as AllIcons from '@ant-design/icons-angular/icons';
+
+const antDesignIcons = Object.keys(AllIcons).reduce((acc, key) => {
+    const icon = (AllIcons as any)[key] as IconDefinition;
+    if (icon?.name) acc.push(icon);
+    return acc;
+}, [] as IconDefinition[]);
 import { DocumentListComponent } from './document-list.component';
 import { DocumentService } from './document.service';
 import { signal } from '@angular/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 describe('DocumentListComponent', () => {
     let component: DocumentListComponent;
@@ -17,10 +27,16 @@ describe('DocumentListComponent', () => {
         documents: signal([]),
         loading: signal(false),
         meta: signal(null),
-        loadDocuments: () => { },
-        uploadDocument: () => { },
-        downloadDocument: () => { },
-        deleteDocument: () => { },
+        loadDocuments: vi.fn(),
+        uploadDocument: vi.fn(),
+        downloadDocument: vi.fn(),
+        deleteDocument: vi.fn(),
+    };
+
+    const mockMessage = {
+        success: vi.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -30,7 +46,9 @@ describe('DocumentListComponent', () => {
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
+                provideNzIcons(antDesignIcons),
                 { provide: DocumentService, useValue: mockDocumentService },
+                { provide: NzMessageService, useValue: mockMessage },
                 {
                     provide: ActivatedRoute,
                     useValue: {
@@ -64,10 +82,10 @@ describe('DocumentListComponent', () => {
         expect(component.formatSize(0)).toBe('0 B');
     });
 
-    it('getMimeIconがMIMEタイプに応じたアイコンを返すこと', () => {
-        expect(component.getMimeIcon('application/pdf')).toBe('picture_as_pdf');
-        expect(component.getMimeIcon('image/png')).toBe('image');
-        expect(component.getMimeIcon('text/plain')).toBe('description');
+    it('getMimeNzIconがMIMEタイプに応じたアイコンを返すこと', () => {
+        expect(component.getMimeNzIcon('application/pdf')).toBe('file-pdf');
+        expect(component.getMimeNzIcon('image/png')).toBe('file-image');
+        expect(component.getMimeNzIcon('text/plain')).toBe('file-text');
     });
 
     it('getMimeLabelがMIMEタイプに応じたラベルを返すこと', () => {

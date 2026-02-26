@@ -2,15 +2,16 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { InvoicesService } from './invoices.service';
 import { DEFAULT_TAX_RATE } from '@shared/types';
 
@@ -19,178 +20,211 @@ import { DEFAULT_TAX_RATE } from '@shared/types';
     standalone: true,
     imports: [
         CommonModule, RouterLink, ReactiveFormsModule,
-        MatFormFieldModule, MatInputModule, MatButtonModule,
-        MatIconModule, MatDatepickerModule, MatNativeDateModule,
-        MatCardModule, MatTableModule, MatProgressSpinnerModule,
+        NzFormModule, NzInputModule, NzInputNumberModule,
+        NzButtonModule, NzIconModule, NzDatePickerModule,
+        NzCardModule, NzTableModule, NzSpinModule, NzDividerModule,
     ],
     template: `
-        <div class="invoice-form-container">
-            <div class="header">
-                <h1>{{ isEdit ? '請求書編集' : '新規請求書' }}</h1>
-            </div>
-
-            @if (isLoading) {
-                <div class="loading-container" data-testid="loading">
-                    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-                </div>
-            } @else {
-                <form [formGroup]="form" (ngSubmit)="onSubmit()" data-testid="invoice-form">
-                    <mat-card class="form-card">
-                        <mat-card-content>
-                            <div class="form-row">
-                                <mat-form-field class="full-width">
-                                    <mat-label>取引先名</mat-label>
-                                    <input matInput formControlName="clientName"
-                                           data-testid="client-name-input">
-                                </mat-form-field>
-                            </div>
-                            <div class="form-row two-col">
-                                <mat-form-field>
-                                    <mat-label>発行日</mat-label>
-                                    <input matInput formControlName="issuedDate" type="date"
-                                           data-testid="issued-date-input">
-                                </mat-form-field>
-                                <mat-form-field>
-                                    <mat-label>支払期限</mat-label>
-                                    <input matInput formControlName="dueDate" type="date"
-                                           data-testid="due-date-input">
-                                </mat-form-field>
-                            </div>
-                            <div class="form-row two-col">
-                                <mat-form-field>
-                                    <mat-label>税率 (%)</mat-label>
-                                    <input matInput type="number" formControlName="taxRate"
-                                           data-testid="tax-rate-input">
-                                </mat-form-field>
-                                <mat-form-field>
-                                    <mat-label>プロジェクトID (任意)</mat-label>
-                                    <input matInput formControlName="projectId"
-                                           data-testid="project-id-input">
-                                </mat-form-field>
-                            </div>
-                            <mat-form-field class="full-width">
-                                <mat-label>備考</mat-label>
-                                <textarea matInput formControlName="notes" rows="3"
-                                          data-testid="notes-input"></textarea>
-                            </mat-form-field>
-                        </mat-card-content>
-                    </mat-card>
-
-                    <!-- Items -->
-                    <mat-card class="items-card">
-                        <mat-card-header>
-                            <mat-card-title>明細行</mat-card-title>
-                        </mat-card-header>
-                        <mat-card-content>
-                            <table mat-table [dataSource]="itemsDataSource" class="items-table"
-                                   data-testid="items-table">
-                                <ng-container matColumnDef="description">
-                                    <th mat-header-cell *matHeaderCellDef>説明</th>
-                                    <td mat-cell *matCellDef="let row; let i = index">
-                                        <mat-form-field class="full-width compact">
-                                            <input matInput [formControl]="getItemControl(i, 'description')"
-                                                   data-testid="item-description">
-                                        </mat-form-field>
-                                    </td>
-                                </ng-container>
-                                <ng-container matColumnDef="quantity">
-                                    <th mat-header-cell *matHeaderCellDef>数量</th>
-                                    <td mat-cell *matCellDef="let row; let i = index">
-                                        <mat-form-field class="compact narrow">
-                                            <input matInput type="number"
-                                                   [formControl]="getItemControl(i, 'quantity')"
-                                                   data-testid="item-quantity">
-                                        </mat-form-field>
-                                    </td>
-                                </ng-container>
-                                <ng-container matColumnDef="unitPrice">
-                                    <th mat-header-cell *matHeaderCellDef>単価</th>
-                                    <td mat-cell *matCellDef="let row; let i = index">
-                                        <mat-form-field class="compact narrow">
-                                            <input matInput type="number"
-                                                   [formControl]="getItemControl(i, 'unitPrice')"
-                                                   data-testid="item-unit-price">
-                                        </mat-form-field>
-                                    </td>
-                                </ng-container>
-                                <ng-container matColumnDef="amount">
-                                    <th mat-header-cell *matHeaderCellDef>金額</th>
-                                    <td mat-cell *matCellDef="let row; let i = index" class="text-right">
-                                        ¥{{ getItemAmount(i) | number }}
-                                    </td>
-                                </ng-container>
-                                <ng-container matColumnDef="actions">
-                                    <th mat-header-cell *matHeaderCellDef></th>
-                                    <td mat-cell *matCellDef="let row; let i = index">
-                                        <button mat-icon-button color="warn" type="button"
-                                                (click)="removeItem(i)"
-                                                [disabled]="items.length <= 1"
-                                                data-testid="remove-item-btn">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: itemColumns;"
-                                    data-testid="item-row"></tr>
-                            </table>
-
-                            <button mat-stroked-button type="button" (click)="addItem()"
-                                    class="add-item-btn" data-testid="add-item-btn">
-                                <mat-icon>add</mat-icon> 明細行を追加
-                            </button>
-
-                            <!-- Totals -->
-                            <div class="totals" data-testid="totals">
-                                <div class="total-row">
-                                    <span>小計:</span>
-                                    <span>¥{{ subtotal | number }}</span>
-                                </div>
-                                <div class="total-row">
-                                    <span>消費税 ({{ form.value.taxRate }}%):</span>
-                                    <span>¥{{ taxAmount | number }}</span>
-                                </div>
-                                <div class="total-row grand-total">
-                                    <span>合計:</span>
-                                    <span>¥{{ total | number }}</span>
-                                </div>
-                            </div>
-                        </mat-card-content>
-                    </mat-card>
-
-                    <!-- Actions -->
-                    <div class="actions">
-                        <a mat-button routerLink="/invoices" data-testid="cancel-btn">キャンセル</a>
-                        <button mat-raised-button color="primary" type="submit"
-                                [disabled]="form.invalid || isSaving"
-                                data-testid="save-btn">
-                            {{ isSaving ? '保存中...' : '保存' }}
-                        </button>
+        <div class="min-h-[calc(100vh-64px)] bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-6 flex items-center gap-4">
+                    <button nz-button nzType="default" nzShape="circle" routerLink="/invoices"
+                            class="shadow-sm"
+                            data-testid="back-btn">
+                        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 m-0 tracking-tight">{{ isEdit ? '請求書を編集' : '新規請求書の作成' }}</h1>
+                        <p class="text-gray-500 mt-1 mb-0 text-sm">取引先への請求情報を入力してください</p>
                     </div>
-                </form>
-            }
+                </div>
+
+                @if (isLoading) {
+                    <div class="flex justify-center items-center py-24" data-testid="loading">
+                        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+                    </div>
+                } @else {
+                    <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" nzLayout="vertical" class="space-y-6" data-testid="invoice-form">
+                        <!-- 基本情報 -->
+                        <nz-card class="!rounded-2xl shadow-sm border border-gray-100 overflow-hidden" [nzBordered]="false">
+                            <div class="flex items-center gap-2 mb-5">
+                                <span nz-icon nzType="info-circle" nzTheme="outline" class="text-gray-400"></span>
+                                <h2 class="text-base font-bold text-gray-900 m-0">基本情報</h2>
+                            </div>
+
+                            <nz-form-item>
+                                <nz-form-label nzRequired>取引先名</nz-form-label>
+                                <nz-form-control nzErrorTip="取引先名は必須です">
+                                    <nz-input-group nzPrefixIcon="shop">
+                                        <input nz-input formControlName="clientName" placeholder="例: 株式会社◯◯" data-testid="client-name-input" />
+                                    </nz-input-group>
+                                </nz-form-control>
+                            </nz-form-item>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <nz-form-item>
+                                    <nz-form-label nzRequired>発行日</nz-form-label>
+                                    <nz-form-control nzErrorTip="発行日は必須です">
+                                        <nz-date-picker formControlName="issuedDate"
+                                                        nzFormat="yyyy/MM/dd"
+                                                        class="w-full"
+                                                        data-testid="issued-date-input">
+                                        </nz-date-picker>
+                                    </nz-form-control>
+                                </nz-form-item>
+                                
+                                <nz-form-item>
+                                    <nz-form-label nzRequired>支払期限</nz-form-label>
+                                    <nz-form-control nzErrorTip="支払期限は必須です">
+                                        <nz-date-picker formControlName="dueDate"
+                                                        nzFormat="yyyy/MM/dd"
+                                                        class="w-full"
+                                                        data-testid="due-date-input">
+                                        </nz-date-picker>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <nz-form-item>
+                                    <nz-form-label nzRequired>消費税率 (%)</nz-form-label>
+                                    <nz-form-control nzErrorTip="消費税率は必須です">
+                                        <nz-input-number formControlName="taxRate"
+                                                         [nzMin]="0" [nzMax]="100" [nzStep]="1"
+                                                         nzPlaceHolder="10"
+                                                         class="!w-full"
+                                                         data-testid="tax-rate-input">
+                                        </nz-input-number>
+                                    </nz-form-control>
+                                </nz-form-item>
+                                
+                                <nz-form-item>
+                                    <nz-form-label>プロジェクトID (任意)</nz-form-label>
+                                    <nz-form-control>
+                                        <nz-input-group nzPrefixIcon="project">
+                                            <input nz-input formControlName="projectId" placeholder="PROJ-001" data-testid="project-id-input" />
+                                        </nz-input-group>
+                                    </nz-form-control>
+                                </nz-form-item>
+                            </div>
+                            
+                            <nz-form-item>
+                                <nz-form-label>備考 (任意)</nz-form-label>
+                                <nz-form-control>
+                                    <textarea nz-input formControlName="notes" [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                                              placeholder="振込先情報やその他の連絡事項を入力" data-testid="notes-input"></textarea>
+                                </nz-form-control>
+                            </nz-form-item>
+                        </nz-card>
+
+                        <!-- 明細行 -->
+                        <nz-card class="!rounded-2xl shadow-sm border border-gray-100 overflow-hidden" [nzBordered]="false">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <span nz-icon nzType="unordered-list" nzTheme="outline" class="text-gray-400"></span>
+                                    <h2 class="text-base font-bold text-gray-900 m-0">請求明細</h2>
+                                </div>
+                                <button nz-button nzType="dashed" type="button" (click)="addItem()" data-testid="add-item-btn">
+                                    <span nz-icon nzType="plus" nzTheme="outline"></span>
+                                    <span class="font-medium text-sm">明細を追加</span>
+                                </button>
+                            </div>
+                            
+                            <nz-table
+                                #itemsTable
+                                [nzData]="itemsDataSource"
+                                [nzShowPagination]="false"
+                                [nzBordered]="false"
+                                nzSize="middle"
+                                data-testid="items-table">
+                                <thead>
+                                    <tr>
+                                        <th nzWidth="240px">項目名・詳細</th>
+                                        <th nzWidth="110px">数量</th>
+                                        <th nzWidth="150px">単価</th>
+                                        <th nzAlign="right" nzWidth="140px">金額</th>
+                                        <th nzWidth="60px"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of itemsTable.data; track row; let i = $index) {
+                                        <tr data-testid="item-row">
+                                            <td>
+                                                <input nz-input [formControl]="getItemControl(i, 'description')"
+                                                       placeholder="例: システム開発費" data-testid="item-description" />
+                                            </td>
+                                            <td>
+                                                <nz-input-number [formControl]="getItemControl(i, 'quantity')"
+                                                                 [nzMin]="0" [nzStep]="1"
+                                                                 class="!w-full"
+                                                                 data-testid="item-quantity">
+                                                </nz-input-number>
+                                            </td>
+                                            <td>
+                                                <nz-input-number [formControl]="getItemControl(i, 'unitPrice')"
+                                                                 [nzMin]="0" [nzStep]="100"
+                                                                 [nzFormatter]="priceFormatter"
+                                                                 [nzParser]="priceParser"
+                                                                 class="!w-full"
+                                                                 data-testid="item-unit-price">
+                                                </nz-input-number>
+                                            </td>
+                                            <td class="text-right">
+                                                <span class="font-bold text-gray-900 text-base">¥{{ getItemAmount(i) | number }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button nz-button nzType="text" nzDanger nzSize="small"
+                                                        type="button"
+                                                        (click)="removeItem(i)"
+                                                        [disabled]="items.length <= 1"
+                                                        class="opacity-60 hover:opacity-100 transition-opacity disabled:opacity-30"
+                                                        data-testid="remove-item-btn">
+                                                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </nz-table>
+
+                            <!-- 集計表示 -->
+                            <div class="bg-gray-50/80 p-6 border-t border-gray-100 -mx-6 -mb-6 mt-4" data-testid="totals">
+                                <div class="max-w-xs ml-auto space-y-3">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-500 font-medium">小計</span>
+                                        <span class="font-mono text-gray-900 font-medium">¥{{ subtotal | number }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-500 font-medium">消費税 ({{ form.value.taxRate }}%)</span>
+                                        <span class="font-mono text-gray-900 font-medium">¥{{ taxAmount | number }}</span>
+                                    </div>
+                                    <div class="border-t border-gray-200 pt-3 mt-1 flex justify-between items-end">
+                                        <span class="text-gray-900 font-bold">合計金額</span>
+                                        <span class="text-2xl font-bold text-gray-900 tracking-tight">¥{{ total | number }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </nz-card>
+
+                        <!-- アクションボタン -->
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <a nz-button nzType="default" routerLink="/invoices" data-testid="cancel-btn">
+                                キャンセル
+                            </a>
+                            <button nz-button nzType="primary" type="submit"
+                                    [disabled]="form.invalid || isSaving"
+                                    [nzLoading]="isSaving"
+                                    class="!rounded-lg shadow-sm font-bold min-w-[120px]"
+                                    data-testid="save-btn">
+                                {{ isEdit ? '変更を保存' : '請求書を作成' }}
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
         </div>
     `,
-    styles: [`
-        .invoice-form-container { padding: 24px; max-width: 960px; margin: 0 auto; }
-        .header { margin-bottom: 16px; }
-        .form-card, .items-card { margin-bottom: 16px; }
-        .form-row { margin-bottom: 8px; }
-        .two-col { display: flex; gap: 16px; }
-        .two-col mat-form-field { flex: 1; }
-        .full-width { width: 100%; }
-        .compact { font-size: 14px; }
-        .narrow { width: 120px; }
-        .items-table { width: 100%; margin-bottom: 16px; }
-        .add-item-btn { margin-bottom: 16px; }
-        .text-right { text-align: right; }
-        .totals { border-top: 1px solid #ddd; padding-top: 16px; }
-        .total-row { display: flex; justify-content: flex-end; gap: 24px; padding: 4px 0; }
-        .grand-total { font-weight: bold; font-size: 1.2em; border-top: 2px solid #333; padding-top: 8px; margin-top: 4px; }
-        .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-        .loading-container { display: flex; justify-content: center; padding: 48px; }
-    `],
+    styles: [],
 })
 export class InvoiceFormComponent implements OnInit {
     private fb = inject(FormBuilder);
@@ -203,7 +237,9 @@ export class InvoiceFormComponent implements OnInit {
     isSaving = false;
     invoiceId: string | null = null;
 
-    itemColumns = ['description', 'quantity', 'unitPrice', 'amount', 'actions'];
+    // Formatters for nz-input-number
+    priceFormatter = (value: number): string => `¥ ${value}`;
+    priceParser = (value: string): number => Number(value.replace(/¥\s?/g, '')) || 0;
 
     form: FormGroup = this.fb.group({
         clientName: ['', Validators.required],
@@ -287,10 +323,18 @@ export class InvoiceFormComponent implements OnInit {
         this.isSaving = true;
 
         const value = this.form.value;
+
+        // nz-date-picker returns Date objects; convert to ISO string
+        const formatDate = (d: any): string => {
+            if (!d) return '';
+            if (d instanceof Date) return d.toISOString().substring(0, 10);
+            return String(d).substring(0, 10);
+        };
+
         const dto = {
             clientName: value.clientName,
-            issuedDate: value.issuedDate,
-            dueDate: value.dueDate,
+            issuedDate: formatDate(value.issuedDate),
+            dueDate: formatDate(value.dueDate),
             taxRate: value.taxRate,
             projectId: value.projectId || undefined,
             notes: value.notes || undefined,
@@ -320,8 +364,8 @@ export class InvoiceFormComponent implements OnInit {
     private patchForm(invoice: any): void {
         this.form.patchValue({
             clientName: invoice.clientName,
-            issuedDate: invoice.issuedDate?.substring(0, 10),
-            dueDate: invoice.dueDate?.substring(0, 10),
+            issuedDate: invoice.issuedDate ? new Date(invoice.issuedDate) : null,
+            dueDate: invoice.dueDate ? new Date(invoice.dueDate) : null,
             taxRate: Number(invoice.taxRate),
             projectId: invoice.projectId ?? '',
             notes: invoice.notes ?? '',

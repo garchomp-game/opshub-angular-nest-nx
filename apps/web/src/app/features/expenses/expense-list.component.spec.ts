@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { ja_JP, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { ExpenseListComponent } from './expense-list.component';
 import { ExpenseService } from './expense.service';
 import { signal } from '@angular/core';
@@ -29,12 +31,12 @@ describe('ExpenseListComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [
-                ExpenseListComponent,
-                NoopAnimationsModule,
-                RouterTestingModule,
-            ],
+            imports: [ExpenseListComponent],
             providers: [
+                provideRouter([]),
+                provideNoopAnimations(),
+                provideNzI18n(ja_JP),
+                provideNzIcons([]),
                 { provide: ExpenseService, useValue: mockExpenseService },
             ],
         }).compileComponents();
