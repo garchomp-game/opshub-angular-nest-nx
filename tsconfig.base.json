@@ -1,0 +1,36 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "es2022",
+        "module": "esnext",
+        "lib": [
+            "es2022",
+            "dom"
+        ],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "@shared/types": [
+                "libs/shared/types/src/index.ts"
+            ],
+            "@shared/util": [
+                "libs/shared/util/src/index.ts"
+            ],
+            "@prisma-db": [
+                "libs/prisma-db/src/index.ts"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "tmp"
+    ]
+}

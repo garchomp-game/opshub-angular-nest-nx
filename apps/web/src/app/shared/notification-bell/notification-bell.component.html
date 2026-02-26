@@ -1,0 +1,71 @@
+<!-- Notification Bell Button -->
+<button
+  mat-icon-button
+  [matMenuTriggerFor]="notificationMenu"
+  (menuOpened)="onMenuOpened()"
+  data-testid="notification-bell-btn"
+  aria-label="通知"
+>
+  <mat-icon
+    [matBadge]="unreadCount()"
+    [matBadgeHidden]="unreadCount() === 0"
+    matBadgeColor="warn"
+    matBadgeSize="small"
+    data-testid="notification-bell-icon"
+  >
+    notifications
+  </mat-icon>
+</button>
+
+<!-- Notification Dropdown Menu -->
+<mat-menu #notificationMenu="matMenu" class="notification-menu" data-testid="notification-menu">
+  <div class="notification-header" (click)="$event.stopPropagation()">
+    <span class="notification-title">通知</span>
+    @if (unreadCount() > 0) {
+      <button
+        mat-button
+        color="primary"
+        (click)="onMarkAllAsRead()"
+        data-testid="mark-all-read-btn"
+      >
+        すべて既読
+      </button>
+    }
+  </div>
+
+  <mat-divider></mat-divider>
+
+  @if (isLoading()) {
+    <div class="notification-loading" data-testid="notification-loading">
+      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+    </div>
+  } @else if (notifications().length === 0) {
+    <div class="notification-empty" data-testid="notification-empty">
+      <mat-icon>notifications_none</mat-icon>
+      <span>通知はありません</span>
+    </div>
+  } @else {
+    @for (notification of notifications(); track notification.id) {
+      <button
+        mat-menu-item
+        class="notification-item"
+        [class.unread]="!notification.isRead"
+        (click)="onNotificationClick(notification)"
+        [attr.data-testid]="'notification-item-' + notification.id"
+      >
+        <div class="notification-item-content">
+          <span class="notification-item-title">{{ notification.title }}</span>
+          @if (notification.body) {
+            <span class="notification-item-body">{{ notification.body }}</span>
+          }
+          <span class="notification-item-time">
+            {{ notification.createdAt | date:'M/d HH:mm' }}
+          </span>
+        </div>
+        @if (!notification.isRead) {
+          <span class="unread-dot" data-testid="unread-dot"></span>
+        }
+      </button>
+    }
+  }
+</mat-menu>
