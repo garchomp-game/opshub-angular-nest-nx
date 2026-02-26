@@ -5,7 +5,7 @@ import { CurrentUser as ICurrentUser } from '@shared/types';
 import { TenantsService } from '../services/tenants.service';
 import { UpdateTenantDto } from '../dto/update-tenant.dto';
 
-@Controller('api/admin/tenant')
+@Controller('admin/tenant')
 @Roles('tenant_admin')
 export class TenantsController {
     constructor(private readonly tenantsService: TenantsService) { }

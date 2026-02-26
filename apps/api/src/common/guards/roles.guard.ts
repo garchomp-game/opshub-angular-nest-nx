@@ -19,9 +19,9 @@ export class RolesGuard implements CanActivate {
         const user = context.switchToHttp().getRequest().user as CurrentUser;
         if (!user) throw new ForbiddenException('ユーザー情報が取得できません');
 
-        // アクティブテナントでのロールをチェック
+        const activeTenantId = user.tenantIds?.[0] ?? (user as any).tenantId;
         const userRoles = user.roles
-            .filter((r) => r.tenantId === user.tenantId)
+            .filter((r) => r.tenantId === activeTenantId)
             .map((r) => r.role);
 
         const hasRole = requiredRoles.some((role) => userRoles.includes(role as any));

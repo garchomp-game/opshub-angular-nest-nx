@@ -15,7 +15,7 @@ import { UsersService } from '../services/users.service';
 import { InviteUserDto } from '../dto/invite-user.dto';
 import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
 
-@Controller('api/admin/users')
+@Controller('admin/users')
 @Roles('tenant_admin')
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
