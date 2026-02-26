@@ -1,1 +1,28 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// ─── Angular Material テーマ ───
+html {
+  @include mat.theme((color: (primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+        theme-type: light,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
+}
+
+// ─── Global Reset (Tailwind base で大部分カバー) ───
+body {
+  @apply h-full font-sans bg-gray-50 text-gray-900 antialiased;
+}
+
+html {
+  @apply h-full;
+}
+
+a {
+  @apply text-inherit no-underline;
+}

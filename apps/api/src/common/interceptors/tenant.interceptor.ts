@@ -16,7 +16,7 @@ export class TenantInterceptor implements NestInterceptor {
 
         const request = context.switchToHttp().getRequest();
         const user = request.user;
-        const tenantId = request.headers['x-tenant-id'] ?? user?.tenantId;
+        const tenantId = request.headers['x-tenant-id'] ?? user?.tenantIds?.[0] ?? user?.tenantId;
 
         return new Observable((subscriber) => {
             tenantStore.run(

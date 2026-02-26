@@ -68,15 +68,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     async onModuleInit(): Promise<void> {
         await this._client.$connect();
         this.logger.log('Prisma connected to database');
-
-        // クエリログ（開発環境のみ）
-        if (process.env['NODE_ENV'] === 'development') {
-            (this._client as any).$on('query', (e: any) => {
-                this.logger.debug(
-                    `Query: ${e.query} | Params: ${e.params} | Duration: ${e.duration}ms`,
-                );
-            });
-        }
     }
 
     async onModuleDestroy(): Promise<void> {
