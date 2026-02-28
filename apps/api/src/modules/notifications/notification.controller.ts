@@ -1,9 +1,12 @@
 import { Controller, Get, Patch, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { NotificationQueryDto } from './dto/notification-query.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 
+@ApiTags('notifications')
+@ApiBearerAuth()
 @Controller('notifications')
 export class NotificationController {
     constructor(private readonly notificationService: NotificationsService) { }

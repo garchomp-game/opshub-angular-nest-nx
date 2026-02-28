@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app/app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -43,6 +44,17 @@ async function bootstrap() {
     new ResponseInterceptor(),
   );
 
+  // Swagger (開発モードのみ)
+  if (process.env['NODE_ENV'] !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('OpsHub API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const doc = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, doc);
+  }
+
   const port = process.env['PORT'] ?? 3000;
   await app.listen(port);
   const logger = app.get(Logger);
@@ -50,3 +62,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

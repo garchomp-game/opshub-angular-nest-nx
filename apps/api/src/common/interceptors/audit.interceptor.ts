@@ -54,6 +54,10 @@ export class AuditInterceptor implements NestInterceptor {
                     tap({
                         next: async (responseData) => {
                             try {
+                                const diff = beforeData && body
+                                    ? this.computeDiff(beforeData, body)
+                                    : undefined;
+
                                 await this.prisma.auditLog.create({
                                     data: {
                                         tenantId: user.tenantId,
@@ -69,6 +73,7 @@ export class AuditInterceptor implements NestInterceptor {
                                             duration: Date.now() - startTime,
                                             userAgent: request.headers['user-agent'],
                                             ip: request.ip,
+                                            ...(diff ? { diff } : {}),
                                         },
                                     },
                                 });
@@ -140,5 +145,27 @@ export class AuditInterceptor implements NestInterceptor {
     private extractResourceType(url: string): string {
         const segments = url.replace(/^\/api\//, '').split('/');
         return segments[0] ?? 'unknown';
+    }
+
+    /**
+     * beforeData と afterData の差分を計算する。
+     * 変更されたフィールドと、その前後の値を返す。
+     */
+    private computeDiff(
+        beforeData: Record<string, any>,
+        afterData: Record<string, any>,
+    ): { changedFields: string[]; from: Record<string, any>; to: Record<string, any> } {
+        const changedFields = Object.keys(afterData).filter(
+            (k) => beforeData[k] !== afterData[k],
+        );
+
+        const from: Record<string, any> = {};
+        const to: Record<string, any> = {};
+        for (const field of changedFields) {
+            from[field] = beforeData[field];
+            to[field] = afterData[field];
+        }
+
+        return { changedFields, from, to };
     }
 }

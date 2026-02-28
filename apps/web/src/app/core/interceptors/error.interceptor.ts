@@ -13,13 +13,31 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // 401 は AuthInterceptor が処理するのでスキップ
       if (error.status === 401) return throwError(() => error);
 
-      // HTTP エラーの詳細をログに記録
+      // ネットワークエラー (status: 0) の検出
+      if (error.status === 0) {
+        logger.warn('Network error detected (retryable)', {
+          url: error.url,
+          method: req.method,
+          message: error.message,
+          retryable: true,
+        });
+
+        snackBar.open('ネットワークに接続できません。接続を確認してください。', '閉じる', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+        });
+
+        return throwError(() => error);
+      }
+
+      // HTTP エラーの詳細をログに記録（URL, method, レスポンス body を含む）
       logger.error('HTTP error', {
         status: error.status,
         statusText: error.statusText,
         url: error.url,
         method: req.method,
         message: error.error?.error?.message ?? error.error?.message ?? error.message,
+        responseBody: error.error,
       });
 
       const message = error.error?.error?.message

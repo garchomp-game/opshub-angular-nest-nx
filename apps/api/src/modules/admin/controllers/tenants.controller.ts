@@ -1,10 +1,13 @@
 import { Controller, Get, Patch, Delete, Body, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 import { TenantsService } from '../services/tenants.service';
 import { UpdateTenantDto } from '../dto/update-tenant.dto';
 
+@ApiTags('admin/tenant')
+@ApiBearerAuth()
 @Controller('admin/tenant')
 @Roles('tenant_admin')
 export class TenantsController {

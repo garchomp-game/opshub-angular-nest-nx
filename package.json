@@ -96,6 +96,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.2.6",
     "@nestjs/terminus": "^11.1.1",
     "@primeuix/themes": "^2.0.3",
     "@prisma/client": "^6.19.2",

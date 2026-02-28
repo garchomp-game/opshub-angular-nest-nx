@@ -11,7 +11,8 @@ export default defineConfig({
     timeout: 30_000,
     use: {
         baseURL: 'http://localhost:4200',
-        trace: 'on-first-retry',
+        screenshot: 'only-on-failure',
+        trace: 'retain-on-failure',
     },
     webServer: [
         {

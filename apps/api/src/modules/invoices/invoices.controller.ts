@@ -2,6 +2,7 @@ import {
     Controller, Get, Post, Patch, Delete,
     Param, Body, Query, HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { InvoicesService } from './invoices.service';
@@ -10,6 +11,8 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 import { QueryInvoiceDto } from './dto/query-invoice.dto';
 
+@ApiTags('invoices')
+@ApiBearerAuth()
 @Controller('invoices')
 export class InvoicesController {
     constructor(private readonly invoicesService: InvoicesService) { }

@@ -2,6 +2,7 @@ import {
     Controller, Get, Post, Patch, Delete,
     Param, Body, Query, HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -11,6 +12,8 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 
+@ApiTags('projects')
+@ApiBearerAuth()
 @Controller('projects')
 export class ProjectsController {
     constructor(private readonly projectsService: ProjectsService) { }

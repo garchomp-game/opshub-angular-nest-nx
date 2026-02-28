@@ -13,6 +13,7 @@ import {
     BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
 import { DocumentsService } from './documents.service';
 import { QueryDocumentDto } from './dto/query-document.dto';
@@ -21,6 +22,8 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthUser } from '../auth/types/auth.types';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@shared/types';
 
+@ApiTags('documents')
+@ApiBearerAuth()
 @Controller()
 export class DocumentsController {
     constructor(private readonly documentsService: DocumentsService) { }
