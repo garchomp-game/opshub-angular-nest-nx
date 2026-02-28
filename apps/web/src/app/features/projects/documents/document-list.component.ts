@@ -110,7 +110,7 @@ import { formatFileSize } from '@shared/util';
               <td class="text-surface-500 whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <p-avatar [label]="(doc.uploader?.profile?.displayName || 'U').charAt(0)"
-                      shape="circle" size="small"
+                      shape="circle"
                       [style]="{'background-color': 'var(--p-primary-100)', 'color': 'var(--p-primary-700)', 'width': '1.5rem', 'height': '1.5rem', 'font-size': '0.75rem'}" />
                   <span class="font-medium">{{ doc.uploader?.profile?.displayName || '—' }}</span>
                 </div>
@@ -119,11 +119,11 @@ import { formatFileSize } from '@shared/util';
                 {{ doc.createdAt | date:'yyyy/MM/dd HH:mm' }}
               </td>
               <td class="text-right whitespace-nowrap">
-                <p-button icon="pi pi-download" [rounded]="true" [text]="true" size="small"
+                <p-button icon="pi pi-download" [rounded]="true" [text]="true"
                     pTooltip="ダウンロード"
                     (onClick)="onDownload(doc)"
                     data-testid="download-button" />
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" size="small"
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
                     severity="danger"
                     pTooltip="削除"
                     (onClick)="onDelete(doc)"

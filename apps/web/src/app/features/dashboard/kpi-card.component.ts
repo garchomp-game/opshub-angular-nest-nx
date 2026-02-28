@@ -1,41 +1,28 @@
 import { Component, input, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroDocumentText, heroCheckCircle, heroBriefcase,
-  heroClock, heroUsers, heroBanknotes, heroChartBar,
-} from '@ng-icons/heroicons/outline';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [NgIcon],
-  viewProviders: [provideIcons({
-    heroDocumentText, heroCheckCircle, heroBriefcase,
-    heroClock, heroUsers, heroBanknotes, heroChartBar,
-  })],
+  imports: [CardModule],
   template: `
-    <div class="stat bg-base-100 rounded-xl shadow-sm border border-base-200
-          hover:shadow-md transition-all"
-       [class.hover:scale-[1.02]]="!!link()"
-       [class.cursor-pointer]="!!link()"
-       (click)="onClick()"
-       (keydown.enter)="onClick()"
-       [attr.tabindex]="link() ? 0 : null"
-       [attr.role]="link() ? 'link' : null"
-       data-testid="kpi-card">
-      <div class="stat-figure" [style.color]="color()">
-        <ng-icon [name]="icon()" class="text-3xl" />
+    <p-card styleClass="hover:shadow-lg transition-all"
+        [style]="{ cursor: link() ? 'pointer' : 'default' }"
+        (click)="onClick()"
+        data-testid="kpi-card">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium opacity-60 mb-1">{{ title() }}</div>
+          <div class="text-3xl font-bold" [style.color]="color()">{{ value() }}</div>
+        </div>
+        <div class="w-12 h-12 rounded-full flex items-center justify-center" [style.background-color]="color() + '1a'">
+          <i [class]="piIcon()" class="text-2xl" [style.color]="color()"></i>
+        </div>
       </div>
-      <div class="stat-title">{{ title() }}</div>
-      <div class="stat-value" [style.color]="color()">{{ value() }}</div>
-    </div>
+    </p-card>
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `],
+  styles: [`:host { display: block; }`],
 })
 export class KpiCardComponent {
   private router = inject(Router);
@@ -45,6 +32,19 @@ export class KpiCardComponent {
   icon = input.required<string>();
   color = input<string>('#1976d2');
   link = input<string>();
+
+  piIcon(): string {
+    const map: Record<string, string> = {
+      'heroDocumentText': 'pi pi-file',
+      'heroCheckCircle': 'pi pi-check-circle',
+      'heroBriefcase': 'pi pi-briefcase',
+      'heroClock': 'pi pi-clock',
+      'heroUsers': 'pi pi-users',
+      'heroBanknotes': 'pi pi-money-bill',
+      'heroChartBar': 'pi pi-chart-bar',
+    };
+    return map[this.icon()] ?? 'pi pi-star';
+  }
 
   onClick(): void {
     const url = this.link();
