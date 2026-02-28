@@ -11,26 +11,29 @@ import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 import { QueryInvoiceDto } from './dto/query-invoice.dto';
 
 @Controller('invoices')
-@Roles('pm', 'accounting', 'tenant_admin')
 export class InvoicesController {
     constructor(private readonly invoicesService: InvoicesService) { }
 
     @Get()
+    @Roles('pm', 'accounting', 'tenant_admin')
     findAll(@CurrentUser() user: any, @Query() query: QueryInvoiceDto) {
         return this.invoicesService.findAll(user.tenantId, query);
     }
 
     @Get(':id')
+    @Roles('pm', 'accounting', 'tenant_admin')
     findOne(@Param('id') id: string, @CurrentUser() user: any) {
         return this.invoicesService.findOne(user.tenantId, id);
     }
 
     @Post()
+    @Roles('accounting', 'tenant_admin')
     create(@Body() dto: CreateInvoiceDto, @CurrentUser() user: any) {
         return this.invoicesService.create(user.tenantId, user.id, dto);
     }
 
     @Patch(':id')
+    @Roles('accounting', 'tenant_admin')
     update(
         @Param('id') id: string,
         @Body() dto: UpdateInvoiceDto,
@@ -40,6 +43,7 @@ export class InvoicesController {
     }
 
     @Patch(':id/status')
+    @Roles('accounting', 'tenant_admin')
     updateStatus(
         @Param('id') id: string,
         @Body() dto: UpdateInvoiceStatusDto,
@@ -49,6 +53,7 @@ export class InvoicesController {
     }
 
     @Delete(':id')
+    @Roles('accounting', 'tenant_admin')
     @HttpCode(HttpStatus.NO_CONTENT)
     remove(@Param('id') id: string, @CurrentUser() user: any) {
         return this.invoicesService.remove(user.tenantId, id);

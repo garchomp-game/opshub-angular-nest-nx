@@ -162,8 +162,16 @@ export class WorkflowsService {
         }
     }
 
-    async update(tenantId: string, id: string, dto: UpdateWorkflowDto) {
+    async update(tenantId: string, id: string, userId: string, dto: UpdateWorkflowDto) {
         const workflow = await this.findOne(tenantId, id);
+
+        // 作成者のみ更新可能
+        if (workflow.createdBy !== userId) {
+            throw new ForbiddenException({
+                code: 'ERR-WF-003',
+                message: '自分の申請のみ更新できます',
+            });
+        }
 
         if (workflow.status !== 'draft') {
             throw new ConflictException({

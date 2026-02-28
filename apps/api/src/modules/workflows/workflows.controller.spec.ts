@@ -109,7 +109,7 @@ describe('WorkflowsController', () => {
 
             expect(result).toEqual(mockWorkflow);
             expect(service.update).toHaveBeenCalledWith(
-                mockUser.tenantId, 'wf-001', dto,
+                mockUser.tenantId, 'wf-001', mockUser.id, dto,
             );
         });
     });

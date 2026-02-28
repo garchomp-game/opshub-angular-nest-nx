@@ -1,57 +1,55 @@
-import { Component, input } from '@angular/core';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { Component, input, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroDocumentText, heroCheckCircle, heroBriefcase,
+  heroClock, heroUsers, heroBanknotes, heroChartBar,
+} from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
-  imports: [NzCardModule, NzStatisticModule, NzIconModule],
+  imports: [NgIcon],
+  viewProviders: [provideIcons({
+    heroDocumentText, heroCheckCircle, heroBriefcase,
+    heroClock, heroUsers, heroBanknotes, heroChartBar,
+  })],
   template: `
-    <nz-card [nzBordered]="true"
-             class="kpi-card group"
-             [style.borderLeftWidth.px]="4"
-             [style.borderLeftColor]="color()"
-             data-testid="kpi-card">
-      <nz-statistic
-        [nzValue]="value()"
-        [nzTitle]="title()"
-        [nzPrefix]="prefixTpl"
-        [nzValueStyle]="{ color: color(), 'font-weight': '700', 'font-size': '28px' }">
-      </nz-statistic>
-      <ng-template #prefixTpl>
-        <span nz-icon [nzType]="icon()" nzTheme="outline"
-              [style.color]="color()" class="text-xl"></span>
-      </ng-template>
-    </nz-card>
+    <div class="stat bg-base-100 rounded-xl shadow-sm border border-base-200
+          hover:shadow-md transition-all"
+       [class.hover:scale-[1.02]]="!!link()"
+       [class.cursor-pointer]="!!link()"
+       (click)="onClick()"
+       (keydown.enter)="onClick()"
+       [attr.tabindex]="link() ? 0 : null"
+       [attr.role]="link() ? 'link' : null"
+       data-testid="kpi-card">
+      <div class="stat-figure" [style.color]="color()">
+        <ng-icon [name]="icon()" class="text-3xl" />
+      </div>
+      <div class="stat-title">{{ title() }}</div>
+      <div class="stat-value" [style.color]="color()">{{ value() }}</div>
+    </div>
   `,
   styles: [`
     :host {
       display: block;
     }
-    .kpi-card {
-      border-radius: 12px;
-      overflow: hidden;
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-    }
-    .kpi-card:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-    ::ng-deep .kpi-card .ant-card-body {
-      padding: 20px 24px;
-    }
-    ::ng-deep .kpi-card .ant-statistic-title {
-      font-size: 13px;
-      color: #6b7280;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
   `],
 })
 export class KpiCardComponent {
+  private router = inject(Router);
+
   title = input.required<string>();
   value = input.required<number>();
   icon = input.required<string>();
   color = input<string>('#1976d2');
+  link = input<string>();
+
+  onClick(): void {
+    const url = this.link();
+    if (url) {
+      this.router.navigateByUrl(url);
+    }
+  }
 }

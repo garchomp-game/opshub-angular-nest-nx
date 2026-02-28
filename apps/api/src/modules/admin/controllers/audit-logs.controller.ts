@@ -6,7 +6,7 @@ import { AuditLogsService } from '../services/audit-logs.service';
 import { AuditLogFilterDto } from '../dto/audit-log-filter.dto';
 
 @Controller('admin/audit-logs')
-@Roles('tenant_admin')
+@Roles('tenant_admin', 'it_admin')
 export class AuditLogsController {
     constructor(private readonly auditLogsService: AuditLogsService) { }
 
