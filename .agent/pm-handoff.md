@@ -11,13 +11,13 @@
 | フロントエンド | Angular 21 (apps/web) |
 | DB | PostgreSQL + Prisma |
 | CSS | Tailwind v4 (レイアウト用ユーティリティのみ) |
-| UI ライブラリ | **PrimeNG 21** (Aura テーマ) — 移行中 |
+| UI ライブラリ | **PrimeNG 21 (Aura テーマ)** — 移行完了 |
 | アイコン | PrimeIcons (`pi pi-xxx`) |
-| テスト | Vitest (API/Web), Playwright (E2E) |
+| テスト | Jest (API), Vitest (Web), Playwright (E2E) |
 | パッケージマネージャ | pnpm |
+| API ドキュメント | Swagger (`/api/docs` — 開発モードのみ) |
 
-> ⚠️ **DaisyUI → PrimeNG 移行中**: DaisyUI v5 / @ng-icons/heroicons はまだ `package.json` に残っていますが、
-> 全画面を PrimeNG に移行後に撤去予定です。移行チケット P1-P6 を参照してください。
+> ✅ DaisyUI / @ng-icons は**完全撤去済み**。`shared/ui` フォルダも削除済み。
 
 ---
 
@@ -28,25 +28,25 @@
 ```
 .agent/
 ├── prompts/          ← エージェント向け作業指示書
-│   ├── p1-p6-*.md                            ← PrimeNG 移行チケット (現在アクティブ)
-│   ├── t1-login.md ... t8-admin-search.md    ← 画面実装チケット (旧 DaisyUI 版, 参考用)
-│   ├── v5-*.md                               ← DaisyUI v5 クラス修正 (完了, 参考用)
-│   ├── a1~a5-*-audit.md                      ← 監査レポート
-│   └── d1-footer.md, d2-breadcrumb.md        ← UI 改善チケット
+│   ├── c2-c5-*.md                             ← Phase 3 チケット (完了)
+│   ├── p1-p6-*.md                             ← PrimeNG 移行チケット (完了)
+│   ├── t1-t8-*.md                             ← 画面実装チケット (完了)
+│   ├── v5-*.md                                ← DaisyUI v5 修正 (完了)
+│   ├── a1~a5-*-audit.md                       ← 監査レポート
+│   └── d1-d2-*.md                             ← UI 改善チケット (完了)
 ├── audit/            ← 詳細監査レポート
 ├── llms-txt/         ← LLM 向けリファレンス
 │   ├── primeNG-llms.txt          ← PrimeNG コンポーネント索引
 │   ├── primeNG-llms-full.txt     ← PrimeNG 全 API ドキュメント (48K 行)
-│   ├── daisyui-llms.txt          ← DaisyUI v5 (移行完了後に削除)
 │   └── angular-llms*.txt         ← Angular リファレンス
 ├── pm-handoff.md     ← このファイル
 ├── pm-prompt.md      ← PM 引き継ぎプロンプト (現在の状態と次アクション)
-├── ticket-template.md ← PrimeNG 版チケットテンプレート
+├── ticket-template.md ← チケットテンプレート
 └── workflows/
     └── pm-handoff.md ← PM 引き継ぎワークフロー
 ```
 
-### リファレンス（仕様書・設計書）
+### リファレンス
 
 ```
 reference/            ← 仕様書（旧アーキテクチャ前提、要注意）
@@ -55,7 +55,6 @@ opshub-doc/           ← 旧ドキュメント (Starlight)
 
 > ⚠️ `reference/` と `opshub-doc/` は**旧アーキテクチャ (Next.js/Supabase)** 前提のため、
 > 現在の実装 (NestJS/Angular/Prisma) と大きく乖離している。
-> 詳細は `.agent/audit/a1~a5-*.md` の監査レポートを参照。
 
 ---
 
@@ -69,14 +68,14 @@ pnpm nx serve web          # Web サーバー (http://localhost:4200)
 # テスト
 pnpm nx test api           # API ユニットテスト (229 テスト)
 pnpm nx test web           # Web ユニットテスト (139 テスト)
-npx playwright test        # E2E テスト (39 テスト)
+npx playwright test        # E2E テスト (37 テスト)
 
 # ビルド
 pnpm nx build api
-pnpm nx build web          # バンドルサイズ上限: 2MB (移行中のため引き上げ済み)
+pnpm nx build web          # バンドルサイズ上限: 1.5MB (現在 1.02 MB)
 
-# 一括チェック
-pnpm check                 # typecheck + test 全実行
+# Swagger
+# http://localhost:3000/api/docs (開発モードで API サーバー起動後)
 ```
 
 ### テストアカウント
@@ -107,7 +106,7 @@ opshub/
 ├── apps/
 │   ├── api/                        ← NestJS バックエンド
 │   │   └── src/
-│   │       ├── common/             ← デコレータ、ガード、インターセプター
+│   │       ├── common/             ← デコレータ、ガード、インターセプター、フィルタ
 │   │       └── modules/            ← 11 モジュール
 │   │           ├── auth/           ← 認証 (JWT + Passport)
 │   │           ├── workflows/      ← 申請管理
@@ -129,9 +128,10 @@ opshub/
 │           │   ├── interceptors/   ← auth, error (HttpClient)
 │           │   └── services/       ← LoggerService, GlobalErrorHandler
 │           ├── shared/             ← AppShell, Breadcrumb, NotFound, 通知ベル, 検索バー
-│           │   ├── components/     ← app-shell, breadcrumb, header-search-bar etc.
+│           │   ├── components/     ← app-shell, breadcrumb, header-search-bar, not-found, confirm-dialog
 │           │   ├── notification-bell/
-│           │   └── ui/             ← ⚠️ 廃止予定 (PrimeNG 移行後に削除)
+│           │   ├── pipes/          ← カスタムパイプ
+│           │   └── services/       ← ToastService, ModalService (PrimeNG ラッパー)
 │           ├── features/           ← 各機能モジュール (8 機能)
 │           └── testing/            ← テスト用ヘルパー
 │
@@ -152,60 +152,41 @@ opshub/
 
 ---
 
-## 5. UI ライブラリ移行状態
+## 5. UI ライブラリ状態
 
 ### PrimeNG 基盤 (設定済み)
 
 | 設定 | 状態 |
 |---|---|
 | `app.config.ts` に `providePrimeNG` | ✅ Aura テーマ + darkModeSelector |
-| `MessageService` / `ConfirmationService` | ✅ グローバル provider 登録済み |
+| `MessageService` / `ConfirmationService` | ✅ グローバル provider |
 | `styles.css` に PrimeIcons CSS | ✅ |
 | app-shell に `<p-toast>` / `<p-confirmdialog>` | ✅ |
-| `ToastService` → PrimeNG `MessageService` 委譲 | ✅ |
-| `ModalService` → PrimeNG `ConfirmationService` 委譲 | ✅ |
-| バンドルサイズ上限 | 2MB に引き上げ済み (移行後に見直し) |
+| `ToastService` → PrimeNG `MessageService` | ✅ `shared/services/toast.service.ts` |
+| `ModalService` → PrimeNG `ConfirmationService` | ✅ `shared/services/modal.service.ts` |
+| バンドルサイズ上限 | 1.5 MB (現在 1.02 MB) |
 
-### 画面移行状況
+### 全画面 PrimeNG 移行完了
 
-| 画面 | 状態 | チケット |
-|---|---|---|
-| ログインフォーム | ✅ PrimeNG | — |
-| ワークフローフォーム | ✅ PrimeNG | — |
-| ワークフロー一覧 | 🔄 移行中 | P1 |
-| ワークフロー詳細/承認待ち | 📋 未着手 | P1 |
-| プロジェクト一覧/詳細/フォーム/カンバン/ドキュメント | 📋 未着手 | P2 |
-| 経費一覧/フォーム/サマリー | 📋 未着手 | P3 |
-| 工数入力/レポート | 📋 未着手 | P3 |
-| 請求書一覧/フォーム/詳細/印刷 | 📋 未着手 | P4 |
-| ユーザー管理/招待/テナント設定/監査ログ | 📋 未着手 | P5 |
-| 検索結果 | 📋 未着手 | P5 |
-| ダッシュボード / KPI カード | 📋 未着手 | P6 |
-| アプリシェル / パンくず / 通知 | 📋 未着手 | P6 |
-
-### PrimeNG コンポーネント対応表 (新規エージェント向け)
-
-`.agent/ticket-template.md` に詳細な対応表があります。主要コンポーネント:
-
-| 用途 | PrimeNG | import |
-|---|---|---|
-| ボタン | `<p-button>` | `ButtonModule` from `primeng/button` |
-| テーブル | `<p-table>` | `TableModule` from `primeng/table` |
-| カード | `<p-card>` | `CardModule` from `primeng/card` |
-| セレクト | `<p-select>` | `SelectModule` from `primeng/select` |
-| タグ/バッジ | `<p-tag>` | `TagModule` from `primeng/tag` |
-| ページネータ | `<p-paginator>` | `PaginatorModule` from `primeng/paginator` |
-
-### アーキテクチャ方針
-
-- **shared/ui フォルダは廃止予定** — PrimeNG コンポーネントを各画面で直接 import
-- 残すサービス: `ToastService` / `ModalService` のみ (PrimeNG サービスのラッパー)
-- `@ng-icons/heroicons` → PrimeIcons (`pi pi-xxx`) に全面置換
-- Tailwind CSS は**レイアウト用ユーティリティのみ**継続使用 (`flex`, `grid`, `gap-*`, `p-*`, `m-*`)
+| 画面 | 使用 PrimeNG |
+|---|---|
+| ログイン | InputText, Password, IconField, Button, Message |
+| ダッシュボード | Card, ProgressBar, ProgressSpinner, Button |
+| ワークフロー | Table, Paginator, Tag, Button, Select, Textarea, Avatar |
+| プロジェクト | Table, Paginator, Tag, Avatar, IconField, Select, Button |
+| カンバン | Card, Tag, Button, Avatar |
+| ドキュメント | Table, Paginator, Tag, Avatar, Button, Tooltip, ProgressBar |
+| 経費 | Table, Paginator, Tag, Button, InputNumber, DatePicker, Select |
+| 工数入力 | Table, InputNumber, Button, Select, Card |
+| 請求書 | Table, Paginator, Tag, Button, Card |
+| 管理 (Users/Tenant) | Table, Button, Card, InputText, ProgressSpinner |
+| 監査ログ | Table, Paginator, Tag, Button, DatePicker, Select |
+| 検索 | InputText, Button, Tag, Avatar |
+| アプリシェル | Drawer, Menu, Avatar, Breadcrumb |
 
 ---
 
-## 6. 既知の技術的注意点（ナレッジ）
+## 6. 既知の技術的注意点
 
 ### API 側
 
@@ -214,27 +195,30 @@ opshub/
 | テナント分離 | Prisma `$extends` ミドルウェアで自動 `WHERE tenantId = ?` 挿入 |
 | CurrentUser | `@CurrentUser()` デコレータが `tenantIds[0]` → `tenantId` に変換 |
 | グローバルプレフィックス | `api` が自動付与。コントローラーに `api/` を含めないこと |
+| ValidationPipe | `whitelist: true`, `forbidNonWhitelisted: true`, `transform: true` |
+| Swagger | `@nestjs/swagger` — `/api/docs` (開発モードのみ) |
 | ヘルスチェック | `GET /api/health` — `@Public()` デコレータで認証不要 |
 | 認可 | RLS 不使用。`@Roles()` デコレータ + `RolesGuard` でアプリ層制御 (ADR-0007) |
 | ロギング | nestjs-pino で構造化 JSON ログ (本番は JSON、開発は pino-pretty) |
-| 監査ログ | `AuditInterceptor` — POST/PATCH/PUT/DELETE 操作を自動記録。`beforeData` 付き |
+| 監査ログ | `AuditInterceptor` — POST/PATCH/PUT/DELETE を自動記録。`beforeData` + diff 付き |
+| PII マスキング | `HttpExceptionFilter` — `password`, `token`, `secret` フィールドをマスク |
 | エラー応答 | `HttpExceptionFilter` — 4xx は warn、5xx は error でログ出力 |
 
 ### Web 側
 
 | 項目 | 内容 |
 |---|---|
-| UI | **PrimeNG 21 (Aura)** に移行中。DaisyUI v5 は撤去予定 |
-| PostCSS | `postcss.config.json` で `@tailwindcss/postcss` 設定 (Angular 21 は .js 未対応) |
-| アイコン | PrimeIcons (`pi pi-xxx`)。旧: ng-icons は残存するが新規使用禁止 |
+| UI | **PrimeNG 21 (Aura)** — 全画面移行完了 |
+| PostCSS | `postcss.config.json` で `@tailwindcss/postcss` 設定 |
+| アイコン | PrimeIcons (`pi pi-xxx`) のみ使用 |
 | Signal | 全サービスは Signal ベースのステート管理 |
-| Breadcrumb | ルートの `data.title` から自動生成。`app.routes.ts` に定義 |
+| Breadcrumb | ルートの `data.title` から自動生成 |
 | 404 ページ | `NotFoundComponent` — protected shell 内と public 両方にワイルドカードルート |
-| ロギング | `LoggerService` — ログレベル制御 (開発: DEBUG〜、本番: WARN〜) |
+| ロギング | `LoggerService` — 構造化ログ、レベル制御 (開発: DEBUG〜、本番: WARN〜) |
 | エラーハンドラ | `GlobalErrorHandler` — Angular ErrorHandler を置換、NG0200 等を確実に捕捉 |
 | **DI 注意** | `AuthService` コンストラクタで `Promise.resolve().then()` により HTTP 呼び出しを遅延。循環依存 (NG0200) 回避のため |
-| Toast | `ToastService` を inject → 内部で PrimeNG `MessageService` に委譲 |
-| Modal | `ModalService.open()` → 内部で PrimeNG `ConfirmationService` に委譲。`afterClosed()` API 互換 |
+| Toast | `shared/services/toast.service.ts` — PrimeNG `MessageService` に委譲 |
+| Modal | `shared/services/modal.service.ts` — PrimeNG `ConfirmationService` に委譲 |
 
 ### ビルド・インフラ
 
@@ -243,7 +227,8 @@ opshub/
 | .swcrc | `jsc.target` は `es2022` (es2024 は非対応) |
 | Vite | Angular 21 は Vite ベースビルド |
 | プロキシ | `apps/web/proxy.conf.json` で `/api` → `localhost:3000` |
-| バンドル | 上限 2MB (PrimeNG 移行中。DaisyUI 撤去後に見直し) |
+| バンドル | 上限 1.5MB (現在 1.02 MB) |
+| Playwright | 失敗時スクリーンショット + trace 保存 |
 
 ---
 
@@ -253,108 +238,87 @@ opshub/
 ログイン後にフルページリロード (F5) すると毎回ログインページにリダイレクトされていた。
 
 ### 根本原因
-**NG0200: Circular dependency** — `AuthService` コンストラクタが同期的に `loadFromStorage()` → `fetchProfile()` → `HttpClient.get()` → `authInterceptor` → `inject(AuthService)` を呼び出し、DI の循環依存が発生。`catchError(() => of(null))` がエラーを握り潰し、プロフィール取得失敗 → 未認証 → ログインリダイレクトとなっていた。
+**NG0200: Circular dependency** — `AuthService` コンストラクタが同期的に `loadFromStorage()` → `fetchProfile()` → `HttpClient.get()` → `authInterceptor` → `inject(AuthService)` を呼び出し、DI の循環依存が発生。
 
 ### 修正
 - `Promise.resolve().then(() => this.loadFromStorage())` で 1 マイクロタスク遅延し循環依存を回避
-- `GlobalErrorHandler` を追加し、NG0200 等のフレームワークエラーを確実に捕捉するようにした
-- `LoggerService` を導入し、`catchError` でエラーを返す箇所にはすべて `logger.error()` を追加
-
-### 教訓
-> `providedIn: 'root'` サービスのコンストラクタで HTTP リクエストを発行してはいけない。HttpClient のインターセプターチェーンが同じサービスを inject する場合、初回構築時に循環依存が発生する。
+- `GlobalErrorHandler` を追加し、NG0200 等のフレームワークエラーを確実に捕捉
+- `LoggerService` を導入し、`catchError` でエラーを返す箇所にすべて `logger.error()` を追加
 
 ---
 
-## 8. 現在の状態
+## 8. 完了済みフェーズ
 
-### ✅ 完了済み
-
-#### 実装
+### Phase 1: 全画面実装
 - NestJS 全 11 モジュール
-- Angular 全画面実装 + Vitest 139 テスト通過
-- NG-ZORRO → DaisyUI v5 + CDK → PrimeNG 21 移行中
-- **Footer** / **Breadcrumb** / **404 ページ**
-- PrimeNG 基盤セットアップ (Aura テーマ, Toast/Modal 統合)
-- ログイン・ワークフローフォーム PrimeNG 移行完了
+- Angular 全画面実装
+- E2E テスト (Playwright)
+- セキュリティ改善 (認証永続化, 所有者チェック, 監査ログ)
+- ロギング基盤 (API: nestjs-pino, Web: LoggerService + GlobalErrorHandler)
 
-#### セキュリティ改善
-- 認証セッション永続化バグ修正 (NG0200 循環依存)
-- `workflows.update()` に `createdBy` 所有者チェック追加
-- `AuditInterceptor` に `beforeData` (変更前データ) 記録追加
-- `AuditInterceptor` で `@Public()` エンドポイント (login/register) をスキップ
+### Phase 2: PrimeNG 移行 (P1-P6)
+- 全画面を PrimeNG コンポーネントに移行
+- DaisyUI / @ng-icons 完全撤去
+- バンドルサイズ: 1.26 MB → 1.02 MB
 
-#### ロギング基盤
-- **API**: nestjs-pino 構造化ログ導入 (開発: pino-pretty, 本番: JSON)
-- **Web**: `LoggerService` (レベル制御) + `GlobalErrorHandler` (NG0200 捕捉)
-- `HttpExceptionFilter`: 4xx → warn / 5xx → error + リクエストコンテキスト
-- `AuthService` / `authInterceptor` / `errorInterceptor` に構造化ログ追加
-
-#### フォーム UX 改善
-- `pmId` / `approverId` / `projectId` をテキスト入力 → セレクトボックス化
-- ダッシュボード KPI カードをクリッカブルに (申請一覧/承認待ち連携)
-- 申請一覧に表示モードフィルター追加 (すべて/自分の申請)
-
-#### テスト
-- API ユニットテスト: 229 テスト
-- Web ユニットテスト: 139 テスト
-- E2E テスト: 39 テスト (Playwright)
-  - セキュリティ: トークンリフレッシュ, RBAC, createdBy 認可, バリデーション
-  - セッション: F5 リロード (複数ページ), ログアウト→再ログイン
-  - CRUD: ワークフロー状態遷移 (draft→submit→approve/reject), 経費作成
-
-#### ADR / 監査レポート
-- ADR-0007: RLS → アプリ層認可の正式決定
-- `.agent/audit/a1~a5` : API, 画面, アーキテクチャ, DB, モジュール詳細
-
-### 🔄 進行中 (PrimeNG 移行)
-- チケット P1-P5 を並列エージェントに割り振り済み
-- P6 (ダッシュボード・シェル・DaisyUI 撤去) は P1-P5 完了後に実行
-
-### 🔜 次フェーズ (先送り)
-- D-3: 通知ページ ("/notifications") or Popover
-- D-4: パスワードリセット
-- D-5: テナントデータエクスポート (GDPR)
-- D-6: WF 添付ファイル
-- D-8: 検索 GIN インデックス
-- D-9: レート制限
-- I-6: 監査ログ INSERT ONLY 制約
-- Tier 1: ドキュメント全面改訂 (旧アーキテクチャ→現行)
-- 大規模プロジェクト対応要件の策定（DTO/型安全性の強化など）
+### Phase 3: コード品質向上 (C1-C5)
+- C1: `shared/ui` 完全削除 → `shared/services/` に移動
+- C2: NestJS ValidationPipe + DTO/Swagger 導入
+- C3: バンドル上限 2MB → 1.5MB 引き戻し
+- C5: ロギング・可観測性強化 (構造化ログ, PII マスキング, 監査 diff)
 
 ---
 
-## 9. マルチエージェント運用ルール
+## 9. 次フェーズ候補 (先送り)
+
+| ID | 機能 | 工数 | 備考 |
+|---|---|---|---|
+| D-3 | 通知ページ (/notifications) | 中 | ポーリング or WebSocket |
+| D-4 | パスワードリセット | 中 | メール送信基盤必要 |
+| D-6 | WF 添付ファイル | 中 | documents 基盤を活用 |
+| I-6 | 監査ログ INSERT ONLY 制約 | 小 | DB マイグレーション |
+| D-8 | 検索 GIN インデックス | 小 | PostgreSQL |
+| D-9 | レート制限 | 中 | @nestjs/throttler |
+| D-5 | テナントデータエクスポート (GDPR) | 大 | — |
+| — | OpenAPI クライアント自動生成 | 中 | Swagger spec → Angular SDK |
+| — | ドキュメント全面改訂 | 大 | reference/ の現行化 |
+
+---
+
+## 10. マルチエージェント運用ルール
 
 ### チケット分割の原則
 - **ファイル競合ゼロ**: 各チケットは独立したファイルセットを対象にする
-- **共通部分は先行チケット (T0/P0)**: shared コンポーネントや設定は事前に完了
+- **共通部分は先行チケット**: shared コンポーネントや設定は事前に完了
 - **自己完結プロンプト**: `.agent/prompts/` に対象ファイル・要件・ルールを全て記載
-
-### LLM リファレンス
-- `.agent/llms-txt/primeNG-llms-full.txt` — PrimeNG 全コンポーネント API ドキュメント (48K 行)
-- `.agent/llms-txt/primeNG-llms.txt` — PrimeNG コンポーネント索引
-- `.agent/llms-txt/angular-llms*.txt` — Angular リファレンス
 
 ### エージェントへの共通指示
 ```
 1. 対象ファイルのみ変更すること
 2. 既存ロジック (Signal, Service, Router) は変更禁止
-3. PrimeNG コンポーネントを直接使用。shared/ui は import 禁止
-4. PrimeIcons (pi pi-xxx) を使用。@ng-icons は使用禁止
+3. PrimeNG コンポーネントを直接使用。shared/services のサービスのみ利用可
+4. PrimeIcons (pi pi-xxx) を使用
 5. 日本語 UI を維持
 6. data-testid 属性を主要要素に付与
-7. 完了後 pnpm nx build web で確認
+7. 完了後 pnpm nx build web && pnpm nx test web で確認
 ```
 
 ---
 
-## 10. コミット履歴
+## 11. コミット履歴
 
 | Hash | 内容 |
 |---|---|
-| `0d06416` | PrimeNG 基盤セットアップ + P1-P6 チケット作成 |
+| `2de3ee0` | C2 + C5: DTO/Swagger + ロギング強化 |
+| `af7918a` | C3: バンドル上限 1.5MB |
+| `5af4f3b` | C1: shared/ui 削除 → shared/services 移動 |
+| `8e806ba` | .gitignore クリーンアップ |
+| `b33539f` | テスト修正 — 全 139 + E2E 37 GREEN |
+| `9c1bb82` | PrimeNG 移行完了 — DaisyUI / ng-icons 完全撤去 |
+| `217ffc8` | PM引き継ぎドキュメント改訂 |
+| `0d06416` | PrimeNG 基盤セットアップ + チケット作成 |
 | `0ac00a4` | E2E修正・フォームUX改善・ダッシュボード強化 |
-| `bf2bc7e` | 一旦完成! (DaisyUI 版全画面実装) |
+| `bf2bc7e` | 一旦完成 (全画面実装) |
 | `973fc9b` | E2E完了・Tailwind導入 |
-| `dee23af` | チケット1-11まで完了 |
+| `dee23af` | チケット1-11完了 |
 | `b35a9f6` | Initial commit |

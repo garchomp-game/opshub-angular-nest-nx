@@ -1,45 +1,57 @@
-# PM プロンプト — PrimeNG 移行フェーズ
+# PM プロンプト — Phase 3 完了後
 
 ## 現在の状態
-- **ベースライン**: コミット `0ac00a4` (DaisyUI 版完成)
-- **現在**: コミット `0d06416` (PrimeNG 基盤 + チケット作成)
+- **最終コミット**: `2de3ee0` (C2 + C5 — DTO/Swagger + ロギング強化)
+- **UI ライブラリ**: PrimeNG 21 (Aura テーマ) — **移行完了**
+- **DaisyUI / @ng-icons**: **完全撤去済み**
 
-### 基盤作業済み
-- PrimeNG 21.1.1 + Aura テーマ + PrimeIcons インストール・設定済み
-- `app.config.ts` に `providePrimeNG` 設定済み
-- `MessageService` / `ConfirmationService` グローバル登録済み
-- `ToastService` → PrimeNG MessageService 委譲済み
-- `ModalService` → PrimeNG ConfirmationService 委譲済み
-- app-shell に `<p-toast>` / `<p-confirmdialog>` 配置済み
-- ログインフォーム・ワークフローフォーム → PrimeNG 移行済み
-- バンドルサイズ上限を 2MB に引き上げ済み
+### 完了済みフェーズ
 
-## チケット一覧
+| フェーズ | 内容 | 状態 |
+|---|---|---|
+| Phase 1 | 全画面実装 (NestJS + Angular + Prisma) | ✅ |
+| Phase 2 | PrimeNG 移行 (P1-P6) + DaisyUI 撤去 | ✅ |
+| Phase 3 | コード品質 (C1-C5) | ✅ |
 
-| チケット | ファイル数 | 並列可能 | 状態 | 説明 |
-|---|---|---|---|---|
-| P1 | 3 | ✅ | 🔄 作業中 | ワークフロー (list, detail, pending) |
-| P2 | 5 | ✅ | 🔄 作業中 | プロジェクト (list, detail, form, kanban, docs) |
-| P3 | 5 | ✅ | 🔄 作業中 | 経費・工数 (expense ×3, timesheet ×2) |
-| P4 | 4 | ✅ | 🔄 作業中 | 請求書 (list, form, detail, print) |
-| P5 | 5 | ✅ | 🔄 作業中 | 管理・検索 (users, invite, tenant, audit, search) |
-| P6 | 7+α | ❌ (P1-P5 後) | 📋 未着手 | ダッシュボード, シェル, shared/ui 削除, DaisyUI 撤去 |
+### Phase 3 完了タスク
+
+| ID | 内容 | コミット |
+|---|---|---|
+| C1 | shared/ui 削除 → shared/services/ 移動 | `5af4f3b` |
+| C2 | NestJS ValidationPipe + DTO/Swagger 導入 | `2de3ee0` |
+| C3 | バンドル上限 2MB → 1.5MB | `af7918a` |
+| C5 | ロギング・可観測性強化 (Web + API) | `2de3ee0` |
+
+## テスト状態
+
+| テスト | 件数 | 状態 |
+|---|---|---|
+| API ユニット (Jest) | 229 | ✅ |
+| Web ユニット (Vitest) | 139 | ✅ |
+| E2E (Playwright) | 37 | ✅ |
 
 ## 重要ドキュメント
 - `.agent/pm-handoff.md` — 包括的なプロジェクトナレッジ
-- `.agent/prompts/p0-common-rules.md` — DaisyUI→PrimeNG 変換ルール集
-- `.agent/ticket-template.md` — PrimeNG 版チケットテンプレート
+- `.agent/prompts/` — チケットプロンプト (旧: t1-t8, v5-*, p1-p6 / 新: c2-c5)
 - `.agent/llms-txt/primeNG-llms-full.txt` — PrimeNG 全 API ドキュメント
 
-## 次のアクション
-1. P1-P5 の完了を確認 → ビルドマージ
-2. P6 を実行 (ダッシュボード・シェル・DaisyUI 撤去)
-3. 最終検証: `pnpm nx build web` + E2E テスト
-4. `daisyui`, `@ng-icons/core`, `@ng-icons/heroicons` を package.json から削除
-5. shared/ui フォルダ整理 (サービスを shared/services/ に移動)
+## 次のアクション (Phase 4 候補)
 
-## 将来の検討事項 (大規模プロジェクト向け)
-- DTO/型安全性の強化 (Phase 1: shared interfaces, Phase 2: OpenAPI)
-- 通知ページ / パスワードリセット / GDPR エクスポート
-- 検索 GIN インデックス / レート制限
-- ドキュメント全面改訂 (旧アーキテクチャ→現行)
+### 優先度高
+- D-3: 通知ページ (/notifications) — ポーリング or WebSocket
+- D-4: パスワードリセット — メール送信基盤必要
+- D-6: WF 添付ファイル — ファイルアップロード基盤は documents に存在
+
+### 優先度中
+- I-6: 監査ログ INSERT ONLY 制約 (DB レベル)
+- D-8: 検索 GIN インデックス
+- D-9: レート制限 (API)
+
+### 優先度低
+- D-5: テナントデータエクスポート (GDPR)
+- ドキュメント全面改訂 (reference/, opshub-doc/ — 旧アーキテクチャとの乖離解消)
+
+### 将来検討
+- OpenAPI クライアント自動生成 (Angular SDK)
+- Zod ベースのエンドツーエンド型安全
+- BullMQ ジョブキュー (メール送信, レポート生成)
