@@ -322,3 +322,43 @@ opshub/
 | `973fc9b` | E2E完了・Tailwind導入 |
 | `dee23af` | チケット1-11完了 |
 | `b35a9f6` | Initial commit |
+
+---
+
+## 12. 技術的負債・ゴッチャ（次の PM が踏まないために）
+
+### ⚠️ 削除候補: `ConfirmDialogComponent`
+
+`shared/components/confirm-dialog.component.ts` は `@deprecated` だが、以下 2 ファイルがまだ import している:
+- `workflow-detail.component.ts` (2 箇所で `ModalService.open(ConfirmDialogComponent, ...)`)
+- `workflow-pending.component.ts` (1 箇所)
+
+**実際の確認ダイアログは PrimeNG `ConfirmationService` が処理**しており、`ConfirmDialogComponent` 自体は空テンプレート。import を `ConfirmationService` に直接置き換えれば完全削除可能。
+
+### ⚠️ 環境変数 (.env)
+
+`.env` ファイルにハードコードされた開発用シークレット:
+```
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/opshub?schema=public"
+JWT_SECRET="opshub-jwt-secret-dev-only"
+JWT_REFRESH_SECRET="opshub-jwt-refresh-secret-dev-only"
+```
+本番デプロイ時は必ず差し替えること。`.env` は `.gitignore` に**含まれていない**ため、本番シークレットをコミットしないよう注意。
+
+### ⚠️ Prisma スキーマの場所
+
+```
+libs/prisma-db/prisma/schema.prisma  ← ここ (ルートの prisma/ ではない)
+```
+
+### ⚠️ PROJECT_STATUS_LABELS フォールバック
+
+`project-list.component.ts` で `PROJECT_STATUS_LABELS` に `??` フォールバックを追加している（`5af4f3b`）。これは Vitest のモジュール解決順序で `@shared/types` の barrel export が `undefined` になる場合がある問題への防御コード。本番では不要だがテスト安定性のために残している。
+
+### ⚠️ PrimeNG テストでの `MessageService` 必須
+
+PrimeNG コンポーネントを使うテストでは、`ToastService` → `MessageService` の依存チェーンがあるため、TestBed の providers に **`MessageService`** を追加する必要がある。忘れると `NullInjectorError` が出る。
+
+### ⚠️ E2E テストの webServer タイムアウト
+
+`playwright.config.ts` の `webServer` 設定で API + Web 両サーバーの起動を待つ。初回起動やマシン負荷が高い場合に30秒でタイムアウトすることがある。その場合はリトライすれば通る。
