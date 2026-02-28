@@ -48,7 +48,7 @@ import { AuthService } from '../../core/auth/auth.service';
             </div>
           </div>
           <div class="flex gap-3">
-            <p-button label="カンバンボードへ" icon="pi pi-th-large" size="small"
+            <p-button label="カンバンボードへ" icon="pi pi-th-large"
                 [routerLink]="['/projects', project.id, 'tasks']"
                 data-testid="kanban-btn" />
           </div>
@@ -79,7 +79,7 @@ import { AuthService } from '../../core/auth/auth.service';
                               <td class="py-3">
                                 <div class="flex items-center gap-3">
                                   <p-avatar [label]="(project.pm?.profile?.displayName ?? 'P').charAt(0)"
-                                      shape="circle" size="small"
+                                      shape="circle"
                                       [style]="{'background-color': 'var(--p-primary-100)', 'color': 'var(--p-primary-700)'}" />
                                   <span class="font-medium">{{ project.pm?.profile?.displayName || '未設定' }}</span>
                                 </div>
@@ -156,7 +156,7 @@ import { AuthService } from '../../core/auth/auth.service';
 
                           @if (member.userId !== project.pmId && (auth.isPm() || auth.isAdmin())) {
                             <p-button icon="pi pi-user-minus" [rounded]="true" [text]="true"
-                                severity="danger" size="small"
+                                severity="danger"
                                 pTooltip="メンバーから外す"
                                 (onClick)="removeMember(project.id, member.userId)"
                                 data-testid="remove-member-btn"

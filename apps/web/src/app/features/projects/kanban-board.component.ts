@@ -62,7 +62,7 @@ import { TaskService } from './task.service';
                         <div class="flex items-center gap-1.5"
                             pTooltip="担当者: {{ task.assignee.profile?.displayName || '未設定' }}">
                           <p-avatar [label]="(task.assignee.profile?.displayName ?? 'U').charAt(0)"
-                              shape="circle" size="small"
+                              shape="circle"
                               [style]="{'background-color': 'var(--p-primary-100)', 'color': 'var(--p-primary-700)', 'width': '1.25rem', 'height': '1.25rem', 'font-size': '0.625rem'}" />
                           <span class="truncate max-w-[100px]">{{ task.assignee.profile?.displayName || '—' }}</span>
                         </div>

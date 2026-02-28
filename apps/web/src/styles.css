@@ -1,16 +1,8 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
-@plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
-  logs: false;
-}
-
 @theme {
   --font-sans: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
-  --color-primary: #4f46e5;
-  --color-secondary: #7c3aed;
-  --color-accent: #06b6d4;
 }
 
 /* Global Reset */
