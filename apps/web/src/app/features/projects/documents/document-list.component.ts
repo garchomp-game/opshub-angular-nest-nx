@@ -1,12 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroCloudArrowUp, heroArrowUpTray, heroFolderOpen, heroTrash,
-  heroArrowDownTray, heroDocumentText, heroPhoto, heroDocument,
-} from '@ng-icons/heroicons/outline';
-import { DataTableComponent, ToastService } from '../../../shared/ui';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { TagModule } from 'primeng/tag';
+import { AvatarModule } from 'primeng/avatar';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ToastService } from '../../../shared/ui';
 import { DocumentService } from './document.service';
 import { formatFileSize } from '@shared/util';
 
@@ -14,24 +16,22 @@ import { formatFileSize } from '@shared/util';
   selector: 'app-document-list',
   standalone: true,
   imports: [
-    CommonModule, NgIcon, DataTableComponent,
+    DatePipe,
+    TableModule, PaginatorModule, TagModule, AvatarModule,
+    ButtonModule, TooltipModule, ProgressBarModule,
   ],
-  viewProviders: [provideIcons({
-    heroCloudArrowUp, heroArrowUpTray, heroFolderOpen, heroTrash,
-    heroArrowDownTray, heroDocumentText, heroPhoto, heroDocument,
-  })],
   template: `
     <div class="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-base-200 pb-4">
-        <h2 class="text-2xl font-bold text-base-content m-0">ドキュメント管理</h2>
+      <div class="flex items-center justify-between border-b border-surface-200 pb-4">
+        <h2 class="text-2xl font-bold m-0">ドキュメント管理</h2>
       </div>
 
       <!-- Upload Section -->
-      <div class="card bg-base-100 shadow-sm border-2 border-dashed transition-colors duration-200 cursor-pointer"
-         [class.bg-primary/5]="isDragOver()"
+      <div class="border-2 border-dashed rounded-xl transition-colors duration-200 cursor-pointer p-8"
+         [class.bg-primary-50]="isDragOver()"
          [class.border-primary]="isDragOver()"
-         [class.border-base-300]="!isDragOver()"
+         [class.border-surface-300]="!isDragOver()"
          (dragover)="onDragOver($event)"
          (dragleave)="onDragLeave($event)"
          (drop)="onDrop($event)"
@@ -42,119 +42,102 @@ import { formatFileSize } from '@shared/util';
          role="button"
          data-testid="drop-zone">
 
-        <div class="card-body items-center text-center pointer-events-none py-8">
+        <div class="flex flex-col items-center text-center pointer-events-none">
           <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors"
-             [class.bg-base-100]="isDragOver()"
-             [class.bg-base-200/50]="!isDragOver()">
-            <ng-icon name="heroCloudArrowUp"
-               class="text-3xl transition-colors"
+             [class.bg-white]="isDragOver()"
+             [class.bg-surface-100]="!isDragOver()">
+            <i class="pi pi-cloud-upload text-3xl transition-colors"
                [class.text-primary]="isDragOver()"
-               [class.text-base-content/40]="!isDragOver()" />
+               [style.opacity]="isDragOver() ? 1 : 0.5"></i>
           </div>
 
-          <h3 class="text-lg font-bold text-base-content mb-2 m-0">ファイルをドラッグ＆ドロップ</h3>
-          <p class="text-base-content/50 mb-6 font-medium">または</p>
+          <h3 class="text-lg font-bold mb-2 m-0">ファイルをドラッグ＆ドロップ</h3>
+          <p class="text-surface-400 mb-6 font-medium">または</p>
 
-          <button class="btn btn-primary pointer-events-auto"
+          <p-button label="ファイルを選択" icon="pi pi-upload"
               data-testid="upload-button"
-              (click)="$event.stopPropagation(); fileInput.click()">
-            <ng-icon name="heroArrowUpTray" class="text-lg" />
-            ファイルを選択
-          </button>
+              styleClass="pointer-events-auto"
+              (onClick)="$event.stopPropagation(); fileInput.click()" />
           <input #fileInput type="file" hidden (change)="onFileSelected($event)" data-testid="file-input" />
 
-          <p class="text-xs text-base-content/40 mt-6 font-medium tracking-wide">最大10MB — PDF, 画像, Office, テキストファイル</p>
+          <p class="text-xs text-surface-300 mt-6 font-medium tracking-wide">最大10MB — PDF, 画像, Office, テキストファイル</p>
         </div>
       </div>
 
       <!-- Loading -->
       @if (documentService.loading() || uploading()) {
-        <progress class="progress progress-primary w-full"></progress>
+        <p-progressbar mode="indeterminate" [style]="{'height': '4px'}" />
       }
 
       <!-- Document List Table -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body p-0">
-          @if (!documentService.loading() && documentService.documents().length === 0) {
-            <div class="flex flex-col items-center justify-center py-16 text-center">
-              <div class="w-20 h-20 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
-                <ng-icon name="heroFolderOpen" class="text-4xl text-base-content/40" />
-              </div>
-              <h3 class="text-lg font-bold text-base-content mb-1">ドキュメントはまだありません</h3>
-              <p class="text-base-content/50 mb-6">ファイルをアップロードしてプロジェクト資料を管理しましょう</p>
-            </div>
-          } @else {
-            <app-data-table
-              [page]="currentPage"
-              [pageSize]="documentService.meta()?.limit ?? 10"
-              [total]="documentService.meta()?.total ?? 0"
-              (pageChange)="onPageIndexChange($event)"
-              data-testid="document-table">
-              <thead>
-                <tr>
-                  <th>ファイル名</th>
-                  <th>サイズ</th>
-                  <th>種別</th>
-                  <th>アップロード者</th>
-                  <th>日時</th>
-                  <th class="text-right">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (doc of documentService.documents(); track doc.id) {
-                  <tr class="hover:bg-base-200/40">
-                    <td>
-                      <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-base-200/50 flex items-center justify-center text-base-content/40 shrink-0">
-                          <ng-icon [name]="getMimeHeroIcon(doc.mimeType)" class="text-xl" />
-                        </div>
-                        <span class="font-medium text-base-content">{{ doc.name }}</span>
-                      </div>
-                    </td>
-                    <td class="text-base-content/60 whitespace-nowrap font-medium">
-                      {{ formatSize(doc.fileSize) }}
-                    </td>
-                    <td>
-                      <span class="badge text-xs" [class]="getMimeBadgeClasses(doc.mimeType)">
-                        {{ getMimeLabel(doc.mimeType) }}
-                      </span>
-                    </td>
-                    <td class="text-base-content/60 whitespace-nowrap">
-                      <div class="flex items-center gap-2">
-                        <div class="avatar avatar-placeholder">
-                          <div class="bg-primary/10 text-primary rounded-full w-6 h-6">
-                            <span style="font-size: 12px;">{{ (doc.uploader?.profile?.displayName || 'U').charAt(0) }}</span>
-                          </div>
-                        </div>
-                        <span class="font-medium">{{ doc.uploader?.profile?.displayName || '—' }}</span>
-                      </div>
-                    </td>
-                    <td class="text-base-content/50 whitespace-nowrap">
-                      {{ doc.createdAt | date:'yyyy/MM/dd HH:mm' }}
-                    </td>
-                    <td class="text-right whitespace-nowrap">
-                      <div class="tooltip" data-tip="ダウンロード">
-                        <button class="btn btn-ghost btn-circle btn-sm"
-                            (click)="onDownload(doc)"
-                            data-testid="download-button">
-                          <ng-icon name="heroArrowDownTray" class="text-lg" />
-                        </button>
-                      </div>
-                      <div class="tooltip" data-tip="削除">
-                        <button class="btn btn-ghost btn-circle btn-sm text-error"
-                            (click)="onDelete(doc)"
-                            data-testid="delete-button">
-                          <ng-icon name="heroTrash" class="text-lg" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </app-data-table>
-          }
+      @if (!documentService.loading() && documentService.documents().length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="w-20 h-20 rounded-full bg-surface-100 flex items-center justify-center mb-4">
+            <i class="pi pi-folder-open text-4xl text-surface-300"></i>
+          </div>
+          <h3 class="text-lg font-bold mb-1">ドキュメントはまだありません</h3>
+          <p class="text-surface-400 mb-6">ファイルをアップロードしてプロジェクト資料を管理しましょう</p>
         </div>
-      </div>
+      } @else if (documentService.documents().length > 0) {
+        <p-table [value]="documentService.documents()" [tableStyle]="{'min-width': '50rem'}"
+            data-testid="document-table">
+          <ng-template #header>
+            <tr>
+              <th>ファイル名</th>
+              <th>サイズ</th>
+              <th>種別</th>
+              <th>アップロード者</th>
+              <th>日時</th>
+              <th class="text-right">操作</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-doc>
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-surface-100 flex items-center justify-center text-surface-400 shrink-0">
+                    <i [class]="getMimeIcon(doc.mimeType)" class="text-xl"></i>
+                  </div>
+                  <span class="font-medium">{{ doc.name }}</span>
+                </div>
+              </td>
+              <td class="text-surface-500 whitespace-nowrap font-medium">
+                {{ formatSize(doc.fileSize) }}
+              </td>
+              <td>
+                <p-tag [value]="getMimeLabel(doc.mimeType)" [severity]="getMimeTagSeverity(doc.mimeType)" />
+              </td>
+              <td class="text-surface-500 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <p-avatar [label]="(doc.uploader?.profile?.displayName || 'U').charAt(0)"
+                      shape="circle" size="small"
+                      [style]="{'background-color': 'var(--p-primary-100)', 'color': 'var(--p-primary-700)', 'width': '1.5rem', 'height': '1.5rem', 'font-size': '0.75rem'}" />
+                  <span class="font-medium">{{ doc.uploader?.profile?.displayName || '—' }}</span>
+                </div>
+              </td>
+              <td class="text-surface-400 whitespace-nowrap">
+                {{ doc.createdAt | date:'yyyy/MM/dd HH:mm' }}
+              </td>
+              <td class="text-right whitespace-nowrap">
+                <p-button icon="pi pi-download" [rounded]="true" [text]="true" size="small"
+                    pTooltip="ダウンロード"
+                    (onClick)="onDownload(doc)"
+                    data-testid="download-button" />
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" size="small"
+                    severity="danger"
+                    pTooltip="削除"
+                    (onClick)="onDelete(doc)"
+                    data-testid="delete-button" />
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        <p-paginator
+          [first]="(currentPage - 1) * (documentService.meta()?.limit ?? 10)"
+          [rows]="documentService.meta()?.limit ?? 10"
+          [totalRecords]="documentService.meta()?.total ?? 0"
+          (onPageChange)="onPaginatorChange($event)" />
+      }
     </div>
   `,
   styles: [],
@@ -250,6 +233,15 @@ export class DocumentListComponent implements OnInit {
 
   // ─── ページネーション ───
 
+  onPaginatorChange(event: any): void {
+    const page = Math.floor(event.first / event.rows) + 1;
+    this.currentPage = page;
+    this.documentService.loadDocuments(this.projectId, {
+      page: String(page),
+      limit: String(event.rows),
+    });
+  }
+
   onPageIndexChange(page: number): void {
     this.currentPage = page;
     this.documentService.loadDocuments(this.projectId, {
@@ -272,11 +264,18 @@ export class DocumentListComponent implements OnInit {
     return formatFileSize(Number(bytes));
   }
 
+  getMimeIcon(mimeType: string): string {
+    if (mimeType === 'application/pdf') return 'pi pi-file-pdf';
+    if (mimeType.startsWith('image/')) return 'pi pi-image';
+    if (mimeType.startsWith('text/')) return 'pi pi-file';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'pi pi-file-word';
+    if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'pi pi-file-excel';
+    return 'pi pi-file';
+  }
+
+  // Keep legacy method name for test compatibility
   getMimeHeroIcon(mimeType: string): string {
-    if (mimeType === 'application/pdf') return 'heroDocumentText';
-    if (mimeType.startsWith('image/')) return 'heroPhoto';
-    if (mimeType.startsWith('text/')) return 'heroDocumentText';
-    return 'heroDocument';
+    return this.getMimeIcon(mimeType);
   }
 
   getMimeLabel(mimeType: string): string {
@@ -295,16 +294,20 @@ export class DocumentListComponent implements OnInit {
     return map[mimeType] || 'ファイル';
   }
 
-  getMimeBadgeClasses(mimeType: string): string {
-    if (mimeType === 'application/pdf') return 'badge-error badge-outline';
-    if (mimeType.startsWith('image/')) return 'badge-info badge-outline';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'badge-secondary badge-outline';
-    if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'badge-success badge-outline';
-    if (mimeType.includes('presentation')) return 'badge-warning badge-outline';
-    return 'badge-ghost';
+  getMimeTagSeverity(mimeType: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    if (mimeType === 'application/pdf') return 'danger';
+    if (mimeType.startsWith('image/')) return 'info';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'secondary';
+    if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'success';
+    if (mimeType.includes('presentation')) return 'warn';
+    return 'secondary';
   }
 
-  getMimeIcon(mimeType: string): string {
-    return this.getMimeHeroIcon(mimeType);
+  getMimeBadgeClasses(mimeType: string): string {
+    return '';  // kept for backward compatibility
+  }
+
+  getMimeIcon_legacy(mimeType: string): string {
+    return this.getMimeIcon(mimeType);
   }
 }

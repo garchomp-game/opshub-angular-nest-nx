@@ -4,9 +4,17 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 
 import { ProjectStatus, PROJECT_STATUS_LABELS } from '@shared/types';
-import { FormPageComponent, FormFieldComponent, ToastService } from '../../shared/ui';
+import { ToastService } from '../../shared/ui';
 import { ProjectService } from './project.service';
 import { AuthService } from '../../core/auth/auth.service';
+
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ButtonModule } from 'primeng/button';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 interface UserItem {
   id: string;
@@ -20,61 +28,82 @@ interface UserItem {
   standalone: true,
   imports: [
     RouterLink, ReactiveFormsModule,
-    FormPageComponent, FormFieldComponent,
+    CardModule, InputTextModule, TextareaModule,
+    SelectModule, DatePickerModule, ButtonModule,
+    FloatLabelModule,
   ],
 
   template: `
-    <app-form-page [title]="isEdit() ? 'プロジェクト編集' : 'プロジェクト新規作成'">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-2" data-testid="project-form">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-          <app-form-field label="プロジェクト名" [required]="true"
-                  [errorMessage]="form.get('name')?.invalid && form.get('name')?.touched ? 'プロジェクト名は必須です' : ''"
-                  class="md:col-span-2">
-            <input type="text" class="input w-full" formControlName="name"
-                placeholder="プロジェクト名を入力" data-testid="name-input" />
-          </app-form-field>
+    <div class="p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
+      <div class="flex items-center gap-4 mb-2">
+        <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true"
+            routerLink="/projects" />
+        <h1 class="text-2xl font-bold m-0">{{ isEdit() ? 'プロジェクト編集' : 'プロジェクト新規作成' }}</h1>
+      </div>
 
-          <app-form-field label="説明" class="md:col-span-2">
-            <textarea class="textarea w-full" formControlName="description"
-                 rows="4" placeholder="プロジェクトの説明"
-                 data-testid="description-input"></textarea>
-          </app-form-field>
-
-          <app-form-field label="PM (プロジェクトマネージャー)" [required]="true"
-                  [errorMessage]="form.get('pmId')?.invalid && form.get('pmId')?.touched ? 'PM を選択してください' : ''"
-                  class="md:col-span-2">
-            <select class="select w-full" formControlName="pmId" data-testid="pm-select">
-              <option value="" disabled>PM を選択</option>
-              @for (u of users(); track u.id) {
-                <option [value]="u.id">{{ u.displayName || u.email }}</option>
+      <p-card>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6" data-testid="project-form">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <!-- プロジェクト名 -->
+            <div class="md:col-span-2 flex flex-col gap-2">
+              <label for="name" class="font-medium">プロジェクト名 <span class="text-red-500">*</span></label>
+              <input id="name" type="text" pInputText class="w-full" formControlName="name"
+                  placeholder="プロジェクト名を入力" data-testid="name-input" />
+              @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                <small class="text-red-500">プロジェクト名は必須です</small>
               }
-            </select>
-          </app-form-field>
+            </div>
 
-          <app-form-field label="開始日">
-            <input type="date" class="input w-full" formControlName="startDate"
-                data-testid="start-date-input" />
-          </app-form-field>
+            <!-- 説明 -->
+            <div class="md:col-span-2 flex flex-col gap-2">
+              <label for="description" class="font-medium">説明</label>
+              <textarea id="description" pTextarea class="w-full" formControlName="description"
+                  rows="4" placeholder="プロジェクトの説明"
+                  data-testid="description-input"></textarea>
+            </div>
 
-          <app-form-field label="終了日">
-            <input type="date" class="input w-full" formControlName="endDate"
-                data-testid="end-date-input" />
-          </app-form-field>
-        </div>
+            <!-- PM -->
+            <div class="md:col-span-2 flex flex-col gap-2">
+              <label for="pmId" class="font-medium">PM (プロジェクトマネージャー) <span class="text-red-500">*</span></label>
+              <p-select id="pmId" [options]="users()" formControlName="pmId"
+                  optionLabel="displayName" optionValue="id"
+                  placeholder="PM を選択" styleClass="w-full"
+                  data-testid="pm-select" />
+              @if (form.get('pmId')?.invalid && form.get('pmId')?.touched) {
+                <small class="text-red-500">PM を選択してください</small>
+              }
+            </div>
 
-        <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-base-200">
-          <a routerLink="/projects" class="btn btn-ghost">キャンセル</a>
-          <button type="submit" class="btn btn-primary"
-              [disabled]="form.invalid || submitting()"
-              data-testid="submit-btn">
-            @if (submitting()) {
-              <span class="loading loading-spinner loading-sm"></span>
-            }
-            {{ isEdit() ? '更新' : '作成' }}
-          </button>
-        </div>
-      </form>
-    </app-form-page>
+            <!-- 開始日 -->
+            <div class="flex flex-col gap-2">
+              <label for="startDate" class="font-medium">開始日</label>
+              <p-datepicker id="startDate" formControlName="startDate"
+                  dateFormat="yy/mm/dd" [showIcon]="true"
+                  styleClass="w-full"
+                  data-testid="start-date-input" />
+            </div>
+
+            <!-- 終了日 -->
+            <div class="flex flex-col gap-2">
+              <label for="endDate" class="font-medium">終了日</label>
+              <p-datepicker id="endDate" formControlName="endDate"
+                  dateFormat="yy/mm/dd" [showIcon]="true"
+                  styleClass="w-full"
+                  data-testid="end-date-input" />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-6 border-t border-surface-200">
+            <p-button label="キャンセル" severity="secondary" [text]="true"
+                routerLink="/projects" />
+            <p-button type="submit" [label]="isEdit() ? '更新' : '作成'"
+                [disabled]="form.invalid || submitting()"
+                [loading]="submitting()"
+                data-testid="submit-btn" />
+          </div>
+        </form>
+      </p-card>
+    </div>
   `,
   styles: [],
 })
@@ -136,8 +165,8 @@ export class ProjectFormComponent implements OnInit {
             name: res.data.name,
             description: res.data.description,
             pmId: res.data.pmId,
-            startDate: res.data.startDate,
-            endDate: res.data.endDate,
+            startDate: res.data.startDate ? new Date(res.data.startDate) : null,
+            endDate: res.data.endDate ? new Date(res.data.endDate) : null,
           });
         }
       });

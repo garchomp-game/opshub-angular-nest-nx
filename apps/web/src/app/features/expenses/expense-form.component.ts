@@ -2,17 +2,16 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroArrowLeft,
-  heroBanknotes,
-  heroArrowUpTray,
-} from '@ng-icons/heroicons/outline';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TextareaModule } from 'primeng/textarea';
+import { CardModule } from 'primeng/card';
 import { ExpenseService } from './expense.service';
 import { EXPENSE_CATEGORIES } from '@shared/types';
 import { HttpClient } from '@angular/common/http';
-import { FormPageComponent } from '../../shared/ui/page-layouts/form-page.component';
-import { FormFieldComponent } from '../../shared/ui/form-field/form-field.component';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 
 interface SimpleItem {
@@ -31,140 +30,131 @@ interface ApproverItem {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    NgIcon,
-    FormPageComponent,
-    FormFieldComponent,
+    ButtonModule,
+    SelectModule,
+    InputTextModule,
+    InputNumberModule,
+    DatePickerModule,
+    TextareaModule,
+    CardModule,
   ],
-  viewProviders: [provideIcons({ heroArrowLeft, heroBanknotes, heroArrowUpTray })],
   template: `
     <div class="min-h-[calc(100vh-64px)] py-8 px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl mx-auto">
         <div class="mb-6">
-          <button class="btn btn-ghost btn-sm mb-4"
-              (click)="goBack()"
-              data-testid="back-btn">
-            <ng-icon name="heroArrowLeft" class="text-base" />
-            戻る
-          </button>
+          <p-button icon="pi pi-arrow-left" label="戻る" [text]="true"
+              (onClick)="goBack()"
+              data-testid="back-btn" />
         </div>
 
-        <app-form-page title="経費申請" subtitle="交通費、交際費、その他の経費を申請します">
+        <p-card>
+          <ng-template #title>
+            <div class="flex flex-col gap-1">
+              <span>経費申請</span>
+              <span class="text-sm font-normal" style="opacity: 0.6;">交通費、交際費、その他の経費を申請します</span>
+            </div>
+          </ng-template>
+
           <form [formGroup]="form" class="space-y-5">
             <!-- 基本情報セクション -->
-            <h3 class="text-base font-bold border-b border-base-200 pb-2 mb-4">申請内容</h3>
+            <h3 class="text-base font-bold pb-2 mb-4" style="border-bottom: 1px solid var(--p-surface-border);">申請内容</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <!-- 日付 -->
-              <app-form-field label="日付" [required]="true"
-                [errorMessage]="form.get('expenseDate')?.touched && form.get('expenseDate')?.hasError('required') ? '日付は必須です' : ''">
-                <input type="date"
-                  formControlName="expenseDate"
-                  class="input w-full"
-                  id="expenseDate"
-                  data-testid="input-date">
-              </app-form-field>
+              <div class="flex flex-col gap-2">
+                <label for="expenseDate" class="font-medium text-sm">日付 <span class="text-red-500">*</span></label>
+                <p-datepicker formControlName="expenseDate" inputId="expenseDate"
+                    dateFormat="yy/mm/dd" [showIcon]="true"
+                    styleClass="w-full" data-testid="input-date" />
+                @if (form.get('expenseDate')?.touched && form.get('expenseDate')?.hasError('required')) {
+                  <small class="text-red-500">日付は必須です</small>
+                }
+              </div>
 
               <!-- カテゴリ -->
-              <app-form-field label="カテゴリ" [required]="true"
-                [errorMessage]="form.get('category')?.touched && form.get('category')?.hasError('required') ? 'カテゴリを選択してください' : ''">
-                <select class="select w-full"
-                  formControlName="category"
-                  id="category"
-                  data-testid="select-category">
-                  <option value="" disabled>カテゴリを選択</option>
-                  @for (cat of categories; track cat) {
-                    <option [value]="cat">{{ cat }}</option>
-                  }
-                </select>
-              </app-form-field>
+              <div class="flex flex-col gap-2">
+                <label for="category" class="font-medium text-sm">カテゴリ <span class="text-red-500">*</span></label>
+                <p-select formControlName="category" [options]="categoryOptions"
+                    placeholder="カテゴリを選択" inputId="category"
+                    styleClass="w-full" data-testid="select-category" />
+                @if (form.get('category')?.touched && form.get('category')?.hasError('required')) {
+                  <small class="text-red-500">カテゴリを選択してください</small>
+                }
+              </div>
             </div>
 
             <!-- 金額 -->
-            <app-form-field label="金額 (円)" [required]="true"
-              [errorMessage]="getAmountError()">
-              <label class="input flex items-center gap-2 w-full">
-                <span class="text-base-content/60 font-bold">¥</span>
-                <input type="number"
-                  formControlName="amount"
-                  id="amount"
-                  data-testid="input-amount"
-                  placeholder="0"
-                  class="grow text-right font-bold text-lg border-0 outline-none bg-transparent">
-              </label>
-            </app-form-field>
+            <div class="flex flex-col gap-2">
+              <label for="amount" class="font-medium text-sm">金額 (円) <span class="text-red-500">*</span></label>
+              <p-inputnumber formControlName="amount" inputId="amount"
+                  placeholder="0" mode="currency" currency="JPY" locale="ja-JP"
+                  styleClass="w-full" data-testid="input-amount" />
+              @if (getAmountError()) {
+                <small class="text-red-500">{{ getAmountError() }}</small>
+              }
+            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <!-- プロジェクト -->
-              <app-form-field label="関連プロジェクト" [required]="true"
-                [errorMessage]="form.get('projectId')?.touched && form.get('projectId')?.hasError('required') ? 'プロジェクトを選択してください' : ''">
-                <select class="select w-full"
-                  formControlName="projectId"
-                  id="projectId"
-                  data-testid="select-project">
-                  <option value="" disabled>プロジェクトを選択</option>
-                  @for (p of projects; track p.id) {
-                    <option [value]="p.id">{{ p.name }}</option>
-                  }
-                </select>
-              </app-form-field>
+              <div class="flex flex-col gap-2">
+                <label for="projectId" class="font-medium text-sm">関連プロジェクト <span class="text-red-500">*</span></label>
+                <p-select formControlName="projectId" [options]="projects"
+                    optionLabel="name" optionValue="id"
+                    placeholder="プロジェクトを選択" inputId="projectId"
+                    styleClass="w-full" data-testid="select-project" />
+                @if (form.get('projectId')?.touched && form.get('projectId')?.hasError('required')) {
+                  <small class="text-red-500">プロジェクトを選択してください</small>
+                }
+              </div>
 
               <!-- 承認者 -->
-              <app-form-field label="承認者" [required]="true"
-                [errorMessage]="form.get('approverId')?.touched && form.get('approverId')?.hasError('required') ? '承認者を選択してください' : ''">
-                <select class="select w-full"
-                  formControlName="approverId"
-                  id="approverId"
-                  data-testid="select-approver">
-                  <option value="" disabled>承認者を選択</option>
-                  @for (a of approvers; track a.id) {
-                    <option [value]="a.id">{{ a.displayName }}</option>
-                  }
-                </select>
-              </app-form-field>
+              <div class="flex flex-col gap-2">
+                <label for="approverId" class="font-medium text-sm">承認者 <span class="text-red-500">*</span></label>
+                <p-select formControlName="approverId" [options]="approvers"
+                    optionLabel="displayName" optionValue="id"
+                    placeholder="承認者を選択" inputId="approverId"
+                    styleClass="w-full" data-testid="select-approver" />
+                @if (form.get('approverId')?.touched && form.get('approverId')?.hasError('required')) {
+                  <small class="text-red-500">承認者を選択してください</small>
+                }
+              </div>
             </div>
 
             <!-- 説明 -->
-            <app-form-field label="説明・備考">
-              <textarea class="textarea w-full" rows="4"
-                formControlName="description"
-                id="description"
-                data-testid="input-description"
-                placeholder="交通機関の区間や、交際費の詳細などを入力してください"></textarea>
-            </app-form-field>
+            <div class="flex flex-col gap-2">
+              <label for="description" class="font-medium text-sm">説明・備考</label>
+              <textarea pTextarea formControlName="description" id="description"
+                  rows="4" class="w-full"
+                  data-testid="input-description"
+                  placeholder="交通機関の区間や、交際費の詳細などを入力してください"></textarea>
+            </div>
 
             <!-- レシート添付 -->
-            <app-form-field label="レシート添付">
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">レシート添付</label>
               <input type="file"
-                class="file-input file- w-full"
-                accept="image/*,.pdf"
-                multiple
-                data-testid="upload-receipt">
-            </app-form-field>
+                  accept="image/*,.pdf"
+                  multiple
+                  data-testid="upload-receipt">
+            </div>
           </form>
 
           <!-- アクションボタン -->
-          <div slot="actions" class="flex items-center justify-end gap-3 pt-4">
-            <button class="btn btn-ghost" type="button" (click)="goBack()"
-                data-testid="cancel-btn">
-              キャンセル
-            </button>
-            <button class="btn btn-outline" type="button"
-                (click)="submit('draft')"
+          <div class="flex items-center justify-end gap-3 mt-8 pt-5" style="border-top: 1px solid var(--p-surface-border);">
+            <p-button label="キャンセル" severity="secondary" [text]="true"
+                (onClick)="goBack()"
+                data-testid="cancel-btn" />
+            <p-button label="下書き保存" severity="secondary" [outlined]="true"
+                (onClick)="submit('draft')"
                 [disabled]="submitting"
-                data-testid="save-draft-btn">
-              下書き保存
-            </button>
-            <button class="btn btn-primary" type="button"
-                (click)="submit('submitted')"
+                data-testid="save-draft-btn" />
+            <p-button label="申請を送信" icon="pi pi-send"
+                (onClick)="submit('submitted')"
                 [disabled]="form.invalid || submitting"
-                data-testid="submit-btn">
-              @if (submitting) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              申請を送信
-            </button>
+                [loading]="submitting"
+                data-testid="submit-btn" />
           </div>
-        </app-form-page>
+        </p-card>
       </div>
     </div>
   `,
@@ -182,6 +172,7 @@ export class ExpenseFormComponent implements OnInit {
   private http = inject(HttpClient);
 
   categories = EXPENSE_CATEGORIES;
+  categoryOptions = EXPENSE_CATEGORIES.map(cat => cat);
   projects: SimpleItem[] = [];
   approvers: ApproverItem[] = [];
   submitting = false;

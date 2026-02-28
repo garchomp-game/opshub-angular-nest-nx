@@ -67,7 +67,7 @@ describe('TimesheetWeeklyComponent', () => {
     mockTimesheetService.isLoading.set(true);
     fixture.detectChanges();
 
-    const spinner = fixture.nativeElement.querySelector('[data-testid="loading"] .loading');
+    const spinner = fixture.nativeElement.querySelector('[data-testid="loading"] .pi-spinner');
     expect(spinner).toBeTruthy();
   });
 

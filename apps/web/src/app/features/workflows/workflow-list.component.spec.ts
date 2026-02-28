@@ -65,7 +65,7 @@ describe('WorkflowListComponent', () => {
     mockWorkflowService.isLoading.set(true);
     fixture.detectChanges();
 
-    const spinner = fixture.nativeElement.querySelector('.loading-spinner');
+    const spinner = fixture.nativeElement.querySelector('p-progressspinner');
     expect(spinner).toBeTruthy();
   });
 

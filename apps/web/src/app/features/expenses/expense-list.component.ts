@@ -2,12 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroBanknotes,
-  heroPlus,
-  heroChartBar,
-} from '@ng-icons/heroicons/outline';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 import { ExpenseService, Expense } from './expense.service';
 import {
   EXPENSE_CATEGORIES,
@@ -15,7 +14,6 @@ import {
   WORKFLOW_STATUS_LABELS,
   WORKFLOW_STATUS_COLORS,
 } from '@shared/types';
-import { ListPageComponent } from '../../shared/ui/page-layouts/list-page.component';
 
 @Component({
   selector: 'app-expense-list',
@@ -23,165 +21,138 @@ import { ListPageComponent } from '../../shared/ui/page-layouts/list-page.compon
   imports: [
     CommonModule,
     FormsModule,
-    NgIcon,
-    ListPageComponent,
+    TableModule,
+    PaginatorModule,
+    SelectModule,
+    TagModule,
+    ButtonModule,
   ],
-  viewProviders: [provideIcons({ heroBanknotes, heroPlus, heroChartBar })],
   template: `
-    <app-list-page title="経費一覧">
-      <div slot="actions" class="flex gap-3">
-        <button class="btn btn-ghost btn-sm" (click)="goToSummary()"
-            data-testid="expense-summary-btn">
-          <ng-icon name="heroChartBar" class="text-base" />
-          集計
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="goToNew()"
-            data-testid="expense-new-btn">
-          <ng-icon name="heroPlus" class="text-base" />
-          新規申請
-        </button>
+    <div class="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold m-0">経費一覧</h1>
+        <div class="flex gap-3">
+          <p-button icon="pi pi-chart-bar" label="集計" [text]="true"
+              (onClick)="goToSummary()"
+              data-testid="expense-summary-btn" />
+          <p-button icon="pi pi-plus" label="新規申請"
+              (onClick)="goToNew()"
+              data-testid="expense-new-btn" />
+        </div>
       </div>
 
       <!-- フィルタ -->
-      <div slot="filters" class="card bg-base-100 shadow-sm">
-        <div class="card-body py-3">
-          <div class="flex flex-wrap gap-4 items-center">
-            <div class="w-full sm:w-64">
-              <select class="select select-sm w-full"
-                [(ngModel)]="selectedCategory"
-                (ngModelChange)="onFilterChange()"
-                data-testid="filter-category">
-                <option value="">すべてのカテゴリ</option>
-                @for (cat of categories; track cat) {
-                  <option [value]="cat">{{ cat }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="w-full sm:w-64">
-              <select class="select select-sm w-full"
-                [(ngModel)]="selectedStatus"
-                (ngModelChange)="onFilterChange()"
-                data-testid="filter-status">
-                <option value="">すべてのステータス</option>
-                <option value="draft">下書き</option>
-                <option value="submitted">申請中</option>
-                <option value="approved">承認済</option>
-                <option value="rejected">差戻し</option>
-              </select>
-            </div>
-          </div>
+      <div class="flex flex-wrap gap-4 items-center" data-testid="expense-filters">
+        <div class="w-full sm:w-64">
+          <p-select [options]="categoryOptions" [(ngModel)]="selectedCategory"
+              (ngModelChange)="onFilterChange()"
+              placeholder="すべてのカテゴリ" [showClear]="true"
+              styleClass="w-full" data-testid="filter-category" />
+        </div>
+        <div class="w-full sm:w-64">
+          <p-select [options]="statusOptions" [(ngModel)]="selectedStatus"
+              (ngModelChange)="onFilterChange()"
+              placeholder="すべてのステータス" [showClear]="true"
+              optionLabel="label" optionValue="value"
+              styleClass="w-full" data-testid="filter-status" />
         </div>
       </div>
 
       <!-- ローディング -->
       @if (expenseService.isLoading()) {
         <div class="flex justify-center py-12" data-testid="loading">
-          <span class="loading loading-spinner loading-lg text-primary"></span>
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--p-primary-color);"></i>
         </div>
       }
 
       <!-- テーブル -->
       @if (!expenseService.isLoading()) {
-        <div class="overflow-x-auto" data-testid="expense-table">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>申請番号</th>
-                <th>カテゴリ</th>
-                <th class="text-right">金額</th>
-                <th>日付</th>
-                <th>プロジェクト</th>
-                <th>ステータス</th>
-                <th>申請者</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of expenseService.expenses(); track row.id) {
-                <tr>
-                  <td class="whitespace-nowrap">
-                    <span class="font-mono text-sm text-base-content/60">{{ row.workflow?.workflowNumber || '—' }}</span>
-                  </td>
-                  <td class="whitespace-nowrap">
-                    <span class="badge badge-sm" [style.background-color]="getCategoryColor(row.category)" style="color: white; border: none;">
-                      {{ row.category }}
-                    </span>
-                  </td>
-                  <td class="font-semibold text-right whitespace-nowrap">
-                    ¥{{ row.amount | number }}
-                  </td>
-                  <td class="text-base-content/70 whitespace-nowrap">
-                    {{ row.expenseDate | date:'yyyy/MM/dd' }}
-                  </td>
-                  <td class="font-medium whitespace-nowrap truncate max-w-[200px]">
-                    {{ row.project?.name || '—' }}
-                  </td>
-                  <td class="whitespace-nowrap">
-                    @if (row.workflow) {
-                      <span class="badge badge-sm" [class]="getStatusBadgeClass(row.workflow.status)">
-                        {{ getStatusLabel(row.workflow.status) }}
-                      </span>
-                    } @else {
-                      <span class="badge badge-sm badge-ghost">下書き</span>
-                    }
-                  </td>
-                  <td class="whitespace-nowrap">
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
-                        {{ (row.createdBy.displayName || 'U').charAt(0) }}
-                      </div>
-                      <span class="font-medium">{{ row.createdBy.displayName || '—' }}</span>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-
-          @if (expenseService.expenses().length === 0 && !expenseService.isLoading()) {
-            <div class="flex flex-col items-center justify-center py-16 text-center">
-              <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-4">
-                <ng-icon name="heroBanknotes" class="text-3xl text-base-content/40" />
-              </div>
-              <h3 class="text-lg font-bold mb-1">経費申請がありません</h3>
-              <p class="text-base-content/60 mb-6">新しい経費申請を作成してください</p>
-            </div>
-          }
-        </div>
+        <p-table [value]="expenseService.expenses()" [tableStyle]="{ 'min-width': '60rem' }"
+            dataKey="id" data-testid="expense-table">
+          <ng-template #header>
+            <tr>
+              <th>申請番号</th>
+              <th>カテゴリ</th>
+              <th class="text-right">金額</th>
+              <th>日付</th>
+              <th>プロジェクト</th>
+              <th>ステータス</th>
+              <th>申請者</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row>
+            <tr>
+              <td class="whitespace-nowrap">
+                <span class="font-mono text-sm" style="opacity: 0.6;">{{ row.workflow?.workflowNumber || '—' }}</span>
+              </td>
+              <td class="whitespace-nowrap">
+                <p-tag [style]="{ 'background-color': getCategoryColor(row.category), 'border': 'none' }"
+                    [value]="row.category" />
+              </td>
+              <td class="font-semibold text-right whitespace-nowrap">
+                ¥{{ row.amount | number }}
+              </td>
+              <td class="whitespace-nowrap" style="opacity: 0.7;">
+                {{ row.expenseDate | date:'yyyy/MM/dd' }}
+              </td>
+              <td class="font-medium whitespace-nowrap" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                {{ row.project?.name || '—' }}
+              </td>
+              <td class="whitespace-nowrap">
+                @if (row.workflow) {
+                  <p-tag [value]="getStatusLabel(row.workflow.status)"
+                      [severity]="getStatusSeverity(row.workflow.status)" />
+                } @else {
+                  <p-tag value="下書き" severity="secondary" />
+                }
+              </td>
+              <td class="whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs uppercase flex-shrink-0"
+                      style="background-color: var(--p-primary-100); color: var(--p-primary-color);">
+                    {{ (row.createdBy.displayName || 'U').charAt(0) }}
+                  </div>
+                  <span class="font-medium">{{ row.createdBy.displayName || '—' }}</span>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="7">
+                <div class="flex flex-col items-center justify-center py-16 text-center">
+                  <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                      style="background-color: var(--p-surface-100);">
+                    <i class="pi pi-wallet" style="font-size: 1.5rem; opacity: 0.4;"></i>
+                  </div>
+                  <h3 class="text-lg font-bold mb-1">経費申請がありません</h3>
+                  <p style="opacity: 0.6;" class="mb-6">新しい経費申請を作成してください</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
 
         @if (expenseService.total() > 0) {
-          <div class="border-t border-base-200 bg-base-200/30 px-4 py-3 flex justify-end items-center gap-2"
-             data-testid="expense-paginator">
-            <div class="join">
-              <button class="join-item btn btn-sm"
-                  [disabled]="pageIndex <= 1"
-                  (click)="onPageIndexChange(pageIndex - 1)">«</button>
-              <button class="join-item btn btn-sm btn-active">{{ pageIndex }}</button>
-              <button class="join-item btn btn-sm"
-                  [disabled]="pageIndex * pageSize >= expenseService.total()"
-                  (click)="onPageIndexChange(pageIndex + 1)">»</button>
-            </div>
-            <select class="select select-sm w-20"
-                [value]="pageSize"
-                (change)="onPageSizeSelectChange($event)">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
+          <p-paginator
+              [first]="first"
+              [rows]="pageSize"
+              [totalRecords]="expenseService.total()"
+              [rowsPerPageOptions]="[10, 20, 50]"
+              (onPageChange)="onPaginatorChange($event)"
+              data-testid="expense-paginator" />
         }
       }
 
       <!-- エラー -->
       @if (expenseService.error()) {
-        <div role="alert" class="alert alert-error mt-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div class="flex items-center gap-3 p-4 rounded-lg" style="background-color: var(--p-red-50); color: var(--p-red-700); border: 1px solid var(--p-red-200);">
+          <i class="pi pi-times-circle" style="font-size: 1.25rem;"></i>
           <span>{{ expenseService.error() }}</span>
         </div>
       }
-    </app-list-page>
+    </div>
   `,
   styles: [],
 })
@@ -190,10 +161,18 @@ export class ExpenseListComponent implements OnInit {
   private router = inject(Router);
 
   categories = EXPENSE_CATEGORIES;
-  selectedCategory = '';
-  selectedStatus = '';
+  categoryOptions = EXPENSE_CATEGORIES.map(cat => cat);
+  statusOptions = [
+    { label: '下書き', value: 'draft' },
+    { label: '申請中', value: 'submitted' },
+    { label: '承認済', value: 'approved' },
+    { label: '差戻し', value: 'rejected' },
+  ];
+  selectedCategory: string | null = null;
+  selectedStatus: string | null = null;
   pageIndex = 1;
   pageSize = 20;
+  first = 0;
 
   displayedColumns = [
     'workflowNumber',
@@ -211,14 +190,28 @@ export class ExpenseListComponent implements OnInit {
 
   onFilterChange(): void {
     this.pageIndex = 1;
+    this.first = 0;
     this.expenseService.loadAll({
       category: this.selectedCategory || undefined,
       status: this.selectedStatus || undefined,
     });
   }
 
+  onPaginatorChange(event: any): void {
+    this.first = event.first;
+    this.pageSize = event.rows;
+    this.pageIndex = Math.floor(event.first / event.rows) + 1;
+    this.expenseService.loadAll({
+      category: this.selectedCategory || undefined,
+      status: this.selectedStatus || undefined,
+      page: this.pageIndex,
+      limit: this.pageSize,
+    });
+  }
+
   onPageIndexChange(pageIndex: number): void {
     this.pageIndex = pageIndex;
+    this.first = (pageIndex - 1) * this.pageSize;
     this.expenseService.loadAll({
       category: this.selectedCategory || undefined,
       status: this.selectedStatus || undefined,
@@ -230,6 +223,7 @@ export class ExpenseListComponent implements OnInit {
   onPageSizeChange(pageSize: number): void {
     this.pageSize = pageSize;
     this.pageIndex = 1;
+    this.first = 0;
     this.expenseService.loadAll({
       category: this.selectedCategory || undefined,
       status: this.selectedStatus || undefined,
@@ -249,6 +243,16 @@ export class ExpenseListComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     return WORKFLOW_STATUS_LABELS[status as keyof typeof WORKFLOW_STATUS_LABELS] || status;
+  }
+
+  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    const severityMap: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      draft: 'secondary',
+      submitted: 'info',
+      approved: 'success',
+      rejected: 'danger',
+    };
+    return severityMap[status] || 'secondary';
   }
 
   getStatusBadgeClass(status: string): string {
