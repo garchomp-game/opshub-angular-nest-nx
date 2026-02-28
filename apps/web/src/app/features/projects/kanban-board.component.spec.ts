@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { KanbanBoardComponent } from './kanban-board.component';
 import { TaskService } from './task.service';
-import { ToastService } from '../../shared/ui';
+import { ToastService } from '../../shared/services';
 
 describe('KanbanBoardComponent', () => {
   let component: KanbanBoardComponent;

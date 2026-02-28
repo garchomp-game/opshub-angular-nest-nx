@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import {
   TaskStatus, TASK_STATUS_LABELS, TASK_TRANSITIONS, canTransition,
 } from '@shared/types';
-import { ToastService } from '../../shared/ui';
+import { ToastService } from '../../shared/services';
 import { TaskService } from './task.service';
 
 @Component({

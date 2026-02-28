@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 
 import { ProjectStatus, PROJECT_STATUS_LABELS } from '@shared/types';
-import { ToastService } from '../../shared/ui';
+import { ToastService } from '../../shared/services';
 import { ProjectService } from './project.service';
 import { AuthService } from '../../core/auth/auth.service';
 

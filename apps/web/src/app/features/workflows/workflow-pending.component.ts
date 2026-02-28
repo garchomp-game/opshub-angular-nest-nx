@@ -7,9 +7,9 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { WorkflowService, Workflow } from './workflow.service';
 import { WORKFLOW_STATUS_LABELS } from '@shared/types';
-import { ModalService } from '../../shared/ui/modal/modal.service';
-import { ConfirmDialogComponent } from '../../shared/ui/modal/confirm-dialog.component';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ModalService } from '../../shared/services/modal.service';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-workflow-pending',

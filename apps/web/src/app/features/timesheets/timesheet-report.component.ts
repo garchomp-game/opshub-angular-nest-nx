@@ -18,7 +18,7 @@ import {
   UserSummary,
   SummaryQuery,
 } from './timesheet.service';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-timesheet-report',

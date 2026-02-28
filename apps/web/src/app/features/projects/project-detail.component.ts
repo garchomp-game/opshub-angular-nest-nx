@@ -10,7 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import {
   PROJECT_STATUS_LABELS, TASK_STATUS_LABELS,
 } from '@shared/types';
-import { ToastService } from '../../shared/ui';
+import { ToastService } from '../../shared/services';
 import { ProjectService } from './project.service';
 import { TaskService } from './task.service';
 import { AuthService } from '../../core/auth/auth.service';

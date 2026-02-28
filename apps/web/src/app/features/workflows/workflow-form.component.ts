@@ -10,7 +10,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
 import { WorkflowService } from './workflow.service';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 interface ApproverItem {
   id: string;

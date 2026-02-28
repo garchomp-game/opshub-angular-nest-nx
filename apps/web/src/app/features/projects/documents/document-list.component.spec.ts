@@ -9,7 +9,7 @@ import { MessageService } from 'primeng/api';
 
 import { DocumentListComponent } from './document-list.component';
 import { DocumentService } from './document.service';
-import { ToastService } from '../../../shared/ui';
+import { ToastService } from '../../../shared/services';
 import { signal } from '@angular/core';
 
 describe('DocumentListComponent', () => {
