@@ -2,8 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TenantSettingsComponent } from './tenant-settings.component';
 import { AdminTenantService } from '../services/tenant.service';
+import { MessageService } from 'primeng/api';
 
 describe('TenantSettingsComponent', () => {
   let component: TenantSettingsComponent;
@@ -23,7 +25,9 @@ describe('TenantSettingsComponent', () => {
       imports: [TenantSettingsComponent],
       providers: [
         provideRouter([]),
+        provideNoopAnimations(),
         { provide: AdminTenantService, useValue: mockTenantService },
+        MessageService,
       ],
     }).compileComponents();
 
