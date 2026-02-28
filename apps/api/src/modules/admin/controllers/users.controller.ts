@@ -8,6 +8,7 @@ import {
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
@@ -15,6 +16,8 @@ import { UsersService } from '../services/users.service';
 import { InviteUserDto } from '../dto/invite-user.dto';
 import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
 
+@ApiTags('admin/users')
+@ApiBearerAuth()
 @Controller('admin/users')
 @Roles('tenant_admin')
 export class UsersController {

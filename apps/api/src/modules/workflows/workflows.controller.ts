@@ -2,6 +2,7 @@ import {
     Controller, Get, Post, Patch, Param, Body, Query,
     HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { WorkflowsService } from './workflows.service';
@@ -10,6 +11,8 @@ import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { QueryWorkflowDto } from './dto/query-workflow.dto';
 import { RejectWorkflowDto } from './dto/reject-workflow.dto';
 
+@ApiTags('workflows')
+@ApiBearerAuth()
 @Controller('workflows')
 export class WorkflowsController {
     constructor(private readonly workflowsService: WorkflowsService) { }

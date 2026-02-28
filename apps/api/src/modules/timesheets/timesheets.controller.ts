@@ -12,6 +12,7 @@ import {
     HttpStatus,
     StreamableFile,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TimesheetsService } from './timesheets.service';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { BulkTimesheetDto } from './dto/bulk-timesheet.dto';
@@ -25,6 +26,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 
+@ApiTags('timesheets')
+@ApiBearerAuth()
 @Controller('timesheets')
 export class TimesheetsController {
     constructor(private readonly timesheetsService: TimesheetsService) { }

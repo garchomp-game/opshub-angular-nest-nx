@@ -1,10 +1,13 @@
 import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 import { AuditLogsService } from '../services/audit-logs.service';
 import { AuditLogFilterDto } from '../dto/audit-log-filter.dto';
 
+@ApiTags('admin/audit-logs')
+@ApiBearerAuth()
 @Controller('admin/audit-logs')
 @Roles('tenant_admin', 'it_admin')
 export class AuditLogsController {

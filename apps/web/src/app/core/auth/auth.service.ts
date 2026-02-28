@@ -170,7 +170,7 @@ export class AuthService {
    */
   private loadFromStorage(): void {
     const token = sessionStorage.getItem(TOKEN_KEY);
-    this.logger.debug('loadFromStorage: token exists =', !!token);
+    this.logger.debug('loadFromStorage', { tokenExists: !!token });
     if (token) {
       this._accessToken.set(token);
       this._initializing.set(true);

@@ -8,6 +8,7 @@ import {
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ExpenseQueryDto } from './dto/expense-query.dto';
@@ -16,6 +17,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 
+@ApiTags('expenses')
+@ApiBearerAuth()
 @Controller('expenses')
 export class ExpensesController {
     constructor(private readonly expensesService: ExpensesService) { }

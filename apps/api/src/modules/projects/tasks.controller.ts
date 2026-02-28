@@ -2,6 +2,7 @@ import {
     Controller, Get, Post, Put, Patch, Delete,
     Param, Body, HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto, ChangeTaskStatusDto } from './dto/update-task.dto';
@@ -9,6 +10,8 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
 
+@ApiTags('tasks')
+@ApiBearerAuth()
 @Controller()
 export class TasksController {
     constructor(private readonly tasksService: TasksService) { }

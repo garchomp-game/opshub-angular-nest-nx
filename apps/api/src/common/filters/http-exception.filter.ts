@@ -4,6 +4,10 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+/** PII マスキング対象フィールド名 */
+const SENSITIVE_FIELDS = ['password', 'token', 'secret'];
+const EMAIL_REGEX = /^(.)[^@]*(@.+)$/;
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(HttpExceptionFilter.name);
@@ -49,6 +53,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
             method: request?.method,
             url: request?.url,
             userId: request?.user?.id,
+            body: this.maskPii(request?.body),
         };
 
         if (status >= 500) {
@@ -64,6 +69,40 @@ export class HttpExceptionFilter implements ExceptionFilter {
             success: false,
             error: { code, message, fields },
         });
+    }
+
+    /**
+     * リクエスト body 内の PII をマスクする。
+     * - password, token, secret → '***'
+     * - メールアドレス → 部分マスク (e.g., 'a***@demo.com')
+     */
+    private maskPii(body: unknown): unknown {
+        if (!body || typeof body !== 'object') return body;
+        if (Array.isArray(body)) return body.map((item) => this.maskPii(item));
+
+        const masked: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+            if (SENSITIVE_FIELDS.includes(key.toLowerCase()) && value) {
+                masked[key] = '***';
+            } else if (typeof value === 'string' && EMAIL_REGEX.test(value)) {
+                masked[key] = this.maskEmail(value);
+            } else if (typeof value === 'object' && value !== null) {
+                masked[key] = this.maskPii(value);
+            } else {
+                masked[key] = value;
+            }
+        }
+        return masked;
+    }
+
+    /**
+     * メールアドレスを部分マスクする。
+     * 例: 'admin@demo.com' → 'a***@demo.com'
+     */
+    private maskEmail(email: string): string {
+        const match = email.match(EMAIL_REGEX);
+        if (!match) return email;
+        return `${match[1]}***${match[2]}`;
     }
 
     private statusToCode(status: number): string {
