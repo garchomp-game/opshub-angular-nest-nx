@@ -8,7 +8,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { ToastService } from '../../../shared/ui';
+import { ToastService } from '../../../shared/services';
 import { DocumentService } from './document.service';
 import { formatFileSize } from '@shared/util';
 

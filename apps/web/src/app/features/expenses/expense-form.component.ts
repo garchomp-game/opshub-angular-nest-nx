@@ -12,7 +12,7 @@ import { CardModule } from 'primeng/card';
 import { ExpenseService } from './expense.service';
 import { EXPENSE_CATEGORIES } from '@shared/types';
 import { HttpClient } from '@angular/common/http';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 interface SimpleItem {
   id: string;

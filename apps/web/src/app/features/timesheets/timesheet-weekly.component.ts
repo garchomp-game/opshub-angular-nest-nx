@@ -18,7 +18,7 @@ import {
   BulkUpsertRequest,
 } from './timesheet.service';
 import { HttpClient } from '@angular/common/http';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 interface GridRow {
   id?: string;

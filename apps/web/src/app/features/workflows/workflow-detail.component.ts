@@ -12,9 +12,9 @@ import { TextareaModule } from 'primeng/textarea';
 import { WorkflowService } from './workflow.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS } from '@shared/types';
-import { ModalService } from '../../shared/ui/modal/modal.service';
-import { ConfirmDialogComponent } from '../../shared/ui/modal/confirm-dialog.component';
-import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ModalService } from '../../shared/services/modal.service';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-workflow-detail',
