@@ -1,40 +1,53 @@
 import { Injectable, inject } from '@angular/core';
-import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
-import { ComponentType } from '@angular/cdk/overlay';
-import { ModalRef } from './modal-ref';
+import { ConfirmationService } from 'primeng/api';
+import { Subject, Observable } from 'rxjs';
 
 export interface ModalConfig {
-  data?: any;
+  data?: {
+    title?: string;
+    message?: string;
+    confirmText?: string;
+    confirmClass?: string;
+    [key: string]: any;
+  };
   width?: string;
+}
+
+/** Compatibility shim keeping the same afterClosed() API */
+export class ModalRef<T = any, R = any> {
+  private afterClosedSubject = new Subject<R | undefined>();
+  componentInstance: any = {};
+
+  close(result?: R): void {
+    this.afterClosedSubject.next(result);
+    this.afterClosedSubject.complete();
+  }
+
+  afterClosed(): Observable<R | undefined> {
+    return this.afterClosedSubject.asObservable();
+  }
 }
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
-  private overlay = inject(Overlay);
+  private confirmationService = inject(ConfirmationService);
 
-  open<T>(component: ComponentType<T>, config?: ModalConfig): ModalRef<T> {
-    const positionStrategy = this.overlay
-      .position().global().centerHorizontally().centerVertically();
+  /**
+   * Opens a confirm dialog.
+   * Returns a ModalRef whose afterClosed() emits true/false (same API as before).
+   */
+  open<T>(component: any, config?: ModalConfig): ModalRef<T, boolean> {
+    const modalRef = new ModalRef<T, boolean>();
+    const data = config?.data ?? {};
 
-    const overlayConfig = new OverlayConfig({
-      positionStrategy,
-      hasBackdrop: true,
-      backdropClass: 'bg-black/50',
-      width: config?.width ?? '32rem',
+    this.confirmationService.confirm({
+      header: data.title ?? '確認',
+      message: data.message ?? '',
+      acceptLabel: data.confirmText ?? '確認',
+      rejectLabel: 'キャンセル',
+      accept: () => modalRef.close(true),
+      reject: () => modalRef.close(false),
     });
-
-    const overlayRef = this.overlay.create(overlayConfig);
-    const portal = new ComponentPortal(component);
-    const componentRef = overlayRef.attach(portal);
-
-    const modalRef = new ModalRef<T>(overlayRef, componentRef.instance);
-
-    overlayRef.backdropClick().subscribe(() => modalRef.close());
-
-    if (config?.data) {
-      Object.assign(componentRef.instance as object, { data: config.data });
-    }
 
     return modalRef;
   }
