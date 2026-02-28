@@ -1,35 +1,33 @@
-import { Injectable, inject, ComponentRef } from '@angular/core';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
-import { ToastContainerComponent, ToastData } from './toast-container.component';
+import { Injectable, inject } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
+const SEVERITY_MAP: Record<ToastType, string> = {
+  success: 'success',
+  error: 'error',
+  info: 'info',
+  warning: 'warn',
+};
+
+const SUMMARY_MAP: Record<ToastType, string> = {
+  success: '成功',
+  error: 'エラー',
+  info: '情報',
+  warning: '警告',
+};
+
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private overlay = inject(Overlay);
-  private containerRef: ComponentRef<ToastContainerComponent> | null = null;
-  private overlayRef: OverlayRef | null = null;
-
-  private ensureContainer(): ToastContainerComponent {
-    if (!this.containerRef) {
-      const positionStrategy = this.overlay
-        .position().global().top('1rem').right('1rem');
-
-      this.overlayRef = this.overlay.create({ positionStrategy });
-      const portal = new ComponentPortal(ToastContainerComponent);
-      this.containerRef = this.overlayRef.attach(portal);
-    }
-    return this.containerRef.instance;
-  }
+  private messageService = inject(MessageService);
 
   show(message: string, type: ToastType = 'info', durationMs = 3000): void {
-    const container = this.ensureContainer();
-    container.addToast({ message, type, id: Date.now() });
-
-    setTimeout(() => {
-      container.removeToast(Date.now());
-    }, durationMs);
+    this.messageService.add({
+      severity: SEVERITY_MAP[type],
+      summary: SUMMARY_MAP[type],
+      detail: message,
+      life: durationMs,
+    });
   }
 
   success(message: string): void { this.show(message, 'success'); }

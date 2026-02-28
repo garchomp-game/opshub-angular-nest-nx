@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft, heroPaperAirplane } from '@ng-icons/heroicons/outline';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { CardModule } from 'primeng/card';
 import { WorkflowService } from './workflow.service';
-import { FormPageComponent } from '../../shared/ui/page-layouts/form-page.component';
-import { FormFieldComponent } from '../../shared/ui/form-field/form-field.component';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 
 interface ApproverItem {
@@ -21,81 +23,74 @@ interface ApproverItem {
   standalone: true,
   imports: [
     CommonModule, RouterLink, ReactiveFormsModule,
-    NgIcon, FormPageComponent, FormFieldComponent,
+    ButtonModule, InputTextModule, TextareaModule, InputNumberModule, SelectModule, CardModule,
   ],
-  viewProviders: [provideIcons({ heroArrowLeft, heroPaperAirplane })],
   template: `
-    <app-form-page [title]="isEditMode ? '申請編集' : '新規申請'">
-      <form [formGroup]="form" data-testid="workflow-form">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-          <app-form-field label="申請種別" [required]="true"
-                  [errorMessage]="form.get('type')?.invalid && form.get('type')?.touched ? '申請種別を選択してください' : ''">
-            <select class="select w-full"
-                formControlName="type"
-                id="type"
-                data-testid="type-select">
-              <option value="" disabled>種別を選択</option>
-              <option value="expense">経費</option>
-              <option value="leave">休暇</option>
-              <option value="purchase">購買</option>
-              <option value="other">その他</option>
-            </select>
-          </app-form-field>
-
-          <app-form-field label="タイトル" [required]="true"
-                  [errorMessage]="form.get('title')?.invalid && form.get('title')?.touched ? 'タイトルを入力してください（100文字以内）' : ''">
-            <input class="input w-full"
-                formControlName="title" id="title"
-                maxlength="100" placeholder="タイトルを入力"
-                data-testid="title-input" />
-          </app-form-field>
-
-          <app-form-field label="説明" class="md:col-span-2">
-            <textarea class="textarea w-full"
-                 formControlName="description" id="description"
-                 rows="4" placeholder="詳細を入力"
-                 maxlength="2000"
-                 data-testid="description-input"></textarea>
-          </app-form-field>
-
-          <app-form-field label="金額">
-            <label class="input flex items-center gap-2 w-full">
-              <span class="text-base-content/50">¥</span>
-              <input type="number" class="grow" formControlName="amount" id="amount"
-                  placeholder="金額を入力"
-                  data-testid="amount-input" />
-            </label>
-          </app-form-field>
-
-          <app-form-field label="承認者" [required]="true"
-                  [errorMessage]="form.get('approverId')?.invalid && form.get('approverId')?.touched ? '承認者を選択してください' : ''">
-            <select class="select w-full"
-                formControlName="approverId" id="approverId"
-                data-testid="approver-select">
-              <option value="" disabled>承認者を選択</option>
-              @for (a of approvers(); track a.id) {
-                <option [value]="a.id">{{ a.displayName || a.email }}</option>
-              }
-            </select>
-          </app-form-field>
-        </div>
-      </form>
-
-      <div slot="actions" class="flex items-center justify-end gap-3">
-        <a class="btn btn-ghost" routerLink="/workflows" data-testid="cancel-btn">
-          キャンセル
-        </a>
-        <button class="btn"
-            (click)="onSaveDraft()" [disabled]="isSubmitting" data-testid="save-draft-btn">
-          下書き保存
-        </button>
-        <button class="btn btn-primary"
-            (click)="onSubmit()" [disabled]="form.invalid || isSubmitting" data-testid="submit-btn">
-          <ng-icon name="heroPaperAirplane" class="text-lg" />
-          送信する
-        </button>
+    <div class="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div class="flex items-center gap-3 mb-6">
+        <p-button icon="pi pi-arrow-left" [rounded]="true" [text]="true" routerLink="/workflows" data-testid="back-btn" />
+        <h1 class="text-2xl font-bold m-0">{{ isEditMode ? '申請編集' : '新規申請' }}</h1>
       </div>
-    </app-form-page>
+
+      <p-card>
+        <form [formGroup]="form" data-testid="workflow-form">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+            <div class="flex flex-col gap-2">
+              <label for="type" class="font-medium text-sm">申請種別 <span class="text-red-500">*</span></label>
+              <p-select formControlName="type" [options]="typeOptions" optionLabel="label" optionValue="value"
+                  placeholder="種別を選択" inputId="type" styleClass="w-full"
+                  data-testid="type-select" />
+              @if (form.get('type')?.invalid && form.get('type')?.touched) {
+                <small class="text-red-500">申請種別を選択してください</small>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="title" class="font-medium text-sm">タイトル <span class="text-red-500">*</span></label>
+              <input pInputText formControlName="title" id="title" maxlength="100"
+                  placeholder="タイトルを入力" class="w-full" data-testid="title-input" />
+              @if (form.get('title')?.invalid && form.get('title')?.touched) {
+                <small class="text-red-500">タイトルを入力してください（100文字以内）</small>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2 md:col-span-2">
+              <label for="description" class="font-medium text-sm">説明</label>
+              <textarea pTextarea formControlName="description" id="description"
+                  rows="4" placeholder="詳細を入力" maxlength="2000"
+                  class="w-full" data-testid="description-input"></textarea>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="amount" class="font-medium text-sm">金額</label>
+              <p-inputnumber formControlName="amount" inputId="amount"
+                  placeholder="金額を入力" mode="currency" currency="JPY" locale="ja-JP"
+                  styleClass="w-full" data-testid="amount-input" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="approverId" class="font-medium text-sm">承認者 <span class="text-red-500">*</span></label>
+              <p-select formControlName="approverId" [options]="approvers()" optionLabel="displayName" optionValue="id"
+                  placeholder="承認者を選択" inputId="approverId" styleClass="w-full"
+                  data-testid="approver-select" />
+              @if (form.get('approverId')?.invalid && form.get('approverId')?.touched) {
+                <small class="text-red-500">承認者を選択してください</small>
+              }
+            </div>
+          </div>
+        </form>
+
+        <div class="flex items-center justify-end gap-3 mt-8 pt-5" style="border-top: 1px solid var(--p-surface-border);">
+          <p-button label="キャンセル" severity="secondary" [text]="true"
+              routerLink="/workflows" data-testid="cancel-btn" />
+          <p-button label="下書き保存" severity="secondary" [outlined]="true"
+              (onClick)="onSaveDraft()" [disabled]="isSubmitting" data-testid="save-draft-btn" />
+          <p-button label="送信する" icon="pi pi-send"
+              (onClick)="onSubmit()" [disabled]="form.invalid || isSubmitting"
+              [loading]="isSubmitting" data-testid="submit-btn" />
+        </div>
+      </p-card>
+    </div>
   `,
   styles: [],
 })
@@ -113,6 +108,13 @@ export class WorkflowFormComponent implements OnInit {
   approvers = signal<ApproverItem[]>([]);
   private editId: string | null = null;
 
+  typeOptions = [
+    { label: '経費', value: 'expense' },
+    { label: '休暇', value: 'leave' },
+    { label: '購買', value: 'purchase' },
+    { label: 'その他', value: 'other' },
+  ];
+
   constructor() {
     this.form = this.fb.group({
       type: ['', Validators.required],
@@ -124,7 +126,6 @@ export class WorkflowFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // 承認者一覧を取得
     this.http.get<any>('/api/admin/users').subscribe({
       next: (res) => {
         const list = Array.isArray(res.data) ? res.data
@@ -141,7 +142,7 @@ export class WorkflowFormComponent implements OnInit {
             displayName: u.displayName || u.profile?.displayName || u.email?.split('@')[0],
           })));
       },
-      error: () => { /* PM/member は admin/users にアクセスできないので空リスト */ },
+      error: () => { },
     });
 
     this.editId = this.route.snapshot.paramMap.get('id');
@@ -188,7 +189,6 @@ export class WorkflowFormComponent implements OnInit {
     this.isSubmitting = true;
 
     if (this.isEditMode && this.editId) {
-      // Update then submit
       this.workflowService.update(this.editId, this.form.value).subscribe({
         next: () => {
           this.workflowService.submit(this.editId!).subscribe({

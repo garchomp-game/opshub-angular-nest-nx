@@ -14,6 +14,8 @@ import {
   heroUserCircle,
   heroBars3,
 } from '@ng-icons/heroicons/outline';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AuthService } from '../../core/auth/auth.service';
 import { HeaderSearchBarComponent } from './header-search-bar/header-search-bar.component';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
@@ -24,7 +26,7 @@ import { BreadcrumbComponent } from './breadcrumb.component';
   standalone: true,
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
-    NgIcon,
+    NgIcon, ToastModule, ConfirmDialogModule,
     HeaderSearchBarComponent, NotificationBellComponent,
     BreadcrumbComponent,
   ],
@@ -36,6 +38,8 @@ import { BreadcrumbComponent } from './breadcrumb.component';
     }),
   ],
   template: `
+  <p-toast position="top-right" />
+  <p-confirmdialog />
   <div class="drawer lg:drawer-open" data-testid="app-shell">
    <!-- Drawer toggle (mobile) -->
    <input id="app-drawer" type="checkbox" class="drawer-toggle" />

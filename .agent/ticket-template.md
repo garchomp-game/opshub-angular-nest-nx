@@ -1,4 +1,4 @@
-# OpsHub 作業者向けプロンプトテンプレート
+# OpsHub 作業者向けプロンプトテンプレート (PrimeNG 版)
 
 以下のテンプレートをコピーして `.agent/prompts/` に新しいチケットを作成します。
 
@@ -10,7 +10,7 @@
 # T{番号}: {機能名} — {作業内容}
 
 ## プロジェクト情報
-- Nx monorepo, Angular 21, Tailwind v4
+- Nx monorepo, Angular 21, PrimeNG 21 (Aura テーマ)
 - パス: apps/web/src/app/features/{機能}/
 
 ## 対象ファイル
@@ -18,31 +18,51 @@
 - `{ファイルパス2}`
 
 ## 使用技術
-- Tailwind v4 + DaisyUI v5 (CSS クラスベース)
-- Angular CDK (振る舞い: Overlay, DragDrop 等)
+- **PrimeNG 21** (Aura テーマ) — コンポーネントを直接 import して使用
+- Tailwind CSS v4 (レイアウト用ユーティリティのみ: flex, grid, gap, p-*, m-* 等)
 - Angular Signals (状態管理)
 - ReactiveFormsModule (フォーム)
 
-## DaisyUI クラス参照
-- テーブル: `table`, `table-zebra`
-- ボタン: `btn`, `btn-primary`, `btn-sm`
-- カード: `card`, `card-body`, `card-title`
-- バッジ: `badge`, `badge-info`, `badge-success`
-- モーダル: `modal`, `modal-box`
-- フォーム: `input`, `select`, `textarea`
-- Navbar: `navbar`
-- ページネーション: `join`, `join-item`
+## PrimeNG コンポーネントリファレンス
+- `.agent/llms-txt/primeNG-llms-full.txt` を参照
+- 各コンポーネントは `import { XxxModule } from 'primeng/xxx'` で import
+- スタイリングは PrimeNG デザイントークンを使用 (var(--p-xxx))
 
-## デザイン要件
-{画面ごとの詳細要件を記載}
+## 主要 PrimeNG コンポーネント対応表
+| 用途 | PrimeNG | import |
+|---|---|---|
+| ボタン | `<p-button>` | `ButtonModule` from `primeng/button` |
+| テーブル | `<p-table>` | `TableModule` from `primeng/table` |
+| カード | `<p-card>` | `CardModule` from `primeng/card` |
+| セレクト | `<p-select>` | `SelectModule` from `primeng/select` |
+| テキスト入力 | `pInputText` | `InputTextModule` from `primeng/inputtext` |
+| 数値入力 | `<p-inputnumber>` | `InputNumberModule` from `primeng/inputnumber` |
+| テキストエリア | `pTextarea` | `TextareaModule` from `primeng/textarea` |
+| 日付 | `<p-datepicker>` | `DatePickerModule` from `primeng/datepicker` |
+| タグ/バッジ | `<p-tag>` | `TagModule` from `primeng/tag` |
+| ページネータ | `<p-paginator>` | `PaginatorModule` from `primeng/paginator` |
+| タブ | `<p-tabs>` | `TabsModule` from `primeng/tabs` |
+| ダイアログ | `<p-dialog>` | `DialogModule` from `primeng/dialog` |
+| アバター | `<p-avatar>` | `AvatarModule` from `primeng/avatar` |
+| プログレスバー | `<p-progressbar>` | `ProgressBarModule` from `primeng/progressbar` |
+| ツールチップ | `pTooltip` | `TooltipModule` from `primeng/tooltip` |
+| パスワード | `<p-password>` | `PasswordModule` from `primeng/password` |
+| メッセージ | `<p-message>` | `MessageModule` from `primeng/message` |
+| ドロワー | `<p-drawer>` | `DrawerModule` from `primeng/drawer` |
+| パンくず | `<p-breadcrumb>` | `BreadcrumbModule` from `primeng/breadcrumb` |
+| メニュー | `<p-menu>` | `MenuModule` from `primeng/menu` |
+| タイムライン | `<p-timeline>` | `TimelineModule` from `primeng/timeline` |
+| スピナー | `<p-progressspinner>` | `ProgressSpinnerModule` from `primeng/progressspinner` |
+| チャート | `<p-chart>` | `ChartModule` from `primeng/chart` |
 
 ## 共通ルール
-1. 既存ロジック (Signal, Service, Router) は変更禁止
-2. Tailwind + DaisyUI クラスでスタイリング
-3. data-testid 属性を主要要素に付与
-4. 日本語 UI を維持
-5. テスト: provideTestNzIcons() は不要 (NG-ZORRO は DaisyUI v5 に移行済み)
-6. 完了後: `pnpm check` で確認 (typecheck + test)
+1. **shared/ui は使用禁止** — PrimeNG コンポーネントを直接 import
+2. Toast は `ToastService` (内部で PrimeNG MessageService を使用) を inject
+3. 確認ダイアログは `ModalService` (内部で PrimeNG ConfirmationService を使用) を inject
+4. `data-testid` 属性を主要要素に付与
+5. 日本語 UI を維持
+6. 既存ロジック (Signal, Service, Router) は変更禁止
+7. 完了後: `pnpm nx build web` で確認
 ```
 
 ---
@@ -54,7 +74,6 @@
 ```
 ## 完了報告
 - 変更ファイル: {リスト}
-- テスト結果: {pass/fail}
-- 画面スクリーンショット: {あれば}
+- ビルド結果: {pass/fail}
 - 注意事項: {あれば}
 ```

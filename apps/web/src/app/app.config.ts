@@ -7,6 +7,10 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { registerLocaleData } from '@angular/common';
 import ja from '@angular/common/locales/ja';
 
+import { providePrimeNG } from 'primeng/config';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import Aura from '@primeuix/themes/aura';
+
 import { APP_ROUTES } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
@@ -23,6 +27,16 @@ export const appConfig: ApplicationConfig = {
             withInterceptors([authInterceptor, errorInterceptor]),
         ),
         provideAnimationsAsync(),
+        providePrimeNG({
+            theme: {
+                preset: Aura,
+                options: {
+                    darkModeSelector: '.dark',
+                },
+            },
+        }),
+        MessageService,
+        ConfirmationService,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
     ],
 };
