@@ -48,3 +48,4 @@ __screenshots__/
 
 # Temporary files
 tmp/
+playwright_all.log
