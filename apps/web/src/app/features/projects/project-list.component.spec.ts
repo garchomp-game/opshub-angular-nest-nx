@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MessageService } from 'primeng/api';
 
 import { ProjectListComponent } from './project-list.component';
 import { ProjectService } from './project.service';
@@ -32,11 +33,13 @@ describe('ProjectListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProjectListComponent, NoopAnimationsModule],
+      imports: [ProjectListComponent],
       providers: [
         provideRouter([]),
+        provideNoopAnimations(),
         { provide: ProjectService, useValue: mockProjectService },
         { provide: AuthService, useValue: mockAuthService },
+        MessageService,
       ],
     }).compileComponents();
 

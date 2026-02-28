@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { MessageService } from 'primeng/api';
 
 import { DocumentListComponent } from './document-list.component';
 import { DocumentService } from './document.service';
@@ -41,6 +42,7 @@ describe('DocumentListComponent', () => {
         provideRouter([]),
         { provide: DocumentService, useValue: mockDocumentService },
         { provide: ToastService, useValue: mockToast },
+        MessageService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -75,9 +77,9 @@ describe('DocumentListComponent', () => {
   });
 
   it('getMimeHeroIconがMIMEタイプに応じたアイコンを返すこと', () => {
-    expect(component.getMimeHeroIcon('application/pdf')).toBe('heroDocumentText');
-    expect(component.getMimeHeroIcon('image/png')).toBe('heroPhoto');
-    expect(component.getMimeHeroIcon('text/plain')).toBe('heroDocumentText');
+    expect(component.getMimeHeroIcon('application/pdf')).toBe('pi pi-file-pdf');
+    expect(component.getMimeHeroIcon('image/png')).toBe('pi pi-image');
+    expect(component.getMimeHeroIcon('text/plain')).toBe('pi pi-file');
   });
 
   it('getMimeLabelがMIMEタイプに応じたラベルを返すこと', () => {

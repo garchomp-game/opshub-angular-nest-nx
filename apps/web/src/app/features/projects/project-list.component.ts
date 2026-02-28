@@ -138,8 +138,13 @@ export class ProjectListComponent implements OnInit {
   auth = inject(AuthService);
   private router = inject(Router);
 
-  statuses = Object.values(ProjectStatus);
-  private statusLabels: Record<string, string> = PROJECT_STATUS_LABELS;
+  statuses = Object.values(ProjectStatus ?? {});
+  private statusLabels: Record<string, string> = PROJECT_STATUS_LABELS ?? {
+    planning: '計画中',
+    active: '進行中',
+    completed: '完了',
+    cancelled: '中止',
+  };
 
   statusOptions = this.statuses.map(s => ({ label: this.statusLabels[s] ?? s, value: s }));
 

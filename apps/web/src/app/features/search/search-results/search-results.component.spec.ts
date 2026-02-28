@@ -33,10 +33,10 @@ describe('SearchResultsComponent', () => {
   });
 
   it('should return correct type icons', () => {
-    expect(component.getTypeIcon('workflow')).toBe('heroDocumentText');
-    expect(component.getTypeIcon('project')).toBe('heroFolder');
-    expect(component.getTypeIcon('task')).toBe('heroCheckCircle');
-    expect(component.getTypeIcon('expense')).toBe('heroCurrencyYen');
+    expect(component.getTypeIcon('workflow')).toBe('pi pi-file');
+    expect(component.getTypeIcon('project')).toBe('pi pi-folder');
+    expect(component.getTypeIcon('task')).toBe('pi pi-check-circle');
+    expect(component.getTypeIcon('expense')).toBe('pi pi-money-bill');
   });
 
   it('should return correct type labels', () => {

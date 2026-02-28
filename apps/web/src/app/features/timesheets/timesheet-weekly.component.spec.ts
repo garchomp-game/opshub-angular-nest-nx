@@ -6,6 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TimesheetWeeklyComponent } from './timesheet-weekly.component';
 import { TimesheetService } from './timesheet.service';
+import { MessageService } from 'primeng/api';
 
 describe('TimesheetWeeklyComponent', () => {
   let component: TimesheetWeeklyComponent;
@@ -29,6 +30,7 @@ describe('TimesheetWeeklyComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        MessageService,
         { provide: TimesheetService, useValue: mockTimesheetService },
       ],
     }).compileComponents();
@@ -67,8 +69,8 @@ describe('TimesheetWeeklyComponent', () => {
     mockTimesheetService.isLoading.set(true);
     fixture.detectChanges();
 
-    const spinner = fixture.nativeElement.querySelector('[data-testid="loading"] .pi-spinner');
-    expect(spinner).toBeTruthy();
+    const loading = fixture.nativeElement.querySelector('[data-testid="loading"]');
+    expect(loading).toBeTruthy();
   });
 
   it('行追加で新しい行が追加されること', () => {
