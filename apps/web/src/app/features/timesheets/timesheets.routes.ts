@@ -3,6 +3,6 @@ import { TimesheetWeeklyComponent } from './timesheet-weekly.component';
 import { TimesheetReportComponent } from './timesheet-report.component';
 
 export const TIMESHEET_ROUTES: Routes = [
-    { path: '', component: TimesheetWeeklyComponent },
-    { path: 'reports', component: TimesheetReportComponent },
+  { path: '', component: TimesheetWeeklyComponent },
+  { path: 'reports', component: TimesheetReportComponent },
 ];

@@ -1,33 +1,54 @@
-# T1: ログイン画面 — NG-ZORRO 移行
+# T1: Login — DaisyUI + CDK 移行
+
+## プロジェクト情報
+- Nx monorepo, Angular 21, Tailwind v3 + DaisyUI 4
+- テーマ: `opshub` (tailwind.config.js で定義済み)
+- アイコン: `@ng-icons/heroicons` (Heroicons)
 
 ## 対象ファイル
 - `apps/web/src/app/core/auth/login/login.component.ts`
+- `apps/web/src/app/core/auth/login/login.component.spec.ts`
 
-## 作業内容
-Angular Material → NG-ZORRO に UI を移行する。ロジック（AuthService 呼び出し、Signal、Router）は変更しない。
+## やること
+1. `login.component.ts` から `ng-zorro-antd` の import を全て削除
+2. テンプレートを DaisyUI クラスで書き換え:
+   - ログインカード: `card bg-base-100 shadow-xl max-w-md mx-auto mt-20`
+   - タイトル: `card-title text-2xl font-bold`
+   - フォーム: `form-control` + `label label-text` + `input input-bordered`
+   - ボタン: `btn btn-primary w-full`
+   - エラー表示: `alert alert-error text-sm`
+   - ローディング: `loading loading-spinner loading-sm`
+3. `login.component.spec.ts` から NG-ZORRO 関連の import/provider を削除
 
-## 使用する NG-ZORRO コンポーネント
-- `NzFormModule` — フォームレイアウト
-- `NzInputModule` — メール・パスワード入力
-- `NzButtonModule` — ログインボタン
-- `NzCheckboxModule` — 「ログイン状態を保持」（あれば）
-- `NzAlertModule` — エラーメッセージ表示
-- `NzIconModule` — アイコン
-- `NzCardModule` — ログインカード
+## 既存ロジック (変更禁止)
+- AuthService.login() 呼び出し
+- Signal (errorMessage, isLoading)
+- Router.navigate
 
-## デザイン要件
-- 画面中央に白いカードを配置（`nz-card`）
-- 背景: グラデーション or `bg-[#001529]`（Ant Design のダークブルー）
-- カード上部: OpsHub ロゴ + 「システムにログインしてください」
-- メール入力: `nz-input` with prefix icon (mail)
-- パスワード入力: `nz-input` type="password" with prefix icon (lock)
-- ログインボタン: `nz-button` nzType="primary" nzBlock
-- エラー: `nz-alert` nzType="error"
-- フッター: `© 2026 OpsHub Inc.`
+## アイコンの使い方
+```typescript
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroLockClosed, heroEnvelope } from '@ng-icons/heroicons/outline';
+
+@Component({
+  imports: [NgIcon],
+  viewProviders: [provideIcons({ heroLockClosed, heroEnvelope })],
+  template: `<ng-icon name="heroLockClosed" class="text-lg" />`
+})
+```
+
+よく使うアイコン名:
+- メール: `heroEnvelope`
+- パスワード: `heroLockClosed`
+- ログイン: `heroArrowRightOnRectangle`
+- 目/表示: `heroEye`, `heroEyeSlash`
 
 ## 共通ルール
-1. `mat-*` import を全て `nz-*` に置換
-2. Tailwind はレイアウト補助のみ（`flex`, `p-*`, `m-*`）
-3. スタイリングは NG-ZORRO Props で制御
-4. 日本語 UI 維持
-5. 既存ロジック変更禁止
+1. `ng-zorro-antd` の import を全て削除すること
+2. DaisyUI クラスでスタイリング。Tailwind はレイアウト補助のみ
+3. アイコンは `@ng-icons/heroicons/outline` から import
+4. 既存ロジック (Signal, Service, Router) は変更禁止
+5. data-testid 属性を主要要素に付与
+6. 日本語 UI を維持
+7. spec から provideNzIcons / provideTestNzIcons / NoopAnimationsModule を削除
+8. 完了後: `pnpm nx test web` で該当テストが PASS することを確認

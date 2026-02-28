@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from '@prisma-db';
 
 // Auth
@@ -32,6 +33,15 @@ import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: true,
+        transport: process.env['NODE_ENV'] !== 'production'
+          ? { target: 'pino-pretty', options: { colorize: true, singleLine: true } }
+          : undefined,
+        level: process.env['LOG_LEVEL'] ?? 'info',
+      },
+    }),
     PrismaModule,
     AuthModule,
     AdminModule,

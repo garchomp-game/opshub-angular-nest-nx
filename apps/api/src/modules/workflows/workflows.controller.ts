@@ -31,7 +31,7 @@ export class WorkflowsController {
     }
 
     @Post()
-    @Roles('member', 'pm', 'accounting', 'approver', 'tenant_admin')
+    @Roles('member', 'pm', 'accounting', 'tenant_admin')
     create(@Body() dto: CreateWorkflowDto, @CurrentUser() user: any) {
         return this.workflowsService.create(user.tenantId, user.id, dto);
     }
@@ -42,7 +42,7 @@ export class WorkflowsController {
         @Body() dto: UpdateWorkflowDto,
         @CurrentUser() user: any,
     ) {
-        return this.workflowsService.update(user.tenantId, id, dto);
+        return this.workflowsService.update(user.tenantId, id, user.id, dto);
     }
 
     @Post(':id/submit')

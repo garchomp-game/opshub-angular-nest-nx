@@ -10,6 +10,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
+        const request = ctx.getRequest();
         const response = ctx.getResponse<Response>();
 
         let status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -40,8 +41,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
             }
         }
 
+        // ログ出力: 5xx → error、4xx → warn
+        const logContext = {
+            status,
+            code,
+            message,
+            method: request?.method,
+            url: request?.url,
+            userId: request?.user?.id,
+        };
+
         if (status >= 500) {
-            this.logger.error(exception);
+            this.logger.error(logContext, 'Server error');
+            if (exception instanceof Error) {
+                this.logger.error({ stack: exception.stack }, 'Stack trace');
+            }
+        } else if (status >= 400) {
+            this.logger.warn(logContext, 'Client error');
         }
 
         response.status(status).json({

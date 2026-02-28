@@ -1,15 +1,17 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app/app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { Reflector } from '@nestjs/core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // nestjs-pino が NestJS 内部のロガーを置き換え
+  app.useLogger(app.get(Logger));
 
   // Global prefix
   app.setGlobalPrefix('api');
@@ -34,8 +36,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global interceptors (順序重要: 上から順に実行)
+  // ※ nestjs-pino が HTTP リクエストログを自動記録するため LoggingInterceptor は不要
   app.useGlobalInterceptors(
-    new LoggingInterceptor(),
     app.get(TenantInterceptor),
     app.get(AuditInterceptor),
     new ResponseInterceptor(),
@@ -43,7 +45,8 @@ async function bootstrap() {
 
   const port = process.env['PORT'] ?? 3000;
   await app.listen(port);
-  Logger.log(`🚀 API running on http://localhost:${port}/api`);
+  const logger = app.get(Logger);
+  logger.log(`🚀 API running on http://localhost:${port}/api`);
 }
 
 bootstrap();

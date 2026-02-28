@@ -22,6 +22,7 @@ export class TasksController {
     }
 
     @Post('projects/:projectId/tasks')
+    @Roles('pm', 'tenant_admin')
     create(
         @CurrentUser() user: ICurrentUser,
         @Param('projectId') projectId: string,
@@ -49,7 +50,7 @@ export class TasksController {
     }
 
     @Delete('tasks/:id')
-    @Roles('pm')
+    @Roles('pm', 'tenant_admin')
     @HttpCode(HttpStatus.NO_CONTENT)
     remove(
         @CurrentUser() user: ICurrentUser,

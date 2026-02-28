@@ -1,225 +1,253 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroPlus, heroInboxStack } from '@ng-icons/heroicons/outline';
 import {
-    WorkflowService, Workflow,
+  WorkflowService, Workflow,
 } from './workflow.service';
 import {
-    WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS,
+  WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS,
 } from '@shared/types';
+import { ListPageComponent } from '../../shared/ui/page-layouts/list-page.component';
 
 @Component({
-    selector: 'app-workflow-list',
-    standalone: true,
-    imports: [
-        CommonModule, RouterLink, FormsModule,
-        NzTableModule, NzSelectModule, NzButtonModule,
-        NzIconModule, NzTagModule, NzSpinModule,
-    ],
-    template: `
-        <div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 class="text-2xl font-bold text-gray-900 m-0">申請一覧</h1>
-                <a nz-button nzType="primary" routerLink="new" data-testid="create-workflow-btn">
-                    <span nz-icon nzType="plus" nzTheme="outline"></span>
-                    新規申請
-                </a>
+  selector: 'app-workflow-list',
+  standalone: true,
+  imports: [
+    CommonModule, RouterLink, FormsModule,
+    NgIcon, ListPageComponent,
+  ],
+  viewProviders: [provideIcons({ heroPlus, heroInboxStack })],
+  template: `
+    <app-list-page title="申請一覧">
+      <a slot="actions" class="btn btn-primary" routerLink="new" data-testid="create-workflow-btn">
+        <ng-icon name="heroPlus" class="text-lg" />
+        新規申請
+      </a>
+
+      <!-- Filters -->
+      <div slot="filters" class="card bg-base-100 shadow-sm" data-testid="workflow-filters">
+        <div class="card-body py-4">
+          <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="w-full sm:w-64">
+              <label class="label font-medium">ステータス</label>
+              <select class="select w-full"
+                  [(ngModel)]="statusFilter"
+                  (ngModelChange)="onFilterChange()"
+                  data-testid="status-filter">
+                <option [ngValue]="null">すべて</option>
+                <option value="draft">下書き</option>
+                <option value="submitted">申請中</option>
+                <option value="approved">承認済</option>
+                <option value="rejected">差戻し</option>
+                <option value="withdrawn">取下げ</option>
+              </select>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" data-testid="workflow-filters">
-                <div class="flex flex-col sm:flex-row gap-4 items-end">
-                    <div class="w-full sm:w-64">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">ステータス</label>
-                        <nz-select [(ngModel)]="statusFilter"
-                                   (ngModelChange)="onFilterChange()"
-                                   nzPlaceHolder="すべて"
-                                   nzAllowClear
-                                   class="w-full"
-                                   data-testid="status-filter">
-                            <nz-option nzValue="draft" nzLabel="下書き"></nz-option>
-                            <nz-option nzValue="submitted" nzLabel="申請中"></nz-option>
-                            <nz-option nzValue="approved" nzLabel="承認済"></nz-option>
-                            <nz-option nzValue="rejected" nzLabel="差戻し"></nz-option>
-                            <nz-option nzValue="withdrawn" nzLabel="取下げ"></nz-option>
-                        </nz-select>
-                    </div>
-
-                    <div class="w-full sm:w-64">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">種別</label>
-                        <nz-select [(ngModel)]="typeFilter"
-                                   (ngModelChange)="onFilterChange()"
-                                   nzPlaceHolder="すべて"
-                                   nzAllowClear
-                                   class="w-full"
-                                   data-testid="type-filter">
-                            <nz-option nzValue="expense" nzLabel="経費"></nz-option>
-                            <nz-option nzValue="leave" nzLabel="休暇"></nz-option>
-                            <nz-option nzValue="purchase" nzLabel="購買"></nz-option>
-                            <nz-option nzValue="other" nzLabel="その他"></nz-option>
-                        </nz-select>
-                    </div>
-                </div>
+            <div class="w-full sm:w-64">
+              <label class="label font-medium">種別</label>
+              <select class="select w-full"
+                  [(ngModel)]="typeFilter"
+                  (ngModelChange)="onFilterChange()"
+                  data-testid="type-filter">
+                <option [ngValue]="null">すべて</option>
+                <option value="expense">経費</option>
+                <option value="leave">休暇</option>
+                <option value="purchase">購買</option>
+                <option value="other">その他</option>
+              </select>
             </div>
 
-            <!-- Loading -->
-            @if (workflowService.isLoading()) {
-                <div class="flex justify-center py-20" data-testid="loading">
-                    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
-                </div>
-            } @else {
-                <!-- Table -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    @if (workflowService.workflows().length === 0) {
-                        <div class="flex flex-col items-center justify-center py-20 text-gray-400" data-testid="empty-state">
-                            <span nz-icon nzType="inbox" nzTheme="outline" class="text-5xl mb-4 opacity-50"></span>
-                            <p class="text-base text-gray-500 font-medium">申請がありません</p>
-                        </div>
-                    } @else {
-                        <nz-table #workflowTable
-                                  [nzData]="workflowService.workflows()"
-                                  [nzFrontPagination]="false"
-                                  [nzTotal]="workflowService.totalCount()"
-                                  [nzPageSize]="pageSize"
-                                  [nzPageIndex]="pageIndex"
-                                  (nzPageIndexChange)="onPageIndexChange($event)"
-                                  (nzPageSizeChange)="onPageSizeChange($event)"
-                                  [nzPageSizeOptions]="[10, 20, 50]"
-                                  nzShowSizeChanger
-                                  nzSize="middle"
-                                  [nzScroll]="{ x: '800px' }"
-                                  data-testid="workflow-table">
-                            <thead>
-                                <tr>
-                                    <th nzWidth="130px" class="whitespace-nowrap">申請番号</th>
-                                    <th nzWidth="100px">種別</th>
-                                    <th nzWidth="200px">タイトル</th>
-                                    <th nzWidth="120px">ステータス</th>
-                                    <th nzWidth="120px">申請日</th>
-                                    <th nzWidth="150px">申請者</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (row of workflowTable.data; track row.id) {
-                                    <tr (click)="onRowClick(row)"
-                                        class="cursor-pointer hover:bg-blue-50/40 transition-colors"
-                                        data-testid="workflow-row">
-                                        <td class="font-medium text-gray-900">{{ row.workflowNumber }}</td>
-                                        <td>
-                                            <nz-tag>{{ getTypeLabel(row.type) }}</nz-tag>
-                                        </td>
-                                        <td class="text-gray-900">{{ row.title }}</td>
-                                        <td>
-                                            <nz-tag [nzColor]="getTagColor(row.status)">
-                                                @if (row.status === 'approved') {
-                                                    <span nz-icon nzType="check-circle" nzTheme="outline" class="mr-1"></span>
-                                                } @else if (row.status === 'rejected') {
-                                                    <span nz-icon nzType="close-circle" nzTheme="outline" class="mr-1"></span>
-                                                } @else if (row.status === 'submitted') {
-                                                    <span nz-icon nzType="clock-circle" nzTheme="outline" class="mr-1"></span>
-                                                }
-                                                {{ getStatusLabel(row.status) }}
-                                            </nz-tag>
-                                        </td>
-                                        <td class="text-gray-500 whitespace-nowrap">{{ row.createdAt | date:'yyyy/MM/dd' }}</td>
-                                        <td>
-                                            <div class="flex items-center text-gray-700">
-                                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold mr-2 uppercase">
-                                                    {{ (row.creator?.profile?.displayName ?? 'U').charAt(0) }}
-                                                </div>
-                                                {{ row.creator?.profile?.displayName ?? '-' }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </nz-table>
-                    }
-                </div>
-            }
+            <div class="w-full sm:w-64">
+              <label class="label font-medium">表示</label>
+              <select class="select w-full"
+                  [(ngModel)]="modeFilter"
+                  (ngModelChange)="onFilterChange()"
+                  data-testid="mode-filter">
+                <option [ngValue]="null">すべての申請</option>
+                <option value="mine">自分の申請のみ</option>
+              </select>
+            </div>
+          </div>
         </div>
-    `,
-    styles: [],
+      </div>
+
+      <!-- Loading -->
+      @if (workflowService.isLoading()) {
+        <div class="flex justify-center py-20" data-testid="loading">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else {
+        @if (workflowService.workflows().length === 0) {
+          <div class="flex flex-col items-center justify-center py-20 text-base-content/40" data-testid="empty-state">
+            <ng-icon name="heroInboxStack" class="text-5xl mb-4 opacity-50" />
+            <p class="text-base text-base-content/50 font-medium">申請がありません</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto" data-testid="workflow-table">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th class="whitespace-nowrap">申請番号</th>
+                  <th>種別</th>
+                  <th>タイトル</th>
+                  <th>ステータス</th>
+                  <th>申請日</th>
+                  <th>申請者</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of paginatedWorkflows(); track row.id) {
+                  <tr (click)="onRowClick(row)"
+                    class="cursor-pointer hover:bg-base-200/50 transition-colors"
+                    data-testid="workflow-row">
+                    <td class="font-medium">{{ row.workflowNumber }}</td>
+                    <td>
+                      <span class="badge badge-outline">{{ getTypeLabel(row.type) }}</span>
+                    </td>
+                    <td>{{ row.title }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getBadgeClass(row.status)">
+                        {{ getStatusLabel(row.status) }}
+                      </span>
+                    </td>
+                    <td class="text-base-content/60 whitespace-nowrap">{{ row.createdAt | date:'yyyy/MM/dd' }}</td>
+                    <td>
+                      <div class="flex items-center text-base-content/80">
+                        <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold mr-2 uppercase">
+                          {{ (row.creator?.profile?.displayName ?? 'U').charAt(0) }}
+                        </div>
+                        {{ row.creator?.profile?.displayName ?? '-' }}
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages() > 1) {
+            <div class="flex justify-center py-4" data-testid="pagination">
+              <div class="join">
+                @for (p of pages(); track p) {
+                  <button class="join-item btn btn-sm"
+                      [class.btn-active]="p === pageIndex"
+                      (click)="onPageIndexChange(p)">
+                    {{ p }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+      }
+    </app-list-page>
+  `,
+  styles: [],
 })
 export class WorkflowListComponent implements OnInit {
-    workflowService = inject(WorkflowService);
-    private router = inject(Router);
+  workflowService = inject(WorkflowService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-    statusFilter: string | null = null;
-    typeFilter: string | null = null;
-    pageSize = 20;
-    pageIndex = 1;
+  statusFilter: string | null = null;
+  typeFilter: string | null = null;
+  modeFilter: string | null = null;
+  pageSize = 20;
+  pageIndex = 1;
 
-    private readonly typeLabels: Record<string, string> = {
-        expense: '経費', leave: '休暇', purchase: '購買', other: 'その他',
-    };
+  private readonly typeLabels: Record<string, string> = {
+    expense: '経費', leave: '休暇', purchase: '購買', other: 'その他',
+  };
 
-    ngOnInit(): void {
-        this.loadData();
+  paginatedWorkflows = computed(() => {
+    return this.workflowService.workflows();
+  });
+
+  totalPages = computed(() => {
+    return Math.ceil(this.workflowService.totalCount() / this.pageSize);
+  });
+
+  pages = computed(() => {
+    const total = this.totalPages();
+    return Array.from({ length: total }, (_, i) => i + 1);
+  });
+
+  ngOnInit(): void {
+    // URL パラメータからフィルター初期値を取得 (ダッシュボードからの遷移用)
+    const queryParams = this.route.snapshot.queryParams;
+    if (queryParams['mode']) {
+      this.modeFilter = queryParams['mode'];
     }
-
-    getStatusLabel(status: string): string {
-        return (WORKFLOW_STATUS_LABELS as any)[status] ?? status;
+    if (queryParams['status']) {
+      this.statusFilter = queryParams['status'];
     }
+    this.loadData();
+  }
 
-    getStatusColor(status: string): string {
-        return (WORKFLOW_STATUS_COLORS as any)[status] ?? '';
-    }
+  getStatusLabel(status: string): string {
+    return (WORKFLOW_STATUS_LABELS as any)[status] ?? status;
+  }
 
-    getTypeLabel(type: string): string {
-        return this.typeLabels[type] ?? type;
-    }
+  getStatusColor(status: string): string {
+    return (WORKFLOW_STATUS_COLORS as any)[status] ?? '';
+  }
 
-    getTagColor(status: string): string {
-        switch (status) {
-            case 'approved': return 'success';
-            case 'rejected': return 'error';
-            case 'submitted': return 'processing';
-            default: return 'default';
-        }
-    }
+  getTypeLabel(type: string): string {
+    return this.typeLabels[type] ?? type;
+  }
 
-    onFilterChange(): void {
-        this.pageIndex = 1;
-        this.loadData();
+  getBadgeClass(status: string): string {
+    switch (status) {
+      case 'approved': return 'badge-success';
+      case 'rejected': return 'badge-error';
+      case 'submitted': return 'badge-warning';
+      case 'draft': return 'badge-ghost';
+      case 'withdrawn': return 'badge-ghost';
+      default: return 'badge-ghost';
     }
+  }
 
-    onPageIndexChange(pageIndex: number): void {
-        this.pageIndex = pageIndex;
-        this.workflowService.loadAll({
-            status: this.statusFilter || undefined,
-            type: this.typeFilter || undefined,
-            page: pageIndex,
-            limit: this.pageSize,
-        });
-    }
+  onFilterChange(): void {
+    this.pageIndex = 1;
+    this.loadData();
+  }
 
-    onPageSizeChange(pageSize: number): void {
-        this.pageSize = pageSize;
-        this.pageIndex = 1;
-        this.workflowService.loadAll({
-            status: this.statusFilter || undefined,
-            type: this.typeFilter || undefined,
-            page: 1,
-            limit: pageSize,
-        });
-    }
+  onPageIndexChange(pageIndex: number): void {
+    this.pageIndex = pageIndex;
+    this.workflowService.loadAll({
+      status: this.statusFilter || undefined,
+      type: this.typeFilter || undefined,
+      mode: this.modeFilter || undefined,
+      page: pageIndex,
+      limit: this.pageSize,
+    });
+  }
 
-    onRowClick(workflow: Workflow): void {
-        this.router.navigate(['/workflows', workflow.id]);
-    }
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.pageIndex = 1;
+    this.workflowService.loadAll({
+      status: this.statusFilter || undefined,
+      type: this.typeFilter || undefined,
+      mode: this.modeFilter || undefined,
+      page: 1,
+      limit: pageSize,
+    });
+  }
 
-    private loadData(): void {
-        this.workflowService.loadAll({
-            status: this.statusFilter || undefined,
-            type: this.typeFilter || undefined,
-        });
-    }
+  onRowClick(workflow: Workflow): void {
+    this.router.navigate(['/workflows', workflow.id]);
+  }
+
+  private loadData(): void {
+    this.workflowService.loadAll({
+      status: this.statusFilter || undefined,
+      type: this.typeFilter || undefined,
+      mode: this.modeFilter || undefined,
+    });
+  }
 }

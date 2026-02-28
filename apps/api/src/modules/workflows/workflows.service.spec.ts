@@ -220,7 +220,7 @@ describe('WorkflowsService', () => {
                 ...mockWorkflow, status: 'draft', title: '更新済',
             });
 
-            const result = await service.update(tenantId, 'wf-001', { title: '更新済' });
+            const result = await service.update(tenantId, 'wf-001', userId, { title: '更新済' });
 
             expect(result.title).toBe('更新済');
         });
@@ -228,8 +228,17 @@ describe('WorkflowsService', () => {
         it('下書き以外は ConflictException を投げること', async () => {
             mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow); // status: submitted
 
-            await expect(service.update(tenantId, 'wf-001', { title: 'update' }))
+            await expect(service.update(tenantId, 'wf-001', userId, { title: 'update' }))
                 .rejects.toThrow(ConflictException);
+        });
+
+        it('他人の申請は ForbiddenException を投げること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue({
+                ...mockWorkflow, status: 'draft',
+            });
+
+            await expect(service.update(tenantId, 'wf-001', 'other-user', { title: 'update' }))
+                .rejects.toThrow(ForbiddenException);
         });
     });
 
