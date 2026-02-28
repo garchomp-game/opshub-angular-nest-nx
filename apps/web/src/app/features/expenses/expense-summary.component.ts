@@ -1,19 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroCalculator,
-  heroBanknotes,
-  heroDocumentText,
-  heroArrowTrendingUp,
-  heroArrowUp,
-  heroRectangleGroup,
-  heroFolder,
-  heroCalendarDays,
-  heroMagnifyingGlass,
-} from '@ng-icons/heroicons/outline';
 import { forkJoin } from 'rxjs';
+import { CardModule } from 'primeng/card';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TabsModule } from 'primeng/tabs';
 import {
   ExpenseService,
   CategorySummary,
@@ -30,225 +23,219 @@ import { EXPENSE_CATEGORY_COLORS } from '@shared/types';
   imports: [
     CommonModule,
     FormsModule,
-    NgIcon,
+    CardModule,
+    TableModule,
+    ButtonModule,
+    DatePickerModule,
+    TabsModule,
   ],
-  viewProviders: [provideIcons({
-    heroCalculator, heroBanknotes, heroDocumentText, heroArrowTrendingUp,
-    heroArrowUp, heroRectangleGroup, heroFolder, heroCalendarDays, heroMagnifyingGlass,
-  })],
   template: `
     <div class="p-6 lg:p-8 max-w-[1200px] mx-auto space-y-6 flex flex-col min-h-full">
-      <div class="card bg-base-100 shadow-sm flex flex-col flex-1">
-        <div class="card-body flex flex-col flex-1">
-          <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <ng-icon name="heroCalculator" class="text-xl" />
+      <p-card>
+        <ng-template #header>
+          <div class="flex items-center gap-3 px-6 pt-5">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                style="background-color: var(--p-primary-100); color: var(--p-primary-color);">
+              <i class="pi pi-calculator" style="font-size: 1.25rem;"></i>
             </div>
             <h2 class="text-xl font-bold m-0">経費集計</h2>
           </div>
+        </ng-template>
 
-          <!-- Filters -->
-          <div class="bg-base-200/30 rounded-lg p-4 mb-6" data-testid="filter-date">
-            <div class="flex flex-wrap items-end gap-4">
-              <div class="w-full sm:w-48">
-                <label class="label text-xs font-medium">開始日</label>
-                <input type="date"
-                  [value]="dateFromStr()"
-                  (change)="onDateFromChange($event)"
-                  class="input input-sm w-full"
-                  data-testid="filter-date-from">
-              </div>
-
-              <span class="text-base-content/40 font-medium hidden sm:block pb-2">〜</span>
-
-              <div class="w-full sm:w-48">
-                <label class="label text-xs font-medium">終了日</label>
-                <input type="date"
-                  [value]="dateToStr()"
-                  (change)="onDateToChange($event)"
-                  class="input input-sm w-full"
-                  data-testid="filter-date-to">
-              </div>
-
-              <button class="btn btn-primary btn-sm w-full sm:w-auto"
-                  (click)="loadData()"
-                  data-testid="apply-filter-btn">
-                <ng-icon name="heroMagnifyingGlass" class="text-base" />
-                適用
-              </button>
+        <!-- Filters -->
+        <div class="rounded-lg p-4 mb-6" style="background-color: var(--p-surface-50);" data-testid="filter-date">
+          <div class="flex flex-wrap items-end gap-4">
+            <div class="w-full sm:w-48">
+              <label class="block text-xs font-medium mb-1">開始日</label>
+              <p-datepicker [(ngModel)]="dateFrom" dateFormat="yy/mm/dd"
+                  [showIcon]="true" styleClass="w-full"
+                  data-testid="filter-date-from" />
             </div>
+
+            <span class="font-medium hidden sm:block pb-2" style="opacity: 0.4;">〜</span>
+
+            <div class="w-full sm:w-48">
+              <label class="block text-xs font-medium mb-1">終了日</label>
+              <p-datepicker [(ngModel)]="dateTo" dateFormat="yy/mm/dd"
+                  [showIcon]="true" styleClass="w-full"
+                  data-testid="filter-date-to" />
+            </div>
+
+            <p-button icon="pi pi-search" label="適用"
+                size="small" (onClick)="loadData()"
+                data-testid="apply-filter-btn" />
           </div>
+        </div>
 
-          <!-- Stats Cards -->
-          @if (stats()) {
-            <div class="stats stats-vertical sm:stats-horizontal shadow w-full mb-6" data-testid="stats-cards">
-              <div class="stat">
-                <div class="stat-figure text-primary">
-                  <ng-icon name="heroBanknotes" class="text-3xl" />
-                </div>
-                <div class="stat-title">合計金額</div>
-                <div class="stat-value text-lg">¥{{ stats()!.totalAmount | number }}</div>
+        <!-- Stats Cards -->
+        @if (stats()) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-testid="stats-cards">
+            <p-card styleClass="text-center">
+              <div class="flex flex-col items-center gap-2">
+                <i class="pi pi-wallet" style="font-size: 1.5rem; color: var(--p-primary-color);"></i>
+                <span class="text-sm" style="opacity: 0.6;">合計金額</span>
+                <span class="text-lg font-bold">¥{{ stats()!.totalAmount | number }}</span>
               </div>
+            </p-card>
 
-              <div class="stat">
-                <div class="stat-figure text-secondary">
-                  <ng-icon name="heroDocumentText" class="text-3xl" />
-                </div>
-                <div class="stat-title">件数</div>
-                <div class="stat-value text-lg">{{ stats()!.totalCount }}<span class="text-sm font-normal ml-1">件</span></div>
+            <p-card styleClass="text-center">
+              <div class="flex flex-col items-center gap-2">
+                <i class="pi pi-file" style="font-size: 1.5rem; color: var(--p-teal-500);"></i>
+                <span class="text-sm" style="opacity: 0.6;">件数</span>
+                <span class="text-lg font-bold">{{ stats()!.totalCount }}<span class="text-sm font-normal ml-1">件</span></span>
               </div>
+            </p-card>
 
-              <div class="stat">
-                <div class="stat-figure text-accent">
-                  <ng-icon name="heroArrowTrendingUp" class="text-3xl" />
-                </div>
-                <div class="stat-title">平均金額</div>
-                <div class="stat-value text-lg">¥{{ stats()!.avgAmount | number }}</div>
+            <p-card styleClass="text-center">
+              <div class="flex flex-col items-center gap-2">
+                <i class="pi pi-chart-line" style="font-size: 1.5rem; color: var(--p-purple-500);"></i>
+                <span class="text-sm" style="opacity: 0.6;">平均金額</span>
+                <span class="text-lg font-bold">¥{{ stats()!.avgAmount | number }}</span>
               </div>
+            </p-card>
 
-              <div class="stat">
-                <div class="stat-figure text-warning">
-                  <ng-icon name="heroArrowUp" class="text-3xl" />
-                </div>
-                <div class="stat-title">最高金額</div>
-                <div class="stat-value text-lg">¥{{ stats()!.maxAmount | number }}</div>
+            <p-card styleClass="text-center">
+              <div class="flex flex-col items-center gap-2">
+                <i class="pi pi-arrow-up" style="font-size: 1.5rem; color: var(--p-orange-500);"></i>
+                <span class="text-sm" style="opacity: 0.6;">最高金額</span>
+                <span class="text-lg font-bold">¥{{ stats()!.maxAmount | number }}</span>
               </div>
-            </div>
-          }
+            </p-card>
+          </div>
+        }
 
-          <!-- Loading -->
-          @if (isLoading()) {
-            <div class="flex justify-center items-center flex-1 py-16" data-testid="loading">
-              <span class="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-          } @else {
-            <!-- Tabs -->
-            <div role="tablist" class="tabs tabs-border mb-4" data-testid="summary-tabs">
-              <input type="radio" name="summary-tab" role="tab" class="tab"
-                  aria-label="カテゴリ別" [checked]="activeTab() === 0"
-                  (change)="activeTab.set(0)" />
-              <input type="radio" name="summary-tab" role="tab" class="tab"
-                  aria-label="プロジェクト別" [checked]="activeTab() === 1"
-                  (change)="activeTab.set(1)" />
-              <input type="radio" name="summary-tab" role="tab" class="tab"
-                  aria-label="月別推移" [checked]="activeTab() === 2"
-                  (change)="activeTab.set(2)" />
-            </div>
-
-            <!-- カテゴリ別 -->
-            @if (activeTab() === 0) {
-              <div class="overflow-x-auto rounded-xl border border-base-200">
-                <table class="table table-zebra" data-testid="category-table">
-                  <thead>
+        <!-- Loading -->
+        @if (isLoading()) {
+          <div class="flex justify-center items-center flex-1 py-16" data-testid="loading">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--p-primary-color);"></i>
+          </div>
+        } @else {
+          <!-- Tabs -->
+          <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)" data-testid="summary-tabs">
+            <p-tablist>
+              <p-tab [value]="0">カテゴリ別</p-tab>
+              <p-tab [value]="1">プロジェクト別</p-tab>
+              <p-tab [value]="2">月別推移</p-tab>
+            </p-tablist>
+            <p-tabpanels>
+              <!-- カテゴリ別 -->
+              <p-tabpanel [value]="0">
+                <p-table [value]="categoryData()" [tableStyle]="{ 'min-width': '30rem' }"
+                    data-testid="category-table">
+                  <ng-template #header>
                     <tr>
                       <th>カテゴリ</th>
-                      <th class="text-right w-[130px]">件数</th>
-                      <th class="text-right w-[160px]">合計金額</th>
-                      <th class="text-right w-[130px]">割合</th>
+                      <th class="text-right" style="width: 130px;">件数</th>
+                      <th class="text-right" style="width: 160px;">合計金額</th>
+                      <th class="text-right" style="width: 130px;">割合</th>
                     </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of categoryData(); track row.category) {
-                      <tr>
-                        <td>
-                          <div class="flex items-center gap-3">
-                            <span class="inline-block w-3 h-3 rounded-full" [style.background-color]="getCategoryColor(row.category)"></span>
-                            <span class="font-semibold">{{ row.category }}</span>
-                          </div>
-                        </td>
-                        <td class="text-right pr-4">
-                          <span class="font-medium font-mono">{{ row.count }}</span><span class="text-base-content/40 text-sm ml-1">件</span>
-                        </td>
-                        <td class="text-right">
-                          <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
-                        </td>
-                        <td class="text-right pr-6">
-                          <span class="badge badge-primary badge-outline badge-sm font-bold">{{ row.percentage }}%</span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-                @if (categoryData().length === 0) {
-                  <div class="flex flex-col items-center justify-center py-16 text-center">
-                    <p class="text-base-content/60 mb-0">データがありません</p>
-                  </div>
-                }
-              </div>
-            }
+                  </ng-template>
+                  <ng-template #body let-row>
+                    <tr>
+                      <td>
+                        <div class="flex items-center gap-3">
+                          <span class="inline-block w-3 h-3 rounded-full" [style.background-color]="getCategoryColor(row.category)"></span>
+                          <span class="font-semibold">{{ row.category }}</span>
+                        </div>
+                      </td>
+                      <td class="text-right pr-4">
+                        <span class="font-medium font-mono">{{ row.count }}</span><span class="text-sm ml-1" style="opacity: 0.4;">件</span>
+                      </td>
+                      <td class="text-right">
+                        <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
+                      </td>
+                      <td class="text-right pr-6">
+                        <span class="font-bold text-sm" style="color: var(--p-primary-color);">{{ row.percentage }}%</span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template #emptymessage>
+                    <tr>
+                      <td colspan="4">
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                          <p style="opacity: 0.6;" class="m-0">データがありません</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </p-tabpanel>
 
-            <!-- PJ別 -->
-            @if (activeTab() === 1) {
-              <div class="overflow-x-auto rounded-xl border border-base-200">
-                <table class="table table-zebra" data-testid="project-table">
-                  <thead>
+              <!-- PJ別 -->
+              <p-tabpanel [value]="1">
+                <p-table [value]="projectData()" [tableStyle]="{ 'min-width': '30rem' }"
+                    data-testid="project-table">
+                  <ng-template #header>
                     <tr>
                       <th>プロジェクト</th>
-                      <th class="text-right w-[130px]">件数</th>
-                      <th class="text-right w-[160px]">合計金額</th>
+                      <th class="text-right" style="width: 130px;">件数</th>
+                      <th class="text-right" style="width: 160px;">合計金額</th>
                     </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of projectData(); track row.projectId) {
-                      <tr>
-                        <td>
-                          <span class="font-medium">{{ row.projectName }}</span>
-                        </td>
-                        <td class="text-right pr-4">
-                          <span class="font-medium font-mono">{{ row.count }}</span><span class="text-base-content/40 text-sm ml-1">件</span>
-                        </td>
-                        <td class="text-right pr-6">
-                          <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-                @if (projectData().length === 0) {
-                  <div class="flex flex-col items-center justify-center py-16 text-center">
-                    <p class="text-base-content/60 mb-0">データがありません</p>
-                  </div>
-                }
-              </div>
-            }
+                  </ng-template>
+                  <ng-template #body let-row>
+                    <tr>
+                      <td>
+                        <span class="font-medium">{{ row.projectName }}</span>
+                      </td>
+                      <td class="text-right pr-4">
+                        <span class="font-medium font-mono">{{ row.count }}</span><span class="text-sm ml-1" style="opacity: 0.4;">件</span>
+                      </td>
+                      <td class="text-right pr-6">
+                        <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template #emptymessage>
+                    <tr>
+                      <td colspan="3">
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                          <p style="opacity: 0.6;" class="m-0">データがありません</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </p-tabpanel>
 
-            <!-- 月別推移 -->
-            @if (activeTab() === 2) {
-              <div class="overflow-x-auto rounded-xl border border-base-200">
-                <table class="table table-zebra" data-testid="monthly-table">
-                  <thead>
+              <!-- 月別推移 -->
+              <p-tabpanel [value]="2">
+                <p-table [value]="monthlyData()" [tableStyle]="{ 'min-width': '30rem' }"
+                    data-testid="monthly-table">
+                  <ng-template #header>
                     <tr>
                       <th>月</th>
-                      <th class="text-right w-[130px]">件数</th>
-                      <th class="text-right w-[160px]">合計金額</th>
+                      <th class="text-right" style="width: 130px;">件数</th>
+                      <th class="text-right" style="width: 160px;">合計金額</th>
                     </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of monthlyData(); track row.month) {
-                      <tr>
-                        <td>
-                          <span class="font-medium">{{ row.month }}</span>
-                        </td>
-                        <td class="text-right pr-4">
-                          <span class="font-medium font-mono">{{ row.count }}</span><span class="text-base-content/40 text-sm ml-1">件</span>
-                        </td>
-                        <td class="text-right pr-6">
-                          <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-                @if (monthlyData().length === 0) {
-                  <div class="flex flex-col items-center justify-center py-16 text-center">
-                    <p class="text-base-content/60 mb-0">データがありません</p>
-                  </div>
-                }
-              </div>
-            }
-          }
-        </div>
-      </div>
+                  </ng-template>
+                  <ng-template #body let-row>
+                    <tr>
+                      <td>
+                        <span class="font-medium">{{ row.month }}</span>
+                      </td>
+                      <td class="text-right pr-4">
+                        <span class="font-medium font-mono">{{ row.count }}</span><span class="text-sm ml-1" style="opacity: 0.4;">件</span>
+                      </td>
+                      <td class="text-right pr-6">
+                        <span class="font-bold text-base">¥{{ row.totalAmount | number }}</span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template #emptymessage>
+                    <tr>
+                      <td colspan="3">
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                          <p style="opacity: 0.6;" class="m-0">データがありません</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </p-tabpanel>
+            </p-tabpanels>
+          </p-tabs>
+        }
+      </p-card>
     </div>
   `,
   styles: [],
@@ -268,9 +255,6 @@ export class ExpenseSummaryComponent implements OnInit {
   isLoading = signal(false);
   activeTab = signal(0);
 
-  dateFromStr = signal(this.formatDate(this.dateFrom));
-  dateToStr = signal(this.formatDate(this.dateTo));
-
   categoryColumns = ['category', 'count', 'totalAmount', 'percentage'];
   projectColumns = ['projectName', 'count', 'totalAmount'];
   monthlyColumns = ['month', 'count', 'totalAmount'];
@@ -279,20 +263,8 @@ export class ExpenseSummaryComponent implements OnInit {
     this.loadData();
   }
 
-  onDateFromChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (value) {
-      this.dateFrom = new Date(value + 'T00:00:00');
-      this.dateFromStr.set(value);
-    }
-  }
-
-  onDateToChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (value) {
-      this.dateTo = new Date(value + 'T00:00:00');
-      this.dateToStr.set(value);
-    }
+  onTabChange(value: string | number | undefined): void {
+    this.activeTab.set(Number(value ?? 0));
   }
 
   loadData(): void {

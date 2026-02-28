@@ -1,38 +1,39 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft, heroPrinter } from '@ng-icons/heroicons/outline';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { InvoicesService } from './invoices.service';
 
 @Component({
   selector: 'app-invoice-print-view',
   standalone: true,
   imports: [
-    CommonModule, NgIcon,
+    CommonModule, ButtonModule, ProgressSpinnerModule,
   ],
-  viewProviders: [provideIcons({ heroArrowLeft, heroPrinter })],
   template: `
     <div class="min-h-screen bg-base-200/50 flex flex-col pt-6 pb-12 print:bg-white print:p-0 print:m-0">
       @if (invoicesService.isLoading()) {
         <div class="flex justify-center items-center py-24" data-testid="loading">
-          <span class="loading loading-spinner loading-lg text-primary"></span>
+          <p-progressspinner strokeWidth="4" />
         </div>
       } @else if (invoice(); as inv) {
         <!-- Print Actions (Hidden when printing) -->
         <div class="max-w-[794px] mx-auto w-full mb-6 print:hidden px-4 sm:px-0 flex justify-between items-center" data-testid="print-actions">
-          <button class="btn btn-ghost btn-sm gap-1"
-              (click)="onBack()"
-              data-testid="back-btn">
-            <ng-icon name="heroArrowLeft" class="text-lg" />
-            戻る
-          </button>
-          <button class="btn btn-primary btn-sm gap-1"
-              (click)="onPrint()"
-              data-testid="print-trigger-btn">
-            <ng-icon name="heroPrinter" class="text-lg" />
-            印刷する
-          </button>
+          <p-button
+            icon="pi pi-arrow-left"
+            label="戻る"
+            severity="secondary"
+            [text]="true"
+            size="small"
+            (onClick)="onBack()"
+            data-testid="back-btn" />
+          <p-button
+            icon="pi pi-print"
+            label="印刷する"
+            size="small"
+            (onClick)="onPrint()"
+            data-testid="print-trigger-btn" />
         </div>
 
         <!-- A4 Print Container -->

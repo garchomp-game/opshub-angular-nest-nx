@@ -7,14 +7,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroClock,
-  heroPlus,
-  heroChevronLeft,
-  heroChevronRight,
-  heroXMark,
-} from '@ng-icons/heroicons/outline';
+import { TableModule } from 'primeng/table';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { CardModule } from 'primeng/card';
 import {
   TimesheetService,
   TimesheetEntry,
@@ -45,160 +42,149 @@ interface ProjectOption {
   imports: [
     CommonModule,
     FormsModule,
-    NgIcon,
+    TableModule,
+    InputNumberModule,
+    ButtonModule,
+    SelectModule,
+    CardModule,
   ],
-  viewProviders: [provideIcons({ heroClock, heroPlus, heroChevronLeft, heroChevronRight, heroXMark })],
   template: `
     <div class="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
-      <div class="card bg-base-100 shadow-sm" data-testid="timesheet-grid">
-        <div class="card-body">
-          <div class="flex justify-between items-center mb-4">
-            <div>
-              <h2 class="card-title text-lg flex items-center gap-2">
-                <ng-icon name="heroClock" class="text-primary text-xl" />
-                工数入力
-              </h2>
-              <p class="text-sm text-base-content/60 mt-1">{{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}</p>
+      <p-card data-testid="timesheet-grid">
+        <ng-template #header>
+          <div class="px-6 pt-5 pb-0">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h2 class="text-lg font-bold flex items-center gap-2 m-0">
+                  <i class="pi pi-clock" style="color: var(--p-primary-color);"></i>
+                  工数入力
+                </h2>
+                <p class="text-sm mt-1" style="opacity: 0.6;">{{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}</p>
+              </div>
+            </div>
+
+            <!-- Week navigation -->
+            <div class="flex items-center gap-2 mb-4 rounded-lg p-2 max-w-fit mx-auto" style="background-color: var(--p-surface-50);">
+              <p-button icon="pi pi-chevron-left" [rounded]="true" [text]="true"
+                  (onClick)="prevWeek()" title="前の週"
+                  data-testid="timesheet-prev-week" />
+
+              <span class="text-base font-bold px-6 min-w-[200px] text-center tracking-wide">
+                {{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}
+              </span>
+
+              <p-button icon="pi pi-chevron-right" [rounded]="true" [text]="true"
+                  (onClick)="nextWeek()" title="次の週"
+                  data-testid="timesheet-next-week" />
+
+              <span class="mx-1" style="border-left: 1px solid var(--p-surface-border); height: 1.5rem;"></span>
+
+              <p-button label="今週" [text]="true" size="small"
+                  (onClick)="goToCurrentWeek()"
+                  data-testid="timesheet-current-week" />
             </div>
           </div>
+        </ng-template>
 
-          <!-- Week navigation -->
-          <div class="flex items-center gap-2 mb-6 bg-base-200/50 rounded-lg p-2 max-w-fit mx-auto">
-            <button class="btn btn-ghost btn-sm btn-circle"
-                (click)="prevWeek()"
-                title="前の週"
-                data-testid="timesheet-prev-week">
-              <ng-icon name="heroChevronLeft" class="text-lg" />
-            </button>
-
-            <span class="text-base font-bold px-6 min-w-[200px] text-center tracking-wide">
-              {{ weekStartFormatted() }} 〜 {{ weekEndFormatted() }}
-            </span>
-
-            <button class="btn btn-ghost btn-sm btn-circle"
-                (click)="nextWeek()"
-                title="次の週"
-                data-testid="timesheet-next-week">
-              <ng-icon name="heroChevronRight" class="text-lg" />
-            </button>
-
-            <div class="divider divider-horizontal mx-1"></div>
-
-            <button class="btn btn-sm btn-ghost" (click)="goToCurrentWeek()"
-                data-testid="timesheet-current-week">
-              今週
-            </button>
+        @if (timesheetService.isLoading()) {
+          <div class="flex justify-center py-16" data-testid="loading">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--p-primary-color);"></i>
           </div>
-
-          @if (timesheetService.isLoading()) {
-            <div class="flex justify-center py-16" data-testid="loading">
-              <span class="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-          } @else {
-            <div class="overflow-x-auto rounded-xl border border-base-200">
-              <table class="table table-zebra" data-testid="timesheet-table">
-                <thead>
-                  <tr>
-                    <th class="min-w-[200px]">プロジェクト</th>
-                    @for (day of weekDays(); track day.date) {
-                      <th class="text-center min-w-[70px]">
-                        <div class="flex flex-col items-center justify-center space-y-1">
-                          <span class="text-xs font-bold text-base-content/40">{{ day.label }}</span>
-                          <span class="text-[13px] font-medium">{{ day.dateShort }}</span>
-                        </div>
-                      </th>
-                    }
-                    <th class="text-center min-w-[80px] bg-primary/10 text-primary">合計</th>
-                    <th class="w-12"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of rows(); track row.projectId; let i = $index) {
-                    <tr data-testid="timesheet-row">
-                      <td>
-                        @if (row.isNew) {
-                          <select class="select select-sm w-full"
-                            [(ngModel)]="row.projectId"
-                            (ngModelChange)="onProjectChange(row, $event)">
-                            <option value="" disabled>プロジェクト選択</option>
-                            @for (p of projects(); track p.id) {
-                              <option [value]="p.id">{{ p.name }}</option>
-                            }
-                          </select>
-                        } @else {
-                          <span class="font-medium block truncate" [title]="row.projectName">{{ row.projectName }}</span>
-                        }
-                      </td>
-                      @for (day of weekDays(); track day.date) {
-                        <td class="text-center !p-2">
-                          <input type="number"
-                            [value]="row.days[day.date] || ''"
-                            (change)="onHoursChange(row, day.date, $event)"
-                            min="0" max="24" step="0.25"
-                            class="input input-sm w-14 text-center"
-                            [attr.data-testid]="'timesheet-hours-' + day.date">
-                        </td>
-                      }
-                      <td class="text-center bg-base-200/30">
-                        <span class="font-bold text-lg">{{ rowTotal(row) || '-' }}</span>
-                      </td>
-                      <td class="text-center">
-                        <button class="btn btn-ghost btn-xs btn-circle text-error opacity-30 hover:opacity-100 transition-opacity"
-                            (click)="removeRow(i)"
-                            title="行を削除">
-                          <ng-icon name="heroXMark" class="text-base" />
-                        </button>
-                      </td>
-                    </tr>
+        } @else {
+          <p-table [value]="rows()" [tableStyle]="{ 'min-width': '60rem' }"
+              data-testid="timesheet-table">
+            <ng-template #header>
+              <tr>
+                <th style="min-width: 200px;">プロジェクト</th>
+                @for (day of weekDays(); track day.date) {
+                  <th class="text-center" style="min-width: 70px;">
+                    <div class="flex flex-col items-center justify-center gap-1">
+                      <span class="text-xs font-bold" style="opacity: 0.4;">{{ day.label }}</span>
+                      <span class="text-[13px] font-medium">{{ day.dateShort }}</span>
+                    </div>
+                  </th>
+                }
+                <th class="text-center" style="min-width: 80px; background-color: var(--p-primary-50); color: var(--p-primary-color);">合計</th>
+                <th style="width: 48px;"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-row let-i="rowIndex">
+              <tr data-testid="timesheet-row">
+                <td>
+                  @if (row.isNew) {
+                    <p-select [options]="projects()" optionLabel="name" optionValue="id"
+                        [(ngModel)]="row.projectId"
+                        (ngModelChange)="onProjectChange(row, $event)"
+                        placeholder="プロジェクト選択" styleClass="w-full" />
+                  } @else {
+                    <span class="font-medium block truncate" [title]="row.projectName">{{ row.projectName }}</span>
                   }
-                  <!-- Footer row -->
-                  @if (rows().length > 0) {
-                    <tr class="bg-base-200/50 border-t-2 border-base-300">
-                      <td>
-                        <span class="font-bold text-base-content/70 uppercase tracking-wider text-xs">合計</span>
-                      </td>
-                      @for (day of weekDays(); track day.date) {
-                        <td class="text-center">
-                          <span class="font-bold text-base">{{ dayTotal(day.date) || '-' }}</span>
-                        </td>
-                      }
-                      <td class="text-center bg-primary/10">
-                        <span class="font-black text-xl text-primary">{{ grandTotal() || '0' }}</span>
-                      </td>
-                      <td></td>
-                    </tr>
+                </td>
+                @for (day of weekDays(); track day.date) {
+                  <td class="text-center" style="padding: 0.5rem;">
+                    <p-inputnumber
+                        [ngModel]="row.days[day.date] || null"
+                        (ngModelChange)="onHoursInputChange(row, day.date, $event)"
+                        [min]="0" [max]="24" [step]="0.25"
+                        [maxFractionDigits]="2"
+                        inputStyleClass="w-14 text-center"
+                        [attr.data-testid]="'timesheet-hours-' + day.date" />
+                  </td>
+                }
+                <td class="text-center" style="background-color: var(--p-surface-50);">
+                  <span class="font-bold text-lg">{{ rowTotal(row) || '-' }}</span>
+                </td>
+                <td class="text-center">
+                  <p-button icon="pi pi-times" [rounded]="true" [text]="true"
+                      severity="danger" size="small"
+                      (onClick)="removeRow(i)" title="行を削除"
+                      [style]="{ opacity: '0.3' }" />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #footer>
+              @if (rows().length > 0) {
+                <tr style="background-color: var(--p-surface-50);">
+                  <td>
+                    <span class="font-bold uppercase tracking-wider text-xs" style="opacity: 0.7;">合計</span>
+                  </td>
+                  @for (day of weekDays(); track day.date) {
+                    <td class="text-center">
+                      <span class="font-bold text-base">{{ dayTotal(day.date) || '-' }}</span>
+                    </td>
                   }
-                </tbody>
-              </table>
-
-              @if (rows().length === 0) {
-                <div class="flex flex-col items-center justify-center py-12 text-center bg-base-200/20">
-                  <p class="text-base-content/60 font-medium mb-4 text-sm">入力項目がありません</p>
-                  <button class="btn btn-sm btn-ghost" (click)="addRow()">
-                    <ng-icon name="heroPlus" class="text-base" />
-                    最初の行を追加
-                  </button>
-                </div>
+                  <td class="text-center" style="background-color: var(--p-primary-50);">
+                    <span class="font-black text-xl" style="color: var(--p-primary-color);">{{ grandTotal() || '0' }}</span>
+                  </td>
+                  <td></td>
+                </tr>
               }
-            </div>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td [attr.colspan]="weekDays().length + 3">
+                  <div class="flex flex-col items-center justify-center py-12 text-center" style="background-color: var(--p-surface-50);">
+                    <p class="font-medium mb-4 text-sm" style="opacity: 0.6;">入力項目がありません</p>
+                    <p-button icon="pi pi-plus" label="最初の行を追加"
+                        [text]="true" size="small" (onClick)="addRow()" />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
 
-            <!-- Actions -->
-            <div class="flex justify-between items-center mt-6">
-              <button class="btn btn-ghost btn-sm" (click)="addRow()"
-                  data-testid="timesheet-add-row-btn">
-                <ng-icon name="heroPlus" class="text-base" />
-                行を追加
-              </button>
+          <!-- Actions -->
+          <div class="flex justify-between items-center mt-6">
+            <p-button icon="pi pi-plus" label="行を追加" [text]="true"
+                size="small" (onClick)="addRow()"
+                data-testid="timesheet-add-row-btn" />
 
-              <button class="btn btn-primary" (click)="save()"
-                  [disabled]="!isDirty()"
-                  data-testid="timesheet-save-btn">
-                保存
-              </button>
-            </div>
-          }
-        </div>
-      </div>
+            <p-button label="保存" (onClick)="save()"
+                [disabled]="!isDirty()"
+                data-testid="timesheet-save-btn" />
+          </div>
+        }
+      </p-card>
     </div>
   `,
   styles: [],
@@ -323,6 +309,15 @@ export class TimesheetWeeklyComponent implements OnInit {
     if (!isNaN(value) && value >= 0 && value <= 24) {
       row.days[date] = Math.round(value * 4) / 4; // Round to 0.25
     } else if (input.value === '') {
+      delete row.days[date];
+    }
+    this._isDirty.set(true);
+  }
+
+  onHoursInputChange(row: GridRow, date: string, value: number | null): void {
+    if (value !== null && value >= 0 && value <= 24) {
+      row.days[date] = Math.round(value * 4) / 4;
+    } else {
       delete row.days[date];
     }
     this._isDirty.set(true);

@@ -1,11 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroUserPlus, heroInformationCircle, heroPaperAirplane } from '@ng-icons/heroicons/outline';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { AdminUsersService } from '../services/users.service';
 import { ROLE_LABELS, Role } from '@shared/types';
-import { ModalRef, FormFieldComponent } from '../../../shared/ui';
 
 @Component({
   selector: 'app-invite-modal',
@@ -13,69 +14,76 @@ import { ModalRef, FormFieldComponent } from '../../../shared/ui';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    NgIcon,
-    FormFieldComponent,
+    DialogModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
   ],
-  viewProviders: [provideIcons({ heroUserPlus, heroInformationCircle, heroPaperAirplane })],
   template: `
-  <div class="modal-box">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-        <ng-icon name="heroUserPlus" class="text-xl" />
-      </div>
-      <span class="text-xl font-bold">ユーザー招待</span>
-    </div>
+  <p-dialog header="ユーザー招待" [(visible)]="visible" [modal]="true"
+      [style]="{ width: '30rem' }" (onHide)="onCancel()"
+      data-testid="invite-dialog">
 
-    <div class="alert mb-5" data-testid="invite-info">
-      <ng-icon name="heroInformationCircle" class="text-lg text-info" />
+    <div class="flex items-center gap-3 rounded-lg p-3 mb-5"
+        style="background: var(--p-blue-50); color: var(--p-blue-700);"
+        data-testid="invite-info">
+      <i class="pi pi-info-circle text-lg"></i>
       <span class="text-sm">指定したメールアドレス宛に招待メールを送信します。ユーザーは受け取ったリンクからパスワードを設定してログインできます。</span>
     </div>
 
-    <form [formGroup]="form" data-testid="invite-form" class="space-y-4">
-      <app-form-field label="メールアドレス" [required]="true"
-              [errorMessage]="form.get('email')?.touched && form.get('email')?.hasError('required') ? 'メールアドレスは必須です' : form.get('email')?.touched && form.get('email')?.hasError('email') ? '有効なメールアドレスを入力してください' : ''">
-        <input class="input w-full" type="email"
+    <form [formGroup]="form" data-testid="invite-form" class="flex flex-col gap-5">
+      <div class="flex flex-col gap-2">
+        <label for="invite-email" class="font-medium text-sm">メールアドレス <span class="text-red-500">*</span></label>
+        <input pInputText id="invite-email" type="email"
             formControlName="email" placeholder="user@example.com"
+            class="w-full"
             data-testid="invite-email-input">
-      </app-form-field>
+        @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+          <small class="text-red-500">メールアドレスは必須です</small>
+        } @else if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+          <small class="text-red-500">有効なメールアドレスを入力してください</small>
+        }
+      </div>
 
-      <app-form-field label="ロール" [required]="true">
-        <select class="select w-full"
-            formControlName="role"
-            data-testid="invite-role-select">
-          @for (role of roleOptions; track role.value) {
-            <option [value]="role.value">{{ role.label }}</option>
-          }
-        </select>
-      </app-form-field>
+      <div class="flex flex-col gap-2">
+        <label for="invite-role" class="font-medium text-sm">ロール <span class="text-red-500">*</span></label>
+        <p-select formControlName="role" [options]="roleOptions"
+            optionLabel="label" optionValue="value"
+            placeholder="ロールを選択" inputId="invite-role"
+            styleClass="w-full"
+            data-testid="invite-role-select" />
+      </div>
 
-      <app-form-field label="表示名（任意）" hint="後からユーザー自身で変更することも可能です。">
-        <input class="input w-full"
+      <div class="flex flex-col gap-2">
+        <label for="invite-name" class="font-medium text-sm">表示名（任意）</label>
+        <input pInputText id="invite-name"
             formControlName="displayName" placeholder="山田 太郎"
+            class="w-full"
             data-testid="invite-name-input">
-      </app-form-field>
+        <small style="color: var(--p-text-muted-color)">後からユーザー自身で変更することも可能です。</small>
+      </div>
     </form>
 
-    <div class="modal-action">
-      <button class="btn" (click)="onCancel()" data-testid="invite-cancel-btn">
-        キャンセル
-      </button>
-      <button class="btn btn-primary gap-2"
-          [disabled]="form.invalid"
-          (click)="onSubmit()"
-          data-testid="invite-submit-btn">
-        <ng-icon name="heroPaperAirplane" class="text-lg" />
-        招待を送信
-      </button>
-    </div>
-  </div>
+    <ng-template #footer>
+      <div class="flex justify-end gap-2">
+        <p-button label="キャンセル" severity="secondary" [text]="true"
+            (onClick)="onCancel()" data-testid="invite-cancel-btn" />
+        <p-button label="招待を送信" icon="pi pi-send"
+            [disabled]="form.invalid"
+            (onClick)="onSubmit()"
+            data-testid="invite-submit-btn" />
+      </div>
+    </ng-template>
+  </p-dialog>
  `,
   styles: [],
 })
 export class InviteModalComponent {
   private fb = inject(FormBuilder);
-  private modalRef = inject(ModalRef);
   private usersService = inject(AdminUsersService);
+
+  @Input() visible = false;
+  @Output() visibleChange = new EventEmitter<boolean>();
 
   form: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -88,11 +96,17 @@ export class InviteModalComponent {
   onSubmit(): void {
     if (this.form.valid) {
       this.usersService.inviteUser(this.form.value);
-      this.modalRef.close(true);
+      this.close();
     }
   }
 
   onCancel(): void {
-    this.modalRef.close();
+    this.close();
+  }
+
+  private close(): void {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.form.reset({ email: '', role: Role.MEMBER, displayName: '' });
   }
 }

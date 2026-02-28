@@ -3,14 +3,16 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  heroArrowLeft, heroPlus, heroTrash,
-  heroInformationCircle, heroListBullet,
-} from '@ng-icons/heroicons/outline';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { InvoicesService } from './invoices.service';
 import { DEFAULT_TAX_RATE } from '@shared/types';
-import { FormPageComponent, FormFieldComponent } from '../../shared/ui';
 
 interface ProjectItem {
   id: string;
@@ -22,83 +24,124 @@ interface ProjectItem {
   standalone: true,
   imports: [
     CommonModule, RouterLink, ReactiveFormsModule,
-    NgIcon, FormPageComponent, FormFieldComponent,
+    TableModule, ButtonModule, SelectModule, DatePickerModule,
+    InputNumberModule, InputTextModule, TextareaModule,
+    ProgressSpinnerModule,
   ],
-  viewProviders: [provideIcons({
-    heroArrowLeft, heroPlus, heroTrash,
-    heroInformationCircle, heroListBullet,
-  })],
   template: `
-    <app-form-page [title]="isEdit ? '請求書を編集' : '新規請求書の作成'"
-            subtitle="取引先への請求情報を入力してください">
+    <div class="p-6">
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold m-0" style="color: var(--p-text-color);">
+          {{ isEdit ? '請求書を編集' : '新規請求書の作成' }}
+        </h1>
+        <p class="mt-1 text-sm m-0" style="color: var(--p-text-muted-color);">取引先への請求情報を入力してください</p>
+      </div>
 
       @if (isLoading) {
         <div class="flex justify-center items-center py-24" data-testid="loading">
-          <span class="loading loading-spinner loading-lg text-primary"></span>
+          <p-progressspinner strokeWidth="4" />
         </div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8" data-testid="invoice-form">
           <!-- 基本情報 -->
           <div>
             <div class="flex items-center gap-2 mb-5">
-              <ng-icon name="heroInformationCircle" class="text-base-content/40" />
-              <h2 class="text-base font-bold text-base-content m-0">基本情報</h2>
+              <i class="pi pi-info-circle" style="color: var(--p-text-muted-color);"></i>
+              <h2 class="text-base font-bold m-0" style="color: var(--p-text-color);">基本情報</h2>
             </div>
 
             <div class="space-y-4">
-              <app-form-field label="取引先名" [required]="true"
-                      [errorMessage]="form.get('clientName')?.touched && form.get('clientName')?.invalid ? '取引先名は必須です' : ''">
-                <input class="input w-full"
+              <!-- 取引先名 -->
+              <div class="flex flex-col gap-1">
+                <label for="clientName" class="font-medium text-sm" style="color: var(--p-text-color);">取引先名 <span class="text-red-500">*</span></label>
+                <input pInputText
                     formControlName="clientName"
+                    id="clientName"
                     placeholder="例: 株式会社◯◯"
+                    fluid
                     data-testid="client-name-input" />
-              </app-form-field>
+                @if (form.get('clientName')?.touched && form.get('clientName')?.invalid) {
+                  <small class="text-red-500">取引先名は必須です</small>
+                }
+              </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <app-form-field label="発行日" [required]="true"
-                        [errorMessage]="form.get('issuedDate')?.touched && form.get('issuedDate')?.invalid ? '発行日は必須です' : ''">
-                  <input type="date" class="input w-full"
+                <!-- 発行日 -->
+                <div class="flex flex-col gap-1">
+                  <label for="issuedDate" class="font-medium text-sm" style="color: var(--p-text-color);">発行日 <span class="text-red-500">*</span></label>
+                  <p-datepicker
                       formControlName="issuedDate"
+                      inputId="issuedDate"
+                      dateFormat="yy/mm/dd"
+                      [showIcon]="true"
+                      styleClass="w-full"
                       data-testid="issued-date-input" />
-                </app-form-field>
+                  @if (form.get('issuedDate')?.touched && form.get('issuedDate')?.invalid) {
+                    <small class="text-red-500">発行日は必須です</small>
+                  }
+                </div>
 
-                <app-form-field label="支払期限" [required]="true"
-                        [errorMessage]="form.get('dueDate')?.touched && form.get('dueDate')?.invalid ? '支払期限は必須です' : ''">
-                  <input type="date" class="input w-full"
+                <!-- 支払期限 -->
+                <div class="flex flex-col gap-1">
+                  <label for="dueDate" class="font-medium text-sm" style="color: var(--p-text-color);">支払期限 <span class="text-red-500">*</span></label>
+                  <p-datepicker
                       formControlName="dueDate"
+                      inputId="dueDate"
+                      dateFormat="yy/mm/dd"
+                      [showIcon]="true"
+                      styleClass="w-full"
                       data-testid="due-date-input" />
-                </app-form-field>
+                  @if (form.get('dueDate')?.touched && form.get('dueDate')?.invalid) {
+                    <small class="text-red-500">支払期限は必須です</small>
+                  }
+                </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <app-form-field label="消費税率 (%)" [required]="true"
-                        [errorMessage]="form.get('taxRate')?.touched && form.get('taxRate')?.invalid ? '消費税率は必須です' : ''">
-                  <input type="number" class="input w-full"
+                <!-- 消費税率 -->
+                <div class="flex flex-col gap-1">
+                  <label for="taxRate" class="font-medium text-sm" style="color: var(--p-text-color);">消費税率 (%) <span class="text-red-500">*</span></label>
+                  <p-inputnumber
                       formControlName="taxRate"
-                      placeholder="10"
-                      min="0" max="100" step="1"
+                      inputId="taxRate"
+                      [min]="0"
+                      [max]="100"
+                      suffix="%"
+                      fluid
                       data-testid="tax-rate-input" />
-                </app-form-field>
+                  @if (form.get('taxRate')?.touched && form.get('taxRate')?.invalid) {
+                    <small class="text-red-500">消費税率は必須です</small>
+                  }
+                </div>
 
-                <app-form-field label="関連プロジェクト (任意)">
-                  <select class="select w-full"
+                <!-- 関連プロジェクト -->
+                <div class="flex flex-col gap-1">
+                  <label for="projectId" class="font-medium text-sm" style="color: var(--p-text-color);">関連プロジェクト (任意)</label>
+                  <p-select
                       formControlName="projectId"
-                      data-testid="project-select">
-                    <option value="">なし</option>
-                    @for (p of projects(); track p.id) {
-                      <option [value]="p.id">{{ p.name }}</option>
-                    }
-                  </select>
-                </app-form-field>
+                      inputId="projectId"
+                      [options]="projectOptions()"
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="なし"
+                      [showClear]="true"
+                      styleClass="w-full"
+                      data-testid="project-select" />
+                </div>
               </div>
 
-              <app-form-field label="備考 (任意)">
-                <textarea class="textarea w-full"
+              <!-- 備考 -->
+              <div class="flex flex-col gap-1">
+                <label for="notes" class="font-medium text-sm" style="color: var(--p-text-color);">備考 (任意)</label>
+                <textarea pTextarea
                      formControlName="notes"
+                     id="notes"
                      rows="3"
                      placeholder="振込先情報やその他の連絡事項を入力"
+                     fluid
                      data-testid="notes-input"></textarea>
-              </app-form-field>
+              </div>
             </div>
           </div>
 
@@ -106,103 +149,107 @@ interface ProjectItem {
           <div>
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
-                <ng-icon name="heroListBullet" class="text-base-content/40" />
-                <h2 class="text-base font-bold text-base-content m-0">請求明細</h2>
+                <i class="pi pi-list" style="color: var(--p-text-muted-color);"></i>
+                <h2 class="text-base font-bold m-0" style="color: var(--p-text-color);">請求明細</h2>
               </div>
-              <button type="button" class="btn btn-outline btn-sm gap-1"
-                  (click)="addItem()"
-                  data-testid="add-item-btn">
-                <ng-icon name="heroPlus" class="text-lg" />
-                明細を追加
-              </button>
+              <p-button type="button"
+                  icon="pi pi-plus"
+                  label="明細を追加"
+                  severity="secondary"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="addItem()"
+                  data-testid="add-item-btn" />
             </div>
 
-            <div class="overflow-x-auto" data-testid="items-table">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th class="w-60">項目名・詳細</th>
-                    <th class="w-28">数量</th>
-                    <th class="w-36">単価</th>
-                    <th class="text-right w-36">金額</th>
-                    <th class="w-14"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of itemsDataSource; track row; let i = $index) {
-                    <tr data-testid="item-row">
-                      <td>
-                        <input class="input input-sm w-full"
-                            [formControl]="getItemControl(i, 'description')"
-                            placeholder="例: システム開発費"
-                            data-testid="item-description" />
-                      </td>
-                      <td>
-                        <input type="number" class="input input-sm w-full font-mono"
-                            [formControl]="getItemControl(i, 'quantity')"
-                            min="0" step="1"
-                            data-testid="item-quantity" />
-                      </td>
-                      <td>
-                        <input type="number" class="input input-sm w-full font-mono"
-                            [formControl]="getItemControl(i, 'unitPrice')"
-                            min="0" step="100"
-                            data-testid="item-unit-price" />
-                      </td>
-                      <td class="text-right">
-                        <span class="font-bold text-base-content text-base font-mono">¥{{ getItemAmount(i) | number }}</span>
-                      </td>
-                      <td class="text-center">
-                        <button type="button"
-                            class="btn btn-ghost btn-sm btn-square text-error"
-                            (click)="removeItem(i)"
-                            [disabled]="items.length <= 1"
-                            data-testid="remove-item-btn">
-                          <ng-icon name="heroTrash" class="text-lg" />
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+            <p-table [value]="itemsDataSource" [tableStyle]="{ 'min-width': '40rem' }" data-testid="items-table">
+              <ng-template #header>
+                <tr>
+                  <th class="w-60">項目名・詳細</th>
+                  <th class="w-28">数量</th>
+                  <th class="w-36">単価</th>
+                  <th class="text-right w-36">金額</th>
+                  <th class="w-14"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row let-i="rowIndex">
+                <tr data-testid="item-row">
+                  <td>
+                    <input pInputText
+                        [formControl]="getItemControl(i, 'description')"
+                        placeholder="例: システム開発費"
+                        class="w-full p-inputtext-sm"
+                        data-testid="item-description" />
+                  </td>
+                  <td>
+                    <p-inputnumber
+                        [formControl]="getItemControl(i, 'quantity')"
+                        [min]="0"
+                        inputStyleClass="w-full font-mono p-inputtext-sm"
+                        data-testid="item-quantity" />
+                  </td>
+                  <td>
+                    <p-inputnumber
+                        [formControl]="getItemControl(i, 'unitPrice')"
+                        [min]="0"
+                        [step]="100"
+                        inputStyleClass="w-full font-mono p-inputtext-sm"
+                        data-testid="item-unit-price" />
+                  </td>
+                  <td class="text-right">
+                    <span class="font-bold text-base font-mono" style="color: var(--p-text-color);">¥{{ getItemAmount(i) | number }}</span>
+                  </td>
+                  <td class="text-center">
+                    <p-button type="button"
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [text]="true"
+                        size="small"
+                        (onClick)="removeItem(i)"
+                        [disabled]="items.length <= 1"
+                        data-testid="remove-item-btn" />
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
 
             <!-- 集計表示 -->
-            <div class="bg-base-200/50 p-6 border-t border-base-200 rounded-b-2xl mt-4" data-testid="totals">
+            <div class="p-6 border-t mt-4 rounded-b-2xl" style="background: var(--p-surface-50); border-color: var(--p-surface-200);" data-testid="totals">
               <div class="max-w-xs ml-auto space-y-3">
                 <div class="flex justify-between items-center text-sm">
-                  <span class="text-base-content/60 font-medium">小計</span>
-                  <span class="font-mono text-base-content font-medium">¥{{ subtotal | number }}</span>
+                  <span class="font-medium" style="color: var(--p-text-muted-color);">小計</span>
+                  <span class="font-mono font-medium" style="color: var(--p-text-color);">¥{{ subtotal | number }}</span>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span class="text-base-content/60 font-medium">消費税 ({{ form.value.taxRate }}%)</span>
-                  <span class="font-mono text-base-content font-medium">¥{{ taxAmount | number }}</span>
+                  <span class="font-medium" style="color: var(--p-text-muted-color);">消費税 ({{ form.value.taxRate }}%)</span>
+                  <span class="font-mono font-medium" style="color: var(--p-text-color);">¥{{ taxAmount | number }}</span>
                 </div>
-                <div class="border-t border-base-300 pt-3 mt-1 flex justify-between items-end">
-                  <span class="text-base-content font-bold">合計金額</span>
-                  <span class="text-2xl font-bold text-base-content tracking-tight font-mono">¥{{ total | number }}</span>
+                <div class="border-t pt-3 mt-1 flex justify-between items-end" style="border-color: var(--p-surface-300);">
+                  <span class="font-bold" style="color: var(--p-text-color);">合計金額</span>
+                  <span class="text-2xl font-bold tracking-tight font-mono" style="color: var(--p-text-color);">¥{{ total | number }}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- アクションボタン -->
-          <div slot="actions" class="flex items-center justify-end gap-3 pt-2">
-            <a routerLink="/invoices" class="btn btn-ghost" data-testid="cancel-btn">
-              キャンセル
-            </a>
-            <button type="submit" class="btn btn-primary min-w-[120px]"
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <p-button
+              routerLink="/invoices"
+              label="キャンセル"
+              severity="secondary"
+              [text]="true"
+              data-testid="cancel-btn" />
+            <p-button type="submit"
+                [label]="isEdit ? '変更を保存' : '請求書を作成'"
                 [disabled]="form.invalid || isSaving"
-                data-testid="save-btn">
-              @if (isSaving) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              {{ isEdit ? '変更を保存' : '請求書を作成' }}
-            </button>
+                [loading]="isSaving"
+                styleClass="min-w-[120px]"
+                data-testid="save-btn" />
           </div>
         </form>
       }
-    </app-form-page>
+    </div>
   `,
   styles: [],
 })
@@ -219,10 +266,13 @@ export class InvoiceFormComponent implements OnInit {
   invoiceId: string | null = null;
   projects = signal<ProjectItem[]>([]);
 
+  /** p-select用のオプション */
+  projectOptions = this.projects;
+
   form: FormGroup = this.fb.group({
     clientName: ['', Validators.required],
-    issuedDate: ['', Validators.required],
-    dueDate: ['', Validators.required],
+    issuedDate: [null as Date | null, Validators.required],
+    dueDate: [null as Date | null, Validators.required],
     taxRate: [DEFAULT_TAX_RATE * 100, [Validators.required, Validators.min(0), Validators.max(100)]],
     projectId: [''],
     notes: [''],
@@ -316,7 +366,7 @@ export class InvoiceFormComponent implements OnInit {
 
     const value = this.form.value;
 
-    // date input returns string 'YYYY-MM-DD'
+    // p-datepicker returns Date objects
     const formatDate = (d: any): string => {
       if (!d) return '';
       if (d instanceof Date) return d.toISOString().substring(0, 10);
@@ -354,17 +404,16 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   private patchForm(invoice: any): void {
-    // Convert dates to 'YYYY-MM-DD' string for <input type="date">
-    const toDateStr = (d: any): string => {
-      if (!d) return '';
-      const date = new Date(d);
-      return date.toISOString().substring(0, 10);
+    // Convert dates to Date objects for p-datepicker
+    const toDate = (d: any): Date | null => {
+      if (!d) return null;
+      return new Date(d);
     };
 
     this.form.patchValue({
       clientName: invoice.clientName,
-      issuedDate: toDateStr(invoice.issuedDate),
-      dueDate: toDateStr(invoice.dueDate),
+      issuedDate: toDate(invoice.issuedDate),
+      dueDate: toDate(invoice.dueDate),
       taxRate: Number(invoice.taxRate),
       projectId: invoice.projectId ?? '',
       notes: invoice.notes ?? '',
