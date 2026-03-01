@@ -50,5 +50,6 @@ setup('authenticate', async ({ page }) => {
     }
 
     const fs = await import('fs');
+    fs.mkdirSync('e2e/.auth', { recursive: true });
     fs.writeFileSync('e2e/.auth/user.json', JSON.stringify(storage, null, 2));
 });
