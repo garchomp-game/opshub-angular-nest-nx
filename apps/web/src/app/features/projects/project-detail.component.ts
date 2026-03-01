@@ -200,7 +200,7 @@ export class ProjectDetailComponent implements OnInit {
   activeTabValue = 'overview';
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id')!;
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.projectService.getById(id).subscribe();
   }
 

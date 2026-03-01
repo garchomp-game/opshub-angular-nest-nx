@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import {
-  ProjectStatus, PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS,
+  ProjectStatus, PROJECT_STATUS_LABELS,
 } from '@shared/types';
 import { ProjectService } from './project.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -38,10 +38,10 @@ import { AuthService } from '../../core/auth/auth.service';
       <!-- Filters -->
       <div class="flex flex-col sm:flex-row gap-4 items-end">
         <div class="w-full sm:w-64">
-          <label class="block font-medium mb-2">キーワード検索</label>
+          <label for="project-search-input" class="block font-medium mb-2">キーワード検索</label>
           <p-iconfield>
             <p-inputicon styleClass="pi pi-search" />
-            <input type="text" pInputText class="w-full" [(ngModel)]="searchText"
+            <input type="text" pInputText class="w-full" id="project-search-input" [(ngModel)]="searchText"
                 (keyup.enter)="applyFilter()"
                 placeholder="キーワード検索"
                 data-testid="search-input" />
@@ -49,8 +49,8 @@ import { AuthService } from '../../core/auth/auth.service';
         </div>
 
         <div class="w-full sm:w-64">
-          <label class="block font-medium mb-2">ステータス</label>
-          <p-select [options]="statusOptions" [(ngModel)]="selectedStatus"
+          <label for="project-status-filter" class="block font-medium mb-2">ステータス</label>
+          <p-select [options]="statusOptions" inputId="project-status-filter" [(ngModel)]="selectedStatus"
               (ngModelChange)="applyFilter()"
               optionLabel="label" optionValue="value"
               placeholder="すべて" [showClear]="true"
@@ -176,8 +176,10 @@ export class ProjectListComponent implements OnInit {
     this.projectService.loadAll(params);
   }
 
-  onPaginatorChange(event: any) {
-    const page = Math.floor(event.first / event.rows) + 1;
+  onPaginatorChange(event: { first?: number; rows?: number }) {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? (this.projectService.meta()?.limit ?? 20);
+    const page = Math.floor(first / rows) + 1;
     const params: Record<string, string> = {
       page: String(page),
       limit: String(event.rows),

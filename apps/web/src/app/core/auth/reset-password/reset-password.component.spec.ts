@@ -11,7 +11,8 @@ import { of, throwError } from 'rxjs';
 describe('ResetPasswordComponent', () => {
     let component: ResetPasswordComponent;
     let fixture: ComponentFixture<ResetPasswordComponent>;
-    let authServiceMock: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let authServiceMock: Record<string, any>;
     let router: Router;
 
     beforeEach(async () => {
@@ -95,12 +96,12 @@ describe('ResetPasswordComponent', () => {
 
     it('should be invalid with short password', () => {
         component.form.setValue({ newPassword: 'Ab1', confirmPassword: 'Ab1' });
-        expect(component.form.get('newPassword')!.valid).toBe(false);
+        expect(component.form.get('newPassword')?.valid).toBe(false);
     });
 
     it('should be invalid with non-alphanumeric password', () => {
         component.form.setValue({ newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' });
-        expect(component.form.get('newPassword')!.valid).toBe(false);
+        expect(component.form.get('newPassword')?.valid).toBe(false);
     });
 
     it('should be valid with proper password', () => {
@@ -119,12 +120,12 @@ describe('ResetPasswordComponent', () => {
         vi.useFakeTimers();
         try {
             setToken('test-token-123');
-            authServiceMock.resetPassword.mockReturnValue(of({ message: 'ok' }));
+            authServiceMock['resetPassword'].mockReturnValue(of({ message: 'ok' }));
             component.form.setValue({ newPassword: 'Password1', confirmPassword: 'Password1' });
             component.onSubmit();
             fixture.detectChanges();
 
-            expect(authServiceMock.resetPassword).toHaveBeenCalledWith('test-token-123', 'Password1');
+            expect(authServiceMock['resetPassword']).toHaveBeenCalledWith('test-token-123', 'Password1');
             expect(component.success()).toBe(true);
 
             const el = fixture.nativeElement as HTMLElement;
@@ -141,7 +142,7 @@ describe('ResetPasswordComponent', () => {
 
     it('should show error message on failure', () => {
         setToken('test-token-123');
-        authServiceMock.resetPassword.mockReturnValue(
+        authServiceMock['resetPassword'].mockReturnValue(
             throwError(() => ({ error: { message: 'トークンが無効です' } })),
         );
         component.form.setValue({ newPassword: 'Password1', confirmPassword: 'Password1' });
@@ -158,6 +159,6 @@ describe('ResetPasswordComponent', () => {
     it('should not call service when form is invalid', () => {
         setToken('test-token-123');
         component.onSubmit();
-        expect(authServiceMock.resetPassword).not.toHaveBeenCalled();
+        expect(authServiceMock['resetPassword']).not.toHaveBeenCalled();
     });
 });

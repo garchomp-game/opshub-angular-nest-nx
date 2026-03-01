@@ -109,7 +109,7 @@ export class TimesheetService {
     return this.http
       .put<TimesheetEntry[]>('/api/timesheets/bulk', request)
       .pipe(
-        tap((entries) => {
+        tap(() => {
           // Reload weekly data after save
           const ws = this._weekStart();
           if (ws) this.loadWeekly(ws);
@@ -182,7 +182,7 @@ export class TimesheetService {
           a.click();
           window.URL.revokeObjectURL(url);
         },
-        error: (err) => {
+        error: () => {
           this._error.set('CSVのダウンロードに失敗しました');
         },
       });

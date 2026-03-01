@@ -2,13 +2,27 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { ApiResponse } from '@shared/types';
+import { CreateTaskDto, UpdateTaskDto, ChangeTaskStatusDto } from '@api-client';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  assigneeId?: string;
+  assignee?: { id: string; profile?: { displayName: string } };
+  dueDate?: string;
+  projectId: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   private http = inject(HttpClient);
 
   // ─── State ───
-  private _tasks = signal<any[]>([]);
+  private _tasks = signal<Task[]>([]);
   private _loading = signal(false);
 
   // ─── Public Signals ───
@@ -20,7 +34,7 @@ export class TaskService {
   loadByProject(projectId: string): void {
     this._loading.set(true);
     this.http
-      .get<ApiResponse<any[]>>(`/api/projects/${projectId}/tasks`)
+      .get<ApiResponse<Task[]>>(`/api/projects/${projectId}/tasks`)
       .subscribe({
         next: (res) => {
           if (res.success) this._tasks.set(res.data);
@@ -30,9 +44,9 @@ export class TaskService {
       });
   }
 
-  create(projectId: string, dto: any): Observable<ApiResponse<any>> {
+  create(projectId: string, dto: CreateTaskDto): Observable<ApiResponse<Task>> {
     return this.http
-      .post<ApiResponse<any>>(`/api/projects/${projectId}/tasks`, dto)
+      .post<ApiResponse<Task>>(`/api/projects/${projectId}/tasks`, dto)
       .pipe(
         tap((res) => {
           if (res.success) {
@@ -42,13 +56,13 @@ export class TaskService {
       );
   }
 
-  update(id: string, dto: any): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`/api/tasks/${id}`, dto);
+  update(id: string, dto: Partial<UpdateTaskDto>): Observable<ApiResponse<Task>> {
+    return this.http.put<ApiResponse<Task>>(`/api/tasks/${id}`, dto);
   }
 
-  changeStatus(id: string, status: string): Observable<ApiResponse<any>> {
+  changeStatus(id: string, status: string): Observable<ApiResponse<Task>> {
     return this.http
-      .patch<ApiResponse<any>>(`/api/tasks/${id}/status`, { status })
+      .patch<ApiResponse<Task>>(`/api/tasks/${id}/status`, { status })
       .pipe(
         tap((res) => {
           if (res.success) {
@@ -60,9 +74,9 @@ export class TaskService {
       );
   }
 
-  remove(id: string): Observable<ApiResponse<any>> {
+  remove(id: string): Observable<ApiResponse<void>> {
     return this.http
-      .delete<ApiResponse<any>>(`/api/tasks/${id}`)
+      .delete<ApiResponse<void>>(`/api/tasks/${id}`)
       .pipe(
         tap(() => {
           this._tasks.update((tasks) => tasks.filter((t) => t.id !== id));

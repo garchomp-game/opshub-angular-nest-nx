@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { ForgotPasswordComponent } from './forgot-password.component';
 import { AuthService } from '../auth.service';
@@ -10,7 +10,8 @@ import { of, throwError } from 'rxjs';
 describe('ForgotPasswordComponent', () => {
     let component: ForgotPasswordComponent;
     let fixture: ComponentFixture<ForgotPasswordComponent>;
-    let authServiceMock: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let authServiceMock: Record<string, any>;
 
     beforeEach(async () => {
         authServiceMock = {
@@ -64,22 +65,22 @@ describe('ForgotPasswordComponent', () => {
 
     it('should be invalid with bad email', () => {
         component.form.setValue({ email: 'not-email' });
-        expect(component.form.get('email')!.valid).toBe(false);
+        expect(component.form.get('email')?.valid).toBe(false);
     });
 
     // ─── Submit success ───
 
     it('should show success message after successful submission', () => {
-        authServiceMock.forgotPassword.mockReturnValue(of({ message: 'ok' }));
+        authServiceMock['forgotPassword'].mockReturnValue(of({ message: 'ok' }));
         component.form.setValue({ email: 'test@demo.com' });
         component.onSubmit();
         fixture.detectChanges();
 
-        expect(authServiceMock.forgotPassword).toHaveBeenCalledWith('test@demo.com');
+        expect(authServiceMock['forgotPassword']).toHaveBeenCalledWith('test@demo.com');
         expect(component.sent()).toBe(true);
         const el = fixture.nativeElement as HTMLElement;
         expect(el.querySelector('[data-testid="success-message"]')).toBeTruthy();
-        expect(el.querySelector('[data-testid="success-message"]')!.textContent).toContain(
+        expect(el.querySelector('[data-testid="success-message"]')?.textContent).toContain(
             'パスワードリセットメールを送信しました',
         );
     });
@@ -87,7 +88,7 @@ describe('ForgotPasswordComponent', () => {
     // ─── Submit error ───
 
     it('should show error message on failure', () => {
-        authServiceMock.forgotPassword.mockReturnValue(
+        authServiceMock['forgotPassword'].mockReturnValue(
             throwError(() => ({ error: { message: 'サーバーエラー' } })),
         );
         component.form.setValue({ email: 'test@demo.com' });
@@ -103,6 +104,6 @@ describe('ForgotPasswordComponent', () => {
 
     it('should not call service when form is invalid', () => {
         component.onSubmit();
-        expect(authServiceMock.forgotPassword).not.toHaveBeenCalled();
+        expect(authServiceMock['forgotPassword']).not.toHaveBeenCalled();
     });
 });

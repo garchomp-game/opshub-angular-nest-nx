@@ -1,11 +1,21 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
+export interface AuditLog {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  userId: string;
+  userName?: string;
+  details?: Record<string, unknown>;
+  createdAt: string;
+}
 @Injectable({ providedIn: 'root' })
 export class AdminAuditLogsService {
   private http = inject(HttpClient);
 
-  readonly logs = signal<any[]>([]);
+  readonly logs = signal<AuditLog[]>([]);
   readonly meta = signal<{ total: number; page: number; limit: number; totalPages: number }>({
     total: 0,
     page: 1,
@@ -34,7 +44,7 @@ export class AdminAuditLogsService {
     if (filter.dateFrom) params = params.set('dateFrom', filter.dateFrom);
     if (filter.dateTo) params = params.set('dateTo', filter.dateTo);
 
-    this.http.get<any>('/api/admin/audit-logs', { params }).subscribe({
+    this.http.get<{ data: AuditLog[]; meta: { total: number; page: number; limit: number; totalPages: number } }>('/api/admin/audit-logs', { params }).subscribe({
       next: (result) => {
         this.logs.set(result.data);
         this.meta.set(result.meta);

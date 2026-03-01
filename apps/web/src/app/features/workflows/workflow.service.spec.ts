@@ -53,7 +53,7 @@ describe('WorkflowService', () => {
   });
 
   it('create が POST /api/workflows を呼ぶこと', () => {
-    const dto = { type: 'expense', title: 'テスト', approverId: 'a1', action: 'draft' };
+    const dto = { type: 'expense' as const, title: 'テスト', approverId: 'a1', action: 'draft' as const };
     service.create(dto).subscribe();
 
     const req = httpMock.expectOne('/api/workflows');
@@ -150,12 +150,12 @@ describe('WorkflowService', () => {
   it('downloadAttachment が GET /api/workflows/:id/attachments/:attId/download を Blob で呼ぶこと', () => {
     // Mock URL.createObjectURL and document.createElement
     const mockUrl = 'blob:test';
-    (URL as any).createObjectURL = vi.fn().mockReturnValue(mockUrl);
-    (URL as any).revokeObjectURL = vi.fn();
+    (URL as unknown as { createObjectURL: (blob: Blob) => string }).createObjectURL = vi.fn().mockReturnValue(mockUrl);
+    (URL as unknown as { revokeObjectURL: (url: string) => void }).revokeObjectURL = vi.fn();
     const mockClick = vi.fn();
     vi.spyOn(document, 'createElement').mockReturnValue({
       href: '', download: '', click: mockClick,
-    } as any);
+    } as unknown as HTMLAnchorElement);
 
     service.downloadAttachment('wf-001', 'att-001', 'test.pdf');
 

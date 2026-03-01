@@ -113,7 +113,7 @@ export class LoginComponent {
         const { email, password } = this.form.value;
         this.errorMessage.set('');
 
-        this.auth.login(email!, password!).subscribe({
+        this.auth.login(email ?? '', password ?? '').subscribe({
             next: (res) => {
                 if (res.success) {
                     this.router.navigate(['/dashboard']);

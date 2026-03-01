@@ -46,8 +46,8 @@ import { EXPENSE_CATEGORY_COLORS } from '@shared/types';
         <div class="rounded-lg p-4 mb-6" style="background-color: var(--p-surface-50);" data-testid="filter-date">
           <div class="flex flex-wrap items-end gap-4">
             <div class="w-full sm:w-48">
-              <label class="block text-xs font-medium mb-1">開始日</label>
-              <p-datepicker [(ngModel)]="dateFrom" dateFormat="yy/mm/dd"
+              <label for="expense-date-from" class="block text-xs font-medium mb-1">開始日</label>
+              <p-datepicker [(ngModel)]="dateFrom" inputId="expense-date-from" dateFormat="yy/mm/dd"
                   [showIcon]="true" styleClass="w-full"
                   data-testid="filter-date-from" />
             </div>
@@ -55,8 +55,8 @@ import { EXPENSE_CATEGORY_COLORS } from '@shared/types';
             <span class="font-medium hidden sm:block pb-2" style="opacity: 0.4;">〜</span>
 
             <div class="w-full sm:w-48">
-              <label class="block text-xs font-medium mb-1">終了日</label>
-              <p-datepicker [(ngModel)]="dateTo" dateFormat="yy/mm/dd"
+              <label for="expense-date-to" class="block text-xs font-medium mb-1">終了日</label>
+              <p-datepicker [(ngModel)]="dateTo" inputId="expense-date-to" dateFormat="yy/mm/dd"
                   [showIcon]="true" styleClass="w-full"
                   data-testid="filter-date-to" />
             </div>

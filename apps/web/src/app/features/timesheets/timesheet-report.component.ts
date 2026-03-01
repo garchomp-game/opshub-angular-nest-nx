@@ -50,8 +50,8 @@ import { ToastService } from '../../shared/services/toast.service';
         <div class="rounded-lg p-4 mb-6" style="background-color: var(--p-surface-50);" data-testid="report-filter-period">
           <div class="flex flex-wrap items-end gap-4">
             <div class="w-full sm:w-48">
-              <label class="block text-xs font-medium mb-1">開始日</label>
-              <p-datepicker [(ngModel)]="filterDateFrom" dateFormat="yy/mm/dd"
+              <label for="report-date-from-input" class="block text-xs font-medium mb-1">開始日</label>
+              <p-datepicker [(ngModel)]="filterDateFrom" inputId="report-date-from-input" dateFormat="yy/mm/dd"
                   [showIcon]="true" styleClass="w-full"
                   data-testid="report-date-from" />
             </div>
@@ -59,8 +59,8 @@ import { ToastService } from '../../shared/services/toast.service';
             <span class="font-medium hidden sm:block pb-2" style="opacity: 0.4;">〜</span>
 
             <div class="w-full sm:w-48">
-              <label class="block text-xs font-medium mb-1">終了日</label>
-              <p-datepicker [(ngModel)]="filterDateTo" dateFormat="yy/mm/dd"
+              <label for="report-date-to-input" class="block text-xs font-medium mb-1">終了日</label>
+              <p-datepicker [(ngModel)]="filterDateTo" inputId="report-date-to-input" dateFormat="yy/mm/dd"
                   [showIcon]="true" styleClass="w-full"
                   data-testid="report-date-to" />
             </div>

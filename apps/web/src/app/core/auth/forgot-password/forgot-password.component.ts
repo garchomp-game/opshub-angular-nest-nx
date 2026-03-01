@@ -111,7 +111,7 @@ export class ForgotPasswordComponent {
     onSubmit(): void {
         if (this.form.invalid) return;
 
-        const email = this.form.value.email!;
+        const email = this.form.value.email ?? '';
         this.loading.set(true);
         this.errorMessage.set('');
 

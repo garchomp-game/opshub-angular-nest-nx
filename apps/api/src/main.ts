@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -8,12 +8,21 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   // nestjs-pino が NestJS 内部のロガーを置き換え
   app.useLogger(app.get(Logger));
+
+  // Security headers
+  app.use(helmet());
+
+  // Body size limits (nodebestpractices 6.14)
+  app.use(json({ limit: '1mb' }));
+  app.use(urlencoded({ extended: true, limit: '1mb' }));
 
   // Global prefix
   app.setGlobalPrefix('api');

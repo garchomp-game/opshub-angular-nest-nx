@@ -83,8 +83,8 @@ describe('TimesheetService', () => {
     const mockUrl = 'blob:mock-url';
     const originalCreateObjectURL = window.URL.createObjectURL;
     const originalRevokeObjectURL = window.URL.revokeObjectURL;
-    window.URL.createObjectURL = vi.fn().mockReturnValue(mockUrl) as any;
-    window.URL.revokeObjectURL = vi.fn() as any;
+    window.URL.createObjectURL = vi.fn().mockReturnValue(mockUrl) as unknown as typeof URL.createObjectURL;
+    window.URL.revokeObjectURL = vi.fn() as unknown as typeof URL.revokeObjectURL;
 
     const query = { dateFrom: '2026-02-01', dateTo: '2026-02-28' };
     service.exportCsv(query);

@@ -1,11 +1,12 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { Confirmation, ConfirmationService, MessageService } from 'primeng/api';
 import { of } from 'rxjs';
 import { NotificationListComponent } from './notification-list.component';
+import { Notification } from '../../shared/notification-bell/notification.model';
 import { NotificationService } from '../../shared/notification-bell/notification.service';
 
 describe('NotificationListComponent', () => {
@@ -186,7 +187,7 @@ describe('NotificationListComponent', () => {
     });
 
     it('onMarkAsRead で markAsReadAndUpdate が呼ばれること', () => {
-        component.onMarkAsRead(mockNotifications[0] as any);
+        component.onMarkAsRead(mockNotifications[0] as unknown as Notification);
         expect(mockNotificationService.markAsReadAndUpdate).toHaveBeenCalledWith('notif-001');
     });
 
@@ -199,17 +200,17 @@ describe('NotificationListComponent', () => {
 
     it('onDelete で確認ダイアログが呼ばれること', () => {
         const confirmSpy = vi.spyOn(confirmationService, 'confirm');
-        component.onDelete(mockNotifications[0] as any);
+        component.onDelete(mockNotifications[0] as unknown as Notification);
         expect(confirmSpy).toHaveBeenCalled();
     });
 
     it('削除確認後に deleteAndUpdate が呼ばれること', () => {
-        vi.spyOn(confirmationService, 'confirm').mockImplementation((opts: any) => {
-            opts.accept();
+        vi.spyOn(confirmationService, 'confirm').mockImplementation((opts: Confirmation) => {
+            opts.accept?.();
             return confirmationService;
         });
 
-        component.onDelete(mockNotifications[0] as any);
+        component.onDelete(mockNotifications[0] as unknown as Notification);
         expect(mockNotificationService.deleteAndUpdate).toHaveBeenCalledWith('notif-001');
     });
 

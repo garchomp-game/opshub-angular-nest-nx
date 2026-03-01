@@ -9,7 +9,8 @@ import { signal } from '@angular/core';
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let authServiceMock: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let authServiceMock: Record<string, any>;
 
   beforeEach(async () => {
     authServiceMock = {
@@ -62,7 +63,7 @@ describe('LoginComponent', () => {
 
   it('should be invalid with bad email', () => {
     component.form.setValue({ email: 'not-email', password: 'Password123' });
-    expect(component.form.get('email')!.valid).toBe(false);
+    expect(component.form.get('email')?.valid).toBe(false);
   });
 
   // ─── Login button ───

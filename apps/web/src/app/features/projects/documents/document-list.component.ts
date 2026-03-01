@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastService } from '../../../shared/services';
-import { DocumentService } from './document.service';
+import { DocumentService, ProjectDocument } from './document.service';
 import { formatFileSize } from '@shared/util';
 
 @Component({
@@ -211,13 +211,13 @@ export class DocumentListComponent implements OnInit {
 
   // ─── ダウンロード ───
 
-  onDownload(doc: any): void {
+  onDownload(doc: ProjectDocument): void {
     this.documentService.downloadDocument(doc.id);
   }
 
   // ─── 削除 ───
 
-  onDelete(doc: any): void {
+  onDelete(doc: ProjectDocument): void {
     if (confirm(`「${doc.name}」を削除しますか？`)) {
       this.documentService.deleteDocument(doc.id).subscribe({
         next: () => {
@@ -233,12 +233,14 @@ export class DocumentListComponent implements OnInit {
 
   // ─── ページネーション ───
 
-  onPaginatorChange(event: any): void {
-    const page = Math.floor(event.first / event.rows) + 1;
+  onPaginatorChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? (this.documentService.meta()?.limit ?? 10);
+    const page = Math.floor(first / rows) + 1;
     this.currentPage = page;
     this.documentService.loadDocuments(this.projectId, {
       page: String(page),
-      limit: String(event.rows),
+      limit: String(rows),
     });
   }
 
@@ -303,6 +305,7 @@ export class DocumentListComponent implements OnInit {
     return 'secondary';
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getMimeBadgeClasses(mimeType: string): string {
     return '';  // kept for backward compatibility
   }

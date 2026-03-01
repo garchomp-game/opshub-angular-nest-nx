@@ -14,7 +14,6 @@ import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
 import {
   TimesheetService,
-  TimesheetEntry,
   BulkUpsertRequest,
 } from './timesheet.service';
 import { HttpClient } from '@angular/common/http';
@@ -287,7 +286,7 @@ export class TimesheetWeeklyComponent implements OnInit {
     this._rows.update((rows) => {
       const row = rows[index];
       if (row.id) {
-        this._deletedIds.update((ids) => [...ids, row.id!]);
+        this._deletedIds.update((ids) => [...ids, row.id as string]);
       }
       return rows.filter((_, i) => i !== index);
     });
@@ -419,7 +418,8 @@ export class TimesheetWeeklyComponent implements OnInit {
           isNew: false,
         });
       }
-      const row = rowMap.get(key)!;
+      const row = rowMap.get(key);
+      if (!row) continue;
       const dateStr =
         typeof entry.workDate === 'string'
           ? entry.workDate.split('T')[0]

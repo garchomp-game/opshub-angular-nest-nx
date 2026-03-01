@@ -136,8 +136,8 @@ interface ApproverItem {
 
             <!-- レシート添付 -->
             <div class="flex flex-col gap-2">
-              <label class="font-medium text-sm">レシート添付</label>
-              <input type="file"
+              <label for="upload-receipt-input" class="font-medium text-sm">レシート添付</label>
+              <input type="file" id="upload-receipt-input"
                   accept="image/*,.pdf"
                   multiple
                   data-testid="upload-receipt">
@@ -193,23 +193,25 @@ export class ExpenseFormComponent implements OnInit {
 
   ngOnInit(): void {
     // 補助データ取得
-    this.http.get<any>('/api/projects').subscribe({
-      next: (res) => {
-        const list = Array.isArray(res) ? res
-          : Array.isArray(res.data) ? res.data : [];
-        this.projects = list.map((p: any) => ({ id: p.id, name: p.name }));
+    this.http.get<{ id: string; name: string }[] | { data: { id: string; name: string }[] }>('/api/projects').subscribe({
+      next: (res: unknown) => {
+        const parsed = res as { data?: unknown } | unknown[];
+        const list = (Array.isArray(parsed) ? parsed
+          : Array.isArray((parsed as { data?: unknown }).data) ? (parsed as { data: unknown[] }).data : []) as { id: string; name: string }[];
+        this.projects = list.map((p) => ({ id: p.id, name: p.name }));
       },
     });
-    this.http.get<any>('/api/admin/users').subscribe({
-      next: (res) => {
-        const list = Array.isArray(res) ? res
-          : Array.isArray(res.data) ? res.data : [];
+    this.http.get<{ id: string; email: string; roles?: string[]; displayName?: string }[] | { data: { id: string; email: string; roles?: string[]; displayName?: string }[] }>('/api/admin/users').subscribe({
+      next: (res: unknown) => {
+        const parsed = res as { data?: unknown } | unknown[];
+        const list = (Array.isArray(parsed) ? parsed
+          : Array.isArray((parsed as { data?: unknown }).data) ? (parsed as { data: unknown[] }).data : []) as { id: string; email: string; roles?: string[]; displayName?: string }[];
         this.approvers = list
-          .filter((u: any) => {
+          .filter((u) => {
             const roles: string[] = u.roles || [];
             return roles.includes('approver') || roles.includes('tenant_admin');
           })
-          .map((u: any) => ({
+          .map((u) => ({
             id: u.id,
             displayName: u.displayName || u.email?.split('@')[0],
           }));

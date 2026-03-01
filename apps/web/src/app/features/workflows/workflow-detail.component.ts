@@ -12,7 +12,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
-import { WorkflowService, WorkflowAttachment } from './workflow.service';
+import { WorkflowService, Workflow, WorkflowAttachment } from './workflow.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS, ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@shared/types';
 import { ConfirmationService } from 'primeng/api';
@@ -422,11 +422,11 @@ export class WorkflowDetailComponent implements OnInit {
   // ─── Status & Type Helpers ───
 
   getStatusLabel(status: string): string {
-    return (WORKFLOW_STATUS_LABELS as any)[status] ?? status;
+    return (WORKFLOW_STATUS_LABELS as Record<string, string>)[status] ?? status;
   }
 
   getStatusColor(status: string): string {
-    return (WORKFLOW_STATUS_COLORS as any)[status] ?? '';
+    return (WORKFLOW_STATUS_COLORS as Record<string, string>)[status] ?? '';
   }
 
   getTypeLabel(type: string): string {
@@ -444,8 +444,8 @@ export class WorkflowDetailComponent implements OnInit {
     }
   }
 
-  getApprovalSteps(wf: any): any[] {
-    const steps: any[] = [];
+  getApprovalSteps(wf: Workflow): { label: string; user: string; icon: string; color: string; date: string | null; tag: string | null; tagSeverity: string | null }[] {
+    const steps: { label: string; user: string; icon: string; color: string; date: string | null; tag: string | null; tagSeverity: string | null }[] = [];
     // Step 1: 申請
     if (wf.status !== 'draft') {
       steps.push({
@@ -504,22 +504,22 @@ export class WorkflowDetailComponent implements OnInit {
 
   // ─── Workflow Actions ───
 
-  canApprove(wf: any): boolean {
+  canApprove(wf: Workflow): boolean {
     return wf.status === 'submitted' && this.auth.canApprove();
   }
 
-  canWithdraw(wf: any): boolean {
+  canWithdraw(wf: Workflow): boolean {
     const user = this.auth.currentUser();
     return (wf.status === 'submitted' || wf.status === 'rejected') &&
       wf.createdBy === user?.id;
   }
 
-  canSubmit(wf: any): boolean {
+  canSubmit(wf: Workflow): boolean {
     const user = this.auth.currentUser();
     return wf.status === 'rejected' && wf.createdBy === user?.id;
   }
 
-  canEdit(wf: any): boolean {
+  canEdit(wf: Workflow): boolean {
     const user = this.auth.currentUser();
     return wf.status === 'draft' && wf.createdBy === user?.id;
   }

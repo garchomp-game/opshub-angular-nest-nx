@@ -29,10 +29,10 @@ export class NotificationService implements OnDestroy {
    * 通知一覧取得
    */
   getAll(query?: { page?: number; limit?: number; unreadOnly?: boolean }): Observable<NotificationListResponse> {
-    const params: any = {};
-    if (query?.page) params.page = query.page;
-    if (query?.limit) params.limit = query.limit;
-    if (query?.unreadOnly) params.unreadOnly = 'true';
+    const params: Record<string, string> = {};
+    if (query?.page) params['page'] = String(query.page);
+    if (query?.limit) params['limit'] = String(query.limit);
+    if (query?.unreadOnly) params['unreadOnly'] = 'true';
 
     return this.http.get<NotificationListResponse>('/api/notifications', { params });
   }
@@ -158,7 +158,7 @@ export class NotificationService implements OnDestroy {
         this._notifications.set(res.data);
         this._isLoading.set(false);
       }),
-      catchError((err) => {
+      catchError(() => {
         this._isLoading.set(false);
         return of({ data: [], total: 0 });
       }),

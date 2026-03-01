@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -11,7 +11,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { InvoicesService } from './invoices.service';
+import { InvoicesService, Invoice, InvoiceItem } from './invoices.service';
 import { DEFAULT_TAX_RATE } from '@shared/types';
 
 interface ProjectItem {
@@ -306,17 +306,20 @@ export class InvoiceFormComponent implements OnInit {
 
   ngOnInit(): void {
     // プロジェクト一覧を取得
-    this.http.get<any>('/api/projects').subscribe({
-      next: (res) => {
-        const list = Array.isArray(res.data) ? res.data
-          : Array.isArray(res.data?.data) ? res.data.data
-            : Array.isArray(res) ? res : [];
-        this.projects.set(list.map((p: any) => ({
+    this.http.get<{ data?: { id: string; name: string }[] | { data: { id: string; name: string }[] } } | { id: string; name: string }[]>('/api/projects').subscribe({
+      next: (res: unknown) => {
+        const parsed = res as { data?: unknown } | unknown[];
+        const rawList = Array.isArray(parsed) ? parsed
+          : Array.isArray((parsed as { data?: unknown }).data) ? (parsed as { data: unknown[] }).data
+            : Array.isArray((parsed as { data?: { data?: unknown[] } }).data?.data) ? (parsed as { data: { data: unknown[] } }).data.data
+              : [];
+        const list = rawList as { id: string; name: string }[];
+        this.projects.set(list.map((p) => ({
           id: p.id,
           name: p.name,
         })));
       },
-      error: () => { },
+      error: () => { /* Project list is optional, ignore errors */ },
     });
 
     this.invoiceId = this.route.snapshot.paramMap.get('id');
@@ -324,8 +327,9 @@ export class InvoiceFormComponent implements OnInit {
       this.isEdit = true;
       this.isLoading = true;
       this.invoicesService.getById(this.invoiceId).subscribe((res) => {
-        const data = res.success ? res.data : res;
-        this.patchForm(data);
+        if (res.success) {
+          this.patchForm(res.data);
+        }
         this.isLoading = false;
       });
     }
@@ -349,8 +353,8 @@ export class InvoiceFormComponent implements OnInit {
     }
   }
 
-  getItemControl(index: number, field: string): any {
-    return this.items.at(index).get(field);
+  getItemControl(index: number, field: string): FormControl {
+    return this.items.at(index).get(field) as FormControl;
   }
 
   getItemAmount(index: number): number {
@@ -367,7 +371,7 @@ export class InvoiceFormComponent implements OnInit {
     const value = this.form.value;
 
     // p-datepicker returns Date objects
-    const formatDate = (d: any): string => {
+    const formatDate = (d: Date | string | null): string => {
       if (!d) return '';
       if (d instanceof Date) return d.toISOString().substring(0, 10);
       return String(d).substring(0, 10);
@@ -380,7 +384,7 @@ export class InvoiceFormComponent implements OnInit {
       taxRate: value.taxRate,
       projectId: value.projectId || undefined,
       notes: value.notes || undefined,
-      items: value.items.map((item: any, i: number) => ({
+      items: value.items.map((item: { description: string; quantity: number; unitPrice: number }, i: number) => ({
         description: item.description,
         quantity: Number(item.quantity),
         unitPrice: Number(item.unitPrice),
@@ -389,13 +393,14 @@ export class InvoiceFormComponent implements OnInit {
     };
 
     const obs = this.isEdit
-      ? this.invoicesService.update(this.invoiceId!, dto)
+      ? this.invoicesService.update(this.invoiceId ?? '', dto)
       : this.invoicesService.create(dto);
 
     obs.subscribe({
       next: (res) => {
-        const data = res.success ? res.data : res;
-        this.router.navigate(['/invoices', data.id]);
+        if (res.success) {
+          this.router.navigate(['/invoices', res.data.id]);
+        }
       },
       error: () => {
         this.isSaving = false;
@@ -403,9 +408,9 @@ export class InvoiceFormComponent implements OnInit {
     });
   }
 
-  private patchForm(invoice: any): void {
+  private patchForm(invoice: Invoice): void {
     // Convert dates to Date objects for p-datepicker
-    const toDate = (d: any): Date | null => {
+    const toDate = (d: string | Date | null | undefined): Date | null => {
       if (!d) return null;
       return new Date(d);
     };
@@ -422,7 +427,7 @@ export class InvoiceFormComponent implements OnInit {
     // Rebuild items FormArray
     this.items.clear();
     if (invoice.items?.length) {
-      invoice.items.forEach((item: any) => {
+      invoice.items.forEach((item: InvoiceItem) => {
         this.items.push(this.fb.group({
           description: [item.description, Validators.required],
           quantity: [Number(item.quantity), [Validators.required, Validators.min(0)]],

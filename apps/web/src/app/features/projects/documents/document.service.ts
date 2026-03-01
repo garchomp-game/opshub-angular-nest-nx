@@ -1,16 +1,29 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { ApiResponse, PaginatedResult } from '@shared/types';
+import { Observable } from 'rxjs';
+import { ApiResponse, PaginatedResult, PaginationMeta } from '@shared/types';
+
+export interface ProjectDocument {
+  id: string;
+  name: string;
+  fileSize: number;
+  mimeType: string;
+  storagePath: string;
+  projectId: string;
+  uploadedBy: string;
+  uploader?: { id: string; profile?: { displayName: string } };
+  createdAt: string;
+  updatedAt?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
   private http = inject(HttpClient);
 
   // ─── State ───
-  private _documents = signal<any[]>([]);
+  private _documents = signal<ProjectDocument[]>([]);
   private _loading = signal(false);
-  private _meta = signal<any | null>(null);
+  private _meta = signal<PaginationMeta | null>(null);
 
   // ─── Public Signals ───
   readonly documents = this._documents.asReadonly();
@@ -25,7 +38,7 @@ export class DocumentService {
       ? '?' + new URLSearchParams(params).toString()
       : '';
     this.http
-      .get<ApiResponse<PaginatedResult<any>>>(
+      .get<ApiResponse<PaginatedResult<ProjectDocument>>>(
         `/api/projects/${projectId}/documents${queryParams}`,
       )
       .subscribe({
@@ -40,10 +53,10 @@ export class DocumentService {
       });
   }
 
-  uploadDocument(projectId: string, file: File): Observable<ApiResponse<any>> {
+  uploadDocument(projectId: string, file: File): Observable<ApiResponse<ProjectDocument>> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ApiResponse<any>>(
+    return this.http.post<ApiResponse<ProjectDocument>>(
       `/api/projects/${projectId}/documents`,
       formData,
     );

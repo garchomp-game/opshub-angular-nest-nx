@@ -25,7 +25,7 @@ import { getNotificationLink } from '@shared/util';
    <div class="flex items-center justify-between px-1 py-2 mb-2" style="border-bottom: 1px solid var(--p-surface-border);">
     <span class="text-base font-semibold">通知</span>
     @if (unreadCount() > 0) {
-     <a (click)="onMarkAllAsRead()" class="text-sm cursor-pointer hover:underline"
+     <a role="button" tabindex="0" (click)="onMarkAllAsRead()" (keydown.enter)="onMarkAllAsRead()" class="text-sm cursor-pointer hover:underline"
        style="color: var(--p-primary-color);" data-testid="mark-all-read-btn">
       すべて既読
      </a>
@@ -48,7 +48,7 @@ import { getNotificationLink } from '@shared/util';
        class="px-3 py-3 cursor-pointer transition-colors"
        [style.background-color]="!notification.isRead ? 'var(--p-primary-50)' : 'transparent'"
        style="border-bottom: 1px solid var(--p-surface-border);"
-       (click)="onNotificationClick(notification)"
+       (click)="onNotificationClick(notification)" (keydown.enter)="onNotificationClick(notification)" role="button" tabindex="0"
        [attr.data-testid]="'notification-item-' + notification.id"
       >
        <div class="flex items-start gap-3">

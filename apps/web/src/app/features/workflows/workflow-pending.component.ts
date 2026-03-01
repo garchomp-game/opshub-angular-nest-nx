@@ -6,7 +6,6 @@ import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { WorkflowService, Workflow } from './workflow.service';
-import { WORKFLOW_STATUS_LABELS } from '@shared/types';
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../shared/services/toast.service';
 

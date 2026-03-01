@@ -2,17 +2,28 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 
+export interface AdminUser {
+  id: string;
+  userId?: string;
+  email: string;
+  roles: string[];
+  status: string;
+  profile?: { displayName: string };
+  displayName?: string;
+  createdAt?: string;
+  lastLogin?: string;
+}
 @Injectable({ providedIn: 'root' })
 export class AdminUsersService {
   private http = inject(HttpClient);
   private messageService = inject(MessageService);
 
-  readonly users = signal<any[]>([]);
+  readonly users = signal<AdminUser[]>([]);
   readonly loading = signal(false);
 
   loadUsers(): void {
     this.loading.set(true);
-    this.http.get<any[]>('/api/admin/users').subscribe({
+    this.http.get<AdminUser[]>('/api/admin/users').subscribe({
       next: (data) => {
         this.users.set(data);
         this.loading.set(false);
@@ -23,7 +34,7 @@ export class AdminUsersService {
 
   inviteUser(dto: { email: string; role: string; displayName?: string }): void {
     this.loading.set(true);
-    this.http.post<any>('/api/admin/users/invite', dto).subscribe({
+    this.http.post<AdminUser>('/api/admin/users/invite', dto).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: '招待を送信しました', life: 3000 });
         this.loadUsers();
@@ -40,7 +51,7 @@ export class AdminUsersService {
   }
 
   updateRole(userId: string, dto: { role: string }): void {
-    this.http.patch<any>(`/api/admin/users/${userId}/role`, dto).subscribe({
+    this.http.patch<AdminUser>(`/api/admin/users/${userId}/role`, dto).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'ロールを更新しました', life: 3000 });
         this.loadUsers();
@@ -56,7 +67,7 @@ export class AdminUsersService {
   }
 
   updateStatus(userId: string, active: boolean): void {
-    this.http.patch<any>(`/api/admin/users/${userId}/status`, { active }).subscribe({
+    this.http.patch<AdminUser>(`/api/admin/users/${userId}/status`, { active }).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
