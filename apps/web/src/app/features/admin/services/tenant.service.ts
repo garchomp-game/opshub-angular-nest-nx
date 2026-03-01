@@ -2,6 +2,15 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  plan?: string;
+  settings?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
 export interface ExportTenantDto {
   format: 'json' | 'csv';
   include: string[];
@@ -20,7 +29,7 @@ export class AdminTenantService {
   private http = inject(HttpClient);
   private messageService = inject(MessageService);
 
-  readonly tenant = signal<any>(null);
+  readonly tenant = signal<Tenant | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -32,7 +41,7 @@ export class AdminTenantService {
 
   loadTenant(): void {
     this.loading.set(true);
-    this.http.get<any>('/api/admin/tenant').subscribe({
+    this.http.get<Tenant>('/api/admin/tenant').subscribe({
       next: (data) => {
         this.tenant.set(data);
         this.loading.set(false);
@@ -46,7 +55,7 @@ export class AdminTenantService {
 
   updateTenant(dto: { name?: string; settings?: Record<string, unknown> }): void {
     this.loading.set(true);
-    this.http.patch<any>('/api/admin/tenant', dto).subscribe({
+    this.http.patch<Tenant>('/api/admin/tenant', dto).subscribe({
       next: (data) => {
         this.tenant.set(data);
         this.loading.set(false);

@@ -7,7 +7,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AdminUsersService } from '../services/users.service';
 import { InviteModalComponent } from './invite-modal.component';
-import { ROLE_LABELS, USER_STATUS_LABELS } from '@shared/types';
+import { ROLE_LABELS } from '@shared/types';
 
 @Component({
   selector: 'app-user-list',
@@ -102,7 +102,7 @@ export class UserListComponent implements OnInit {
   }
 
   getRoleLabel(role: string): string {
-    return (ROLE_LABELS as any)[role] ?? role;
+    return (ROLE_LABELS as Record<string, string>)[role] ?? role;
   }
 
   getRoleSeverity(role: string): 'danger' | 'info' | 'success' | 'secondary' {

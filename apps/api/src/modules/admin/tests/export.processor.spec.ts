@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExportProcessor } from '../processors/export.processor';
 import { PrismaService } from '@prisma-db';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 // 出力ストリームへの参照を保持
 let latestOutputStream: EventEmitter | null = null;
@@ -14,8 +14,8 @@ const mockCreateWriteStream = jest.fn(() => {
 });
 
 // fs をパーシャルモック（Prisma の内部 require には影響しない）
-jest.mock('fs', () => {
-    const actualFs = jest.requireActual('fs');
+jest.mock('node:fs', () => {
+    const actualFs = jest.requireActual('node:fs');
     return {
         ...actualFs,
         mkdirSync: (...args: any[]) => mockMkdirSync(...args),

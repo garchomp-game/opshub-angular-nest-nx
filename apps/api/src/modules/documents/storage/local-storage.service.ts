@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 
 @Injectable()
 export class LocalStorageService extends StorageService {

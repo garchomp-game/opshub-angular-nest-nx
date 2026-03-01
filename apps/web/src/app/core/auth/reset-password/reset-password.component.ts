@@ -156,11 +156,11 @@ export class ResetPasswordComponent implements OnInit {
     onSubmit(): void {
         if (this.form.invalid || !this.token()) return;
 
-        const newPassword = this.form.value.newPassword!;
+        const newPassword = this.form.value.newPassword ?? '';
         this.loading.set(true);
         this.errorMessage.set('');
 
-        this.auth.resetPassword(this.token()!, newPassword).subscribe({
+        this.auth.resetPassword(this.token() ?? '', newPassword).subscribe({
             next: () => {
                 this.success.set(true);
                 this.loading.set(false);

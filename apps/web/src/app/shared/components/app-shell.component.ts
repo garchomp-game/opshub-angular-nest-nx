@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -58,7 +58,7 @@ import { BreadcrumbComponent } from './breadcrumb.component';
     <div class="p-3">
      <a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors hover:bg-red-50"
        style="color: var(--p-red-500);"
-       (click)="auth.logout()" data-testid="sidebar-logout-btn">
+       (click)="auth.logout()" (keydown.enter)="auth.logout()" role="button" tabindex="0" data-testid="sidebar-logout-btn">
       <i class="pi pi-sign-out text-lg"></i>
       ログアウト
      </a>
@@ -88,7 +88,7 @@ import { BreadcrumbComponent } from './breadcrumb.component';
     <div class="mt-auto pt-4" style="border-top: 1px solid var(--p-surface-border);">
      <a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer hover:bg-red-50"
        style="color: var(--p-red-500);"
-       (click)="auth.logout()">
+       (click)="auth.logout()" (keydown.enter)="auth.logout()" role="button" tabindex="0">
       <i class="pi pi-sign-out text-lg"></i>
       ログアウト
      </a>
@@ -118,7 +118,7 @@ import { BreadcrumbComponent } from './breadcrumb.component';
       <div class="h-8 mx-1" style="border-left: 1px solid var(--p-surface-border);"></div>
 
       <!-- User menu -->
-      <div class="flex items-center gap-2 cursor-pointer" (click)="userMenu.toggle($event)" data-testid="user-dropdown">
+      <div class="flex items-center gap-2 cursor-pointer" role="button" tabindex="0" (click)="userMenu.toggle($event)" (keydown.enter)="userMenu.toggle($event)" role="button" tabindex="0" (keydown.enter)="userMenu.toggle($event)" data-testid="user-dropdown">
        <p-avatar [label]="auth.currentUser()?.email?.charAt(0)?.toUpperCase() || 'U'"
            shape="circle" size="normal"
            [style]="{ 'background-color': 'var(--p-primary-color)', 'color': 'white' }" />

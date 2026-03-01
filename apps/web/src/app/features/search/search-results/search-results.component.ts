@@ -221,6 +221,7 @@ export class SearchResultsComponent implements OnInit {
   highlightText(text: string, query: string): string {
     if (!query) return text;
     const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // eslint-disable-next-line security/detect-non-literal-regexp -- input is escaped above
     const regex = new RegExp(`(${escaped})`, 'gi');
     return text.replace(regex, '<mark>$1</mark>');
   }

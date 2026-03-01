@@ -6,9 +6,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { createReadStream } from 'fs';
-import { randomUUID } from 'crypto';
+import { extname, join } from 'node:path';
+import { createReadStream } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import type { Response } from 'express';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';

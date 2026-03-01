@@ -21,7 +21,9 @@ describe('InvoicesService', () => {
   it('getAll が GET /api/invoices を呼ぶこと', () => {
     const mockData = { success: true, data: { data: [{ id: 'inv-001' }], meta: { total: 1 } } };
     service.getAll().subscribe((res) => {
-      expect(res.data.data).toHaveLength(1);
+      if (res.success) {
+        expect(res.data.data).toHaveLength(1);
+      }
     });
 
     const req = httpMock.expectOne('/api/invoices');

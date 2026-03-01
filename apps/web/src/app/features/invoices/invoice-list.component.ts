@@ -157,11 +157,11 @@ export class InvoiceListComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    return (INVOICE_STATUS_LABELS as any)[status] ?? status;
+    return (INVOICE_STATUS_LABELS as Record<string, string>)[status] ?? status;
   }
 
   getStatusColor(status: string): string {
-    return (INVOICE_STATUS_COLORS as any)[status] ?? '';
+    return (INVOICE_STATUS_COLORS as Record<string, string>)[status] ?? '';
   }
 
   getTagSeverity(status: string): 'secondary' | 'warn' | 'success' | 'danger' | 'info' | 'contrast' | undefined {
@@ -179,9 +179,11 @@ export class InvoiceListComponent implements OnInit {
     this.loadData();
   }
 
-  onPaginatorChange(event: any): void {
-    this.pageIndex = Math.floor(event.first / event.rows) + 1;
-    this.pageSize = event.rows;
+  onPaginatorChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize;
+    this.pageIndex = Math.floor(first / rows) + 1;
+    this.pageSize = rows;
     this.invoicesService.loadAll({
       status: this.statusFilter || undefined,
       page: this.pageIndex,

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -33,24 +33,24 @@ import {
       <!-- Filters -->
       <div class="flex flex-col sm:flex-row gap-4 items-end" data-testid="workflow-filters">
         <div class="w-full sm:w-64 flex flex-col gap-2">
-          <label class="font-medium text-sm">ステータス</label>
-          <p-select [options]="statusOptions" [(ngModel)]="statusFilter"
+          <label for="wf-status-filter" class="font-medium text-sm">ステータス</label>
+          <p-select [options]="statusOptions" inputId="wf-status-filter" [(ngModel)]="statusFilter"
               (ngModelChange)="onFilterChange()" optionLabel="label" optionValue="value"
               placeholder="すべて" [showClear]="true" styleClass="w-full"
               data-testid="status-filter" />
         </div>
 
         <div class="w-full sm:w-64 flex flex-col gap-2">
-          <label class="font-medium text-sm">種別</label>
-          <p-select [options]="typeOptions" [(ngModel)]="typeFilter"
+          <label for="wf-type-filter" class="font-medium text-sm">種別</label>
+          <p-select [options]="typeOptions" inputId="wf-type-filter" [(ngModel)]="typeFilter"
               (ngModelChange)="onFilterChange()" optionLabel="label" optionValue="value"
               placeholder="すべて" [showClear]="true" styleClass="w-full"
               data-testid="type-filter" />
         </div>
 
         <div class="w-full sm:w-64 flex flex-col gap-2">
-          <label class="font-medium text-sm">表示</label>
-          <p-select [options]="modeOptions" [(ngModel)]="modeFilter"
+          <label for="wf-mode-filter" class="font-medium text-sm">表示</label>
+          <p-select [options]="modeOptions" inputId="wf-mode-filter" [(ngModel)]="modeFilter"
               (ngModelChange)="onFilterChange()" optionLabel="label" optionValue="value"
               placeholder="すべての申請" [showClear]="true" styleClass="w-full"
               data-testid="mode-filter" />
@@ -183,11 +183,11 @@ export class WorkflowListComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    return (WORKFLOW_STATUS_LABELS as any)[status] ?? status;
+    return (WORKFLOW_STATUS_LABELS as Record<string, string>)[status] ?? status;
   }
 
   getStatusColor(status: string): string {
-    return (WORKFLOW_STATUS_COLORS as any)[status] ?? '';
+    return (WORKFLOW_STATUS_COLORS as Record<string, string>)[status] ?? '';
   }
 
   getTypeLabel(type: string): string {
@@ -210,9 +210,11 @@ export class WorkflowListComponent implements OnInit {
     this.loadData();
   }
 
-  onPaginatorChange(event: any): void {
-    this.pageIndex = Math.floor(event.first / event.rows) + 1;
-    this.pageSize = event.rows;
+  onPaginatorChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize;
+    this.pageIndex = Math.floor(first / rows) + 1;
+    this.pageSize = rows;
     this.workflowService.loadAll({
       status: this.statusFilter || undefined,
       type: this.typeFilter || undefined,

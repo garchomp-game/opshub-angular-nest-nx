@@ -126,36 +126,39 @@ export class WorkflowFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.http.get<any>('/api/admin/users').subscribe({
-      next: (res) => {
-        const list = Array.isArray(res) ? res
-          : Array.isArray(res.data) ? res.data : [];
+    this.http.get<{ id: string; email: string; roles?: string[]; displayName?: string; profile?: { displayName: string } }[]>('/api/admin/users').subscribe({
+      next: (res: unknown) => {
+        const data = res as { id: string; email: string; roles?: string[]; displayName?: string; profile?: { displayName: string } }[] | { data: { id: string; email: string; roles?: string[]; displayName?: string; profile?: { displayName: string } }[] };
+        const list = Array.isArray(data) ? data
+          : Array.isArray((data as { data: unknown[] }).data) ? (data as { data: { id: string; email: string; roles?: string[]; displayName?: string; profile?: { displayName: string } }[] }).data : [];
         this.approvers.set(list
-          .filter((u: any) => {
+          .filter((u) => {
             const roles: string[] = u.roles || [];
             return roles.includes('approver') || roles.includes('tenant_admin');
           })
-          .map((u: any) => ({
+          .map((u) => ({
             id: u.id,
             email: u.email,
             displayName: u.displayName || u.email?.split('@')[0],
           })));
       },
-      error: () => { },
+      error: () => { /* User list is optional, ignore errors */ },
     });
 
     this.editId = this.route.snapshot.paramMap.get('id');
     if (this.editId) {
       this.isEditMode = true;
       this.workflowService.getById(this.editId).subscribe((res) => {
-        const data = res.success ? res.data : res;
-        this.form.patchValue({
-          type: data.type,
-          title: data.title,
-          description: data.description,
-          amount: data.amount,
-          approverId: data.approverId,
-        });
+        if (res.success) {
+          const data = res.data;
+          this.form.patchValue({
+            type: data.type,
+            title: data.title,
+            description: data.description,
+            amount: data.amount,
+            approverId: data.approverId,
+          });
+        }
       });
     }
   }
@@ -190,7 +193,7 @@ export class WorkflowFormComponent implements OnInit {
     if (this.isEditMode && this.editId) {
       this.workflowService.update(this.editId, this.form.value).subscribe({
         next: () => {
-          this.workflowService.submit(this.editId!).subscribe({
+          this.workflowService.submit(this.editId ?? '').subscribe({
             next: () => {
               this.toast.success('申請を送信しました');
               this.router.navigate(['/workflows']);

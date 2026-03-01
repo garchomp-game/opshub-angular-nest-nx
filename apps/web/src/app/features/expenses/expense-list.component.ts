@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
-import { ExpenseService, Expense } from './expense.service';
+import { ExpenseService } from './expense.service';
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_COLORS,
@@ -197,10 +197,12 @@ export class ExpenseListComponent implements OnInit {
     });
   }
 
-  onPaginatorChange(event: any): void {
-    this.first = event.first;
-    this.pageSize = event.rows;
-    this.pageIndex = Math.floor(event.first / event.rows) + 1;
+  onPaginatorChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize;
+    this.first = first;
+    this.pageSize = rows;
+    this.pageIndex = Math.floor(first / rows) + 1;
     this.expenseService.loadAll({
       category: this.selectedCategory || undefined,
       status: this.selectedStatus || undefined,

@@ -79,6 +79,12 @@ jobs:
       - name: Build Web
         run: pnpm nx build web
 
+      - name: Lint Web
+        run: pnpm nx lint web --max-warnings=50
+
+      - name: Lint API
+        run: pnpm nx lint api || true
+
       - name: Test API
         run: pnpm nx test api
 

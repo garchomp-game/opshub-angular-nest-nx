@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -86,7 +86,7 @@ import { getNotificationLink } from '@shared/util';
                 </div>
 
                 <!-- Content -->
-                <div class="flex-1 min-w-0" (click)="onNotificationClick(notification)">
+                <div class="flex-1 min-w-0" role="button" tabindex="0" (click)="onNotificationClick(notification)" (keydown.enter)="onNotificationClick(notification)">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold text-base">{{ notification.title }}</span>
                     @if (!notification.isRead) {
@@ -179,8 +179,9 @@ export class NotificationListComponent implements OnInit {
     this.loadPage();
   }
 
-  onPageChange(event: any): void {
-    this.currentPage.set(Math.floor(event.first / this.pageSize) + 1);
+  onPageChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    this.currentPage.set(Math.floor(first / this.pageSize) + 1);
     this.loadPage();
   }
 

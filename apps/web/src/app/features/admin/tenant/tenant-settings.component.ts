@@ -75,8 +75,8 @@ const EXPORT_TABLES = [
         <div class="space-y-4">
           <!-- フォーマット選択 -->
           <div class="flex flex-col gap-2">
-            <label class="font-medium text-sm">フォーマット</label>
-            <p-selectbutton
+            <span id="format-label" class="font-medium text-sm">フォーマット</span>
+            <p-selectbutton [attr.aria-labelledby]="'format-label'"
               [options]="formatOptions"
               [(ngModel)]="selectedFormat"
               [ngModelOptions]="{ standalone: true }"
@@ -85,7 +85,7 @@ const EXPORT_TABLES = [
 
           <!-- テーブル選択 -->
           <div class="flex flex-col gap-2">
-            <label class="font-medium text-sm">エクスポート対象</label>
+            <span id="export-target-label" class="font-medium text-sm">エクスポート対象</span>
             <div class="flex flex-wrap gap-4">
               @for (table of exportTables; track table.value) {
                 <div class="flex items-center gap-2">

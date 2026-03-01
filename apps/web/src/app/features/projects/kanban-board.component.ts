@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CardModule } from 'primeng/card';
 import { AvatarModule } from 'primeng/avatar';
 import { TooltipModule } from 'primeng/tooltip';
@@ -12,7 +12,7 @@ import {
   TaskStatus, TASK_STATUS_LABELS, TASK_TRANSITIONS, canTransition,
 } from '@shared/types';
 import { ToastService } from '../../shared/services';
-import { TaskService } from './task.service';
+import { TaskService, Task } from './task.service';
 
 @Component({
   selector: 'app-kanban-board',
@@ -151,11 +151,11 @@ export class KanbanBoardComponent implements OnInit {
   columnIds = [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE];
 
   ngOnInit() {
-    this.projectId = this.route.snapshot.paramMap.get('id')!;
+    this.projectId = this.route.snapshot.paramMap.get('id') ?? '';
     this.taskService.loadByProject(this.projectId);
   }
 
-  getTasksByStatus(status: string): any[] {
+  getTasksByStatus(status: string): Task[] {
     return this.taskService.tasks().filter((t) => t.status === status);
   }
 

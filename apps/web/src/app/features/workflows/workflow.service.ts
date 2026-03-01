@@ -1,6 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, finalize } from 'rxjs';
+import { CreateWorkflowDto, UpdateWorkflowDto } from '@api-client';
+import { ApiResponse } from '@shared/types';
 
 export interface WorkflowAttachment {
   id: string;
@@ -78,11 +80,11 @@ export class WorkflowService {
       }
     });
 
-    this.http.get<any>('/api/workflows', { params }).pipe(
+    this.http.get<ApiResponse<PaginatedWorkflows>>('/api/workflows', { params }).pipe(
       tap((res) => {
-        const data = res.success ? res.data : res;
-        this._workflows.set(data.data ?? data);
-        if (data.meta) this._totalCount.set(data.meta.total);
+        const payload = res.success ? res.data : (res as unknown as PaginatedWorkflows);
+        this._workflows.set(payload.data ?? []);
+        if (payload.meta) this._totalCount.set(payload.meta.total);
       }),
       finalize(() => this._isLoading.set(false)),
     ).subscribe();
@@ -90,10 +92,10 @@ export class WorkflowService {
 
   loadPending(): void {
     this._isLoading.set(true);
-    this.http.get<any>('/api/workflows/pending').pipe(
+    this.http.get<ApiResponse<Workflow[]>>('/api/workflows/pending').pipe(
       tap((res) => {
-        const data = res.success ? res.data : res;
-        this._pendingWorkflows.set(Array.isArray(data) ? data : data.data ?? []);
+        const data = res.success ? res.data : (res as unknown as Workflow[]);
+        this._pendingWorkflows.set(Array.isArray(data) ? data : []);
       }),
       finalize(() => this._isLoading.set(false)),
     ).subscribe();
@@ -101,16 +103,16 @@ export class WorkflowService {
 
   loadOne(id: string): void {
     this._isLoading.set(true);
-    this.http.get<any>(`/api/workflows/${id}`).pipe(
+    this.http.get<ApiResponse<Workflow>>(`/api/workflows/${id}`).pipe(
       tap((res) => {
-        const data = res.success ? res.data : res;
+        const data = res.success ? res.data : (res as unknown as Workflow);
         this._currentWorkflow.set(data);
       }),
       finalize(() => this._isLoading.set(false)),
     ).subscribe();
   }
 
-  getAll(query?: WorkflowQuery): Observable<any> {
+  getAll(query?: WorkflowQuery): Observable<ApiResponse<PaginatedWorkflows>> {
     let params = new HttpParams();
     if (query) {
       Object.entries(query).forEach(([key, value]) => {
@@ -119,39 +121,39 @@ export class WorkflowService {
         }
       });
     }
-    return this.http.get<any>('/api/workflows', { params });
+    return this.http.get<ApiResponse<PaginatedWorkflows>>('/api/workflows', { params });
   }
 
-  getPending(): Observable<any> {
-    return this.http.get<any>('/api/workflows/pending');
+  getPending(): Observable<ApiResponse<Workflow[]>> {
+    return this.http.get<ApiResponse<Workflow[]>>('/api/workflows/pending');
   }
 
-  getById(id: string): Observable<any> {
-    return this.http.get<any>(`/api/workflows/${id}`);
+  getById(id: string): Observable<ApiResponse<Workflow>> {
+    return this.http.get<ApiResponse<Workflow>>(`/api/workflows/${id}`);
   }
 
-  create(dto: any): Observable<any> {
-    return this.http.post<any>('/api/workflows', dto);
+  create(dto: CreateWorkflowDto): Observable<ApiResponse<Workflow>> {
+    return this.http.post<ApiResponse<Workflow>>('/api/workflows', dto);
   }
 
-  update(id: string, dto: any): Observable<any> {
-    return this.http.patch<any>(`/api/workflows/${id}`, dto);
+  update(id: string, dto: Partial<UpdateWorkflowDto>): Observable<ApiResponse<Workflow>> {
+    return this.http.patch<ApiResponse<Workflow>>(`/api/workflows/${id}`, dto);
   }
 
-  submit(id: string): Observable<any> {
-    return this.http.post<any>(`/api/workflows/${id}/submit`, {});
+  submit(id: string): Observable<ApiResponse<Workflow>> {
+    return this.http.post<ApiResponse<Workflow>>(`/api/workflows/${id}/submit`, {});
   }
 
-  approve(id: string): Observable<any> {
-    return this.http.post<any>(`/api/workflows/${id}/approve`, {});
+  approve(id: string): Observable<ApiResponse<Workflow>> {
+    return this.http.post<ApiResponse<Workflow>>(`/api/workflows/${id}/approve`, {});
   }
 
-  reject(id: string, reason: string): Observable<any> {
-    return this.http.post<any>(`/api/workflows/${id}/reject`, { reason });
+  reject(id: string, reason: string): Observable<ApiResponse<Workflow>> {
+    return this.http.post<ApiResponse<Workflow>>(`/api/workflows/${id}/reject`, { reason });
   }
 
-  withdraw(id: string): Observable<any> {
-    return this.http.post<any>(`/api/workflows/${id}/withdraw`, {});
+  withdraw(id: string): Observable<ApiResponse<Workflow>> {
+    return this.http.post<ApiResponse<Workflow>>(`/api/workflows/${id}/withdraw`, {});
   }
 
   // ─── Attachment Methods ───

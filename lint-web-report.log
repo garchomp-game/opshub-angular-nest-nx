@@ -1,0 +1,401 @@
+
+> nx run web:lint
+
+Linting "web"...
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/auth.service.spec.ts[24m[0m
+[0m   [2m15:80[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m   [2m16:95[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m   [2m17:92[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m173:80[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m174:95[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m175:92[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m264:80[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m265:95[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m266:92[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m314:76[22m  [31merror[39m    Unexpected empty arrow function  [2m@typescript-eslint/no-empty-function[22m[0m
+[0m  [2m331:80[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m332:95[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m  [2m333:92[22m  [33mwarning[39m  Generic Object Injection Sink    [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/forgot-password/forgot-password.component.spec.ts[24m[0m
+[0m   [2m3:10[22m  [33mwarning[39m  'HttpTestingController' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m13:26[22m  [33mwarning[39m  Unexpected any. Specify a different type           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m67:16[22m  [33mwarning[39m  Forbidden non-null assertion                       [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m82:16[22m  [33mwarning[39m  Forbidden non-null assertion                       [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/forgot-password/forgot-password.component.ts[24m[0m
+[0m  [2m114:23[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/login/login.component.spec.ts[24m[0m
+[0m  [2m12:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m65:12[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/login/login.component.ts[24m[0m
+[0m  [2m116:25[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m116:33[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/reset-password/reset-password.component.spec.ts[24m[0m
+[0m   [2m14:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m98:16[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m103:16[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/auth/reset-password/reset-password.component.ts[24m[0m
+[0m  [2m159:29[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m163:33[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/core/services/logger.service.ts[24m[0m
+[0m  [2m118:26[22m  [31merror[39m  Type boolean trivially inferred from a boolean literal, remove type annotation  [2m@typescript-eslint/no-inferrable-types[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/audit-logs/audit-log-viewer.component.ts[24m[0m
+[0m  [2m163:12[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m181:28[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m53:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m   [2m64:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/services/audit-logs.service.ts[24m[0m
+[0m   [2m8:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m37:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/services/tenant.service.ts[24m[0m
+[0m  [2m23:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m35:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m49:21[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/services/users.service.ts[24m[0m
+[0m  [2m10:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m15:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m26:20[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m43:21[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m59:21[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/tenant/tenant-settings.component.spec.ts[24m[0m
+[0m  [2m114:10[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/tenant/tenant-settings.component.ts[24m[0m
+[0m  [2m78:13[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m  [2m88:13[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/admin/users/user-list.component.ts[24m[0m
+[0m   [2m10:23[22m  [33mwarning[39m  'USER_STATUS_LABELS' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m105:12[22m  [33mwarning[39m  Generic Object Injection Sink                   [2msecurity/detect-object-injection[22m[0m
+[0m  [2m105:28[22m  [33mwarning[39m  Unexpected any. Specify a different type        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/dashboard/dashboard.component.ts[24m[0m
+[0m  [2m217:37[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m258:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/dashboard/dashboard.service.ts[24m[0m
+[0m  [2m29:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m51:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m62:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m73:30[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m74:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m77:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m78:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m81:36[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m82:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/expenses/expense-form.component.ts[24m[0m
+[0m  [2m196:19[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m200:38[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m203:19[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m208:23[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m212:20[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m139:15[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/expenses/expense-list.component.ts[24m[0m
+[0m    [2m1:37[22m  [33mwarning[39m  'signal' is defined but never used        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m10:26[22m  [33mwarning[39m  'Expense' is defined but never used       [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m200:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m255:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m265:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/expenses/expense-summary.component.ts[24m[0m
+[0m  [2m49:15[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m  [2m58:15[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/expenses/expense.service.ts[24m[0m
+[0m  [2m1:38[22m  [33mwarning[39m  'computed' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/invoices/invoice-detail.component.ts[24m[0m
+[0m    [2m9:27[22m  [33mwarning[39m  'Invoice' is defined but never used        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m12:24[22m  [33mwarning[39m  'InvoiceStatus' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m216:36[22m  [33mwarning[39m  Unexpected any. Specify a different type   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m227:12[22m  [33mwarning[39m  Generic Object Injection Sink              [2msecurity/detect-object-injection[22m[0m
+[0m  [2m227:38[22m  [33mwarning[39m  Unexpected any. Specify a different type   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m231:12[22m  [33mwarning[39m  Generic Object Injection Sink              [2msecurity/detect-object-injection[22m[0m
+[0m  [2m231:38[22m  [33mwarning[39m  Unexpected any. Specify a different type   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/invoices/invoice-form.component.ts[24m[0m
+[0m  [2m309:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m314:40[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m319:20[22m  [31merror[39m    Unexpected empty method 'error'           [2m@typescript-eslint/no-empty-function[22m[0m
+[0m  [2m352:49[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m370:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m383:37[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m392:37[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m406:30[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m408:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m425:36[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/invoices/invoice-list.component.ts[24m[0m
+[0m  [2m160:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m160:38[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m164:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m164:38[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m182:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/invoices/invoices.service.ts[24m[0m
+[0m   [2m76:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m88:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m99:44[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m108:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m111:35[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m112:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m115:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m115:32[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m116:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m119:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m119:44[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m120:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m123:56[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m124:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m127:41[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m128:29[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/notifications/notification-list.component.spec.ts[24m[0m
+[0m    [2m1:37[22m  [33mwarning[39m  'fakeAsync' is defined but never used     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m    [2m1:48[22m  [33mwarning[39m  'tick' is defined but never used          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m189:56[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m202:52[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m207:76[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m212:52[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/notifications/notification-list.component.ts[24m[0m
+[0m    [2m1:45[22m  [33mwarning[39m  'computed' is defined but never used                                                    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m182:23[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m233:12[22m  [33mwarning[39m  Generic Object Injection Sink                                                           [2msecurity/detect-object-injection[22m[0m
+[0m  [2m245:12[22m  [33mwarning[39m  Generic Object Injection Sink                                                           [2msecurity/detect-object-injection[22m[0m
+[0m   [2m89:17[22m  [31merror[39m    click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m   [2m89:17[22m  [31merror[39m    Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/documents/document-list.component.ts[24m[0m
+[0m  [2m214:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m220:17[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m236:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m294:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m306:23[22m  [33mwarning[39m  'mimeType' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/documents/document.service.ts[24m[0m
+[0m   [2m3:22[22m  [33mwarning[39m  'tap' is defined but never used           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m11:31[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m13:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m28:40[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m43:73[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m46:39[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/kanban-board.component.ts[24m[0m
+[0m    [2m5:39[22m  [33mwarning[39m  'moveItemInArray' is defined but never used    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m    [2m5:56[22m  [33mwarning[39m  'transferArrayItem' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m154:22[22m  [33mwarning[39m  Forbidden non-null assertion                   [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m158:37[22m  [33mwarning[39m  Unexpected any. Specify a different type       [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m201:12[22m  [33mwarning[39m  Generic Object Injection Sink                  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m201:49[22m  [33mwarning[39m  Generic Object Injection Sink                  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/project-detail.component.ts[24m[0m
+[0m  [2m203:16[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/project-form.component.ts[24m[0m
+[0m    [2m6:10[22m  [33mwarning[39m  'ProjectStatus' is defined but never used          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m    [2m6:25[22m  [33mwarning[39m  'PROJECT_STATUS_LABELS' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m134:19[22m  [33mwarning[39m  Unexpected any. Specify a different type           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m139:37[22m  [33mwarning[39m  Unexpected any. Specify a different type           [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/project-list.component.ts[24m[0m
+[0m   [2m14:41[22m  [33mwarning[39m  'PROJECT_STATUS_COLORS' is defined but never used         [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m149:52[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m152:12[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m179:28[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m41:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m   [2m52:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/project.service.ts[24m[0m
+[0m   [2m1:38[22m  [33mwarning[39m  'computed' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m11:30[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m12:36[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m14:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m30:40[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m43:47[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m46:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m58:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m58:44[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m59:39[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m62:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m62:56[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m63:40[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m66:72[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m67:39[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m73:75[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m74:41[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/projects/task.service.ts[24m[0m
+[0m  [2m11:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m23:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m33:34[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m33:63[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m35:25[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m45:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m45:56[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m46:38[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m49:68[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m51:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m63:46[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m65:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/search/search-results/search-results.component.ts[24m[0m
+[0m  [2m195:51[22m  [33mwarning[39m  Function Call Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m204:12[22m  [33mwarning[39m  Generic Object Injection Sink                     [2msecurity/detect-object-injection[22m[0m
+[0m  [2m208:12[22m  [33mwarning[39m  Generic Object Injection Sink                     [2msecurity/detect-object-injection[22m[0m
+[0m  [2m224:19[22m  [33mwarning[39m  Found non-literal argument to RegExp Constructor  [2msecurity/detect-non-literal-regexp[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/timesheets/timesheet-report.component.ts[24m[0m
+[0m  [2m53:15[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m  [2m62:15[22m  [31merror[39m  A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/timesheets/timesheet-weekly.component.ts[24m[0m
+[0m   [2m17:3[22m   [33mwarning[39m  'TimesheetEntry' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m219:16[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m288:19[22m  [33mwarning[39m  Variable Assigned to Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m290:51[22m  [33mwarning[39m  Forbidden non-null assertion                [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m310:7[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m312:14[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m319:7[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m321:14[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m335:28[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m363:19[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m422:19[22m  [33mwarning[39m  Forbidden non-null assertion                [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m427:7[22m   [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m  [2m428:23[22m  [33mwarning[39m  Generic Object Injection Sink               [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/timesheets/timesheet.service.spec.ts[24m[0m
+[0m  [2m86:70[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m87:45[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/timesheets/timesheet.service.ts[24m[0m
+[0m  [2m112:14[22m  [33mwarning[39m  'entries' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m185:17[22m  [33mwarning[39m  'err' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow-detail.component.ts[24m[0m
+[0m  [2m425:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m425:39[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m429:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m429:39[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m433:12[22m  [33mwarning[39m  Generic Object Injection Sink             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m447:24[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m447:30[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m448:18[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m507:18[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m511:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m517:17[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m522:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow-form.component.ts[24m[0m
+[0m  [2m129:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m134:23[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m138:20[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m144:20[22m  [31merror[39m    Unexpected empty method 'error'           [2m@typescript-eslint/no-empty-function[22m[0m
+[0m  [2m193:39[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow-list.component.ts[24m[0m
+[0m    [2m1:37[22m  [33mwarning[39m  'signal' is defined but never used                        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m186:12[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m186:39[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m190:12[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m190:39[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m194:12[22m  [33mwarning[39m  Generic Object Injection Sink                             [2msecurity/detect-object-injection[22m[0m
+[0m  [2m213:28[22m  [33mwarning[39m  Unexpected any. Specify a different type                  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m36:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m   [2m44:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m   [2m52:11[22m  [31merror[39m    A label component must be associated with a form element  [2m@angular-eslint/template/label-has-associated-control[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow-pending.component.ts[24m[0m
+[0m  [2m9:10[22m  [33mwarning[39m  'WORKFLOW_STATUS_LABELS' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow.service.spec.ts[24m[0m
+[0m  [2m153:13[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m154:13[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m158:10[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/features/workflows/workflow.service.ts[24m[0m
+[0m    [2m1:38[22m  [33mwarning[39m  'computed' is defined but never used      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m81:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m93:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m104:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m113:45[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m122:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m125:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m126:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m129:35[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m130:26[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m133:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m133:32[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m134:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m137:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m137:44[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m138:28[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m141:34[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m142:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m145:35[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m146:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m149:50[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m150:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m153:36[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m154:27[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/components/app-shell.component.ts[24m[0m
+[0m    [2m1:39[22m  [33mwarning[39m  'signal' is defined but never used                                                      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m59:6[22m   [31merror[39m    click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m   [2m59:6[22m   [31merror[39m    Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m   [2m89:6[22m   [31merror[39m    click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m   [2m89:6[22m   [31merror[39m    Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m  [2m121:7[22m   [31merror[39m    click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m  [2m121:7[22m   [31merror[39m    Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/components/breadcrumb.component.ts[24m[0m
+[0m   [2m2:49[22m  [33mwarning[39m  'RouterLink' is defined but never used                                        [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m36:5[22m   [31merror[39m    Type string trivially inferred from a string literal, remove type annotation  [2m@typescript-eslint/no-inferrable-types[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/notification-bell/notification-bell.component.ts[24m[0m
+[0m  [2m28:6[22m  [31merror[39m  click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m  [2m28:6[22m  [31merror[39m  Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m  [2m47:7[22m  [31merror[39m  click must be accompanied by either keyup, keydown or keypress event for accessibility  [2m@angular-eslint/template/click-events-have-key-events[22m[0m
+[0m  [2m47:7[22m  [31merror[39m  Elements with interaction handlers must be focusable                                    [2m@angular-eslint/template/interactive-supports-focus[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/notification-bell/notification.service.ts[24m[0m
+[0m   [2m32:19[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m161:19[22m  [33mwarning[39m  'err' is defined but never used           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/pipes/highlight.pipe.ts[24m[0m
+[0m  [2m11:19[22m  [33mwarning[39m  Found non-literal argument to RegExp Constructor  [2msecurity/detect-non-literal-regexp[22m[0m
+[0m[0m
+[0m[4m/home/garchomp-game/workspace/starlight-test/opshub/apps/web/src/app/shared/services/toast.service.ts[24m[0m
+[0m  [2m26:17[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m  [2m27:16[22m  [33mwarning[39m  Generic Object Injection Sink  [2msecurity/detect-object-injection[22m[0m
+[0m[0m
+[0m[31m[1m✖ 276 problems (31 errors, 245 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  2 errors and 0 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
+✖ 276 problems (31 errors, 245 warnings)
+  2 errors and 0 warnings are potentially fixable with the `--fix` option.
+
+
+
+ NX   Running target lint for project web failed
+
+Failed tasks:
+
+- web:lint
+
+Hint: run the command with --verbose for more details.
+

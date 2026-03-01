@@ -115,7 +115,7 @@ export class ContextLogger {
     constructor(
         private readonly context: string,
         private readonly minLevel: LogLevel,
-        private readonly devMode: boolean = true,
+        private readonly devMode = true,
     ) { }
 
     debug(action: string, data?: unknown): void {

@@ -50,8 +50,8 @@ const ACTION_LABELS: Record<string, string> = {
     <p-card>
       <div class="flex flex-wrap items-end gap-4">
         <div class="flex flex-col gap-2 w-full sm:w-64">
-          <label class="font-medium text-sm">アクション種別</label>
-          <p-select [options]="actionFilterOptions"
+          <label for="filter-action-input" class="font-medium text-sm">アクション種別</label>
+          <p-select [options]="actionFilterOptions" inputId="filter-action-input"
               [(ngModel)]="selectedAction"
               (ngModelChange)="onFilterChange()"
               optionLabel="label" optionValue="value"
@@ -61,8 +61,8 @@ const ACTION_LABELS: Record<string, string> = {
         </div>
 
         <div class="flex flex-col gap-2 w-full sm:w-64">
-          <label class="font-medium text-sm">リソース種別</label>
-          <p-select [options]="resourceTypeOptions"
+          <label for="filter-resource-input" class="font-medium text-sm">リソース種別</label>
+          <p-select [options]="resourceTypeOptions" inputId="filter-resource-input"
               [(ngModel)]="selectedResourceType"
               (ngModelChange)="onFilterChange()"
               optionLabel="label" optionValue="value"
@@ -178,13 +178,15 @@ export class AuditLogViewerComponent implements OnInit {
     this.auditLogsService.loadLogs();
   }
 
-  onPaginatorChange(event: any): void {
-    const newPage = Math.floor(event.first / event.rows) + 1;
+  onPaginatorChange(event: { first?: number; rows?: number }): void {
+    const first = event.first ?? 0;
+    const rows = event.rows ?? this.pageSize;
+    const newPage = Math.floor(first / rows) + 1;
     this.currentPage = newPage;
-    this.pageSize = event.rows;
+    this.pageSize = rows;
     this.auditLogsService.loadLogs({
       page: newPage,
-      limit: event.rows,
+      limit: rows,
       action: this.selectedAction || undefined,
       resourceType: this.selectedResourceType || undefined,
     });

@@ -6,10 +6,10 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { InvoicesService, Invoice } from './invoices.service';
+import { InvoicesService } from './invoices.service';
 import {
   INVOICE_STATUS_LABELS, INVOICE_STATUS_COLORS,
-  INVOICE_TRANSITIONS, InvoiceStatus,
+  INVOICE_TRANSITIONS,
 } from '@shared/types';
 
 @Component({
@@ -213,7 +213,7 @@ export class InvoiceDetailComponent implements OnInit {
   get allowedTransitions(): string[] {
     const inv = this.invoice();
     if (!inv) return [];
-    return (INVOICE_TRANSITIONS as any)[inv.status] ?? [];
+    return (INVOICE_TRANSITIONS as Record<string, string[]>)[inv.status] ?? [];
   }
 
   ngOnInit(): void {
@@ -224,11 +224,11 @@ export class InvoiceDetailComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    return (INVOICE_STATUS_LABELS as any)[status] ?? status;
+    return (INVOICE_STATUS_LABELS as Record<string, string>)[status] ?? status;
   }
 
   getStatusColor(status: string): string {
-    return (INVOICE_STATUS_COLORS as any)[status] ?? '';
+    return (INVOICE_STATUS_COLORS as Record<string, string>)[status] ?? '';
   }
 
   getTagSeverity(status: string): 'secondary' | 'warn' | 'success' | 'danger' | 'info' | 'contrast' | undefined {

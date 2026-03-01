@@ -311,7 +311,7 @@ describe('AuthService visibilitychange', () => {
     vi.spyOn(service, 'refreshToken').mockReturnValue(
       new Observable<never>((subscriber) => subscriber.error(new Error('token expired'))),
     );
-    const logoutSpy = vi.spyOn(service, 'logout').mockImplementation(() => { });
+    const logoutSpy = vi.spyOn(service, 'logout').mockImplementation(() => { /* noop */ });
 
     Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
     document.dispatchEvent(new Event('visibilitychange'));

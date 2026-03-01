@@ -5,7 +5,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { DashboardService } from './dashboard.service';
+import { DashboardService, DashboardNotification } from './dashboard.service';
 import { KpiCardComponent } from './kpi-card.component';
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -214,7 +214,7 @@ export class DashboardComponent implements OnInit {
     this.router.navigateByUrl(path);
   }
 
-  onNotificationClick(notification: any): void {
+  onNotificationClick(notification: DashboardNotification): void {
     const resourceMap: Record<string, string> = {
       workflow: `/workflows/${notification.resourceId}`,
       project: `/projects/${notification.resourceId}`,

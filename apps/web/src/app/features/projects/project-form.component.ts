@@ -3,7 +3,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
-import { ProjectStatus, PROJECT_STATUS_LABELS } from '@shared/types';
 import { ToastService } from '../../shared/services';
 import { ProjectService } from './project.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -131,12 +130,15 @@ export class ProjectFormComponent implements OnInit {
 
   ngOnInit() {
     // テナント内ユーザー一覧を取得
-    this.http.get<any>('/api/admin/users').subscribe({
-      next: (res) => {
-        const list = Array.isArray(res.data) ? res.data
-          : Array.isArray(res.data?.data) ? res.data.data
-            : Array.isArray(res) ? res : [];
-        this.users.set(list.map((u: any) => ({
+    this.http.get<{ data: { userId?: string; id: string; email: string; displayName?: string; profile?: { displayName: string } }[] } | { userId?: string; id: string; email: string; displayName?: string; profile?: { displayName: string } }[]>('/api/admin/users').subscribe({
+      next: (res: unknown) => {
+        const parsed = res as { data?: unknown } | unknown[];
+        const rawList = Array.isArray(parsed) ? parsed
+          : Array.isArray((parsed as { data?: unknown }).data) ? (parsed as { data: unknown[] }).data
+            : Array.isArray((parsed as { data?: { data?: unknown[] } }).data?.data) ? (parsed as { data: { data: unknown[] } }).data.data
+              : [];
+        const list = rawList as { userId?: string; id: string; email: string; displayName?: string; profile?: { displayName: string } }[];
+        this.users.set(list.map((u) => ({
           id: u.userId || u.id,
           email: u.email,
           displayName: u.displayName || u.profile?.displayName || u.email?.split('@')[0],

@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { TenantSettingsComponent } from './tenant-settings.component';
-import { AdminTenantService } from '../services/tenant.service';
+import { AdminTenantService, ExportJobStatus } from '../services/tenant.service';
 import { MessageService } from 'primeng/api';
 
 describe('TenantSettingsComponent', () => {
@@ -21,7 +21,7 @@ describe('TenantSettingsComponent', () => {
     deleteTenant: vi.fn(),
     // Export state
     exportJobId: signal(null as string | null),
-    exportStatus: signal(null),
+    exportStatus: signal<ExportJobStatus | null>(null),
     exporting: signal(false),
     requestExport: vi.fn(),
     downloadExport: vi.fn(),
@@ -111,7 +111,7 @@ describe('TenantSettingsComponent', () => {
       jobId: 'job-001',
       status: 'completed',
       progress: 100,
-    } as any);
+    } as ExportJobStatus);
     fixture.detectChanges();
 
     const btn = fixture.nativeElement.querySelector('[data-testid="download-btn"]');
