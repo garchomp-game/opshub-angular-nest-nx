@@ -8,14 +8,14 @@
 
 | カテゴリ | 技術 |
 |---------|------|
-| モノレポ管理 | [Nx](https://nx.dev) 20.x |
-| フロントエンド | Angular 19 + PrimeNG 21 (Aura テーマ) |
+| モノレポ管理 | [Nx](https://nx.dev) 22.x |
+| フロントエンド | Angular 21 + PrimeNG 21 (Aura テーマ) |
 | バックエンド | NestJS 11 + Passport JWT |
-| ORM | Prisma 6 (SQLite 開発 / PostgreSQL 本番) |
+| ORM | Prisma 6 (PostgreSQL 16) |
 | キュー | BullMQ + Redis |
 | テスト | Vitest (Unit/Integration) + Playwright (E2E) |
 | CI/CD | GitHub Actions |
-| 言語 | TypeScript 5.6 |
+| 言語 | TypeScript 5.9 |
 
 ## セットアップ
 
@@ -61,12 +61,18 @@ pnpm nx serve web   # http://localhost:4200
 pnpm nx build api
 pnpm nx build web
 
+# Lint
+pnpm nx lint web    # ESLint + eslint-plugin-security
+pnpm nx lint api
+
 # ユニットテスト
 pnpm nx test api    # 32 suites / 270 tests
 pnpm nx test web    # 28 suites / 200 tests
 
 # E2E テスト (Playwright)
-pnpm playwright test --project=ui-smoke   # 28 tests
+pnpm playwright test                       # 全テスト (37 tests)
+pnpm playwright test --project=ui-smoke    # UI スモーク (16 tests)
+pnpm playwright test --project=api-smoke   # API スモーク (21 tests)
 
 # OpenAPI クライアント生成
 pnpm generate:api-client

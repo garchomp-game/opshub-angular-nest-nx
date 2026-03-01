@@ -66,9 +66,13 @@ pnpm nx serve api          # API サーバー (http://localhost:3000)
 pnpm nx serve web          # Web サーバー (http://localhost:4200)
 
 # テスト
-pnpm nx test api           # API ユニットテスト (249 テスト)
-pnpm nx test web           # Web ユニットテスト (185 テスト)
+pnpm nx test api           # API ユニットテスト (270 テスト)
+pnpm nx test web           # Web ユニットテスト (200 テスト)
 npx playwright test        # E2E テスト (37 テスト)
+
+# Lint
+pnpm nx lint web           # ESLint + eslint-plugin-security (0 errors)
+pnpm nx lint api
 
 # ビルド
 pnpm nx build api
@@ -141,6 +145,7 @@ opshub/
 │
 ├── libs/
 │   ├── prisma-db/                  ← Prisma クライアント + テナントミドルウェア
+│   ├── api-client/                 ← OpenAPI 自動生成 SDK
 │   └── shared/
 │       ├── types/                  ← 共通型・Enum・定数
 │       └── util/                   ← 共通ユーティリティ
@@ -208,7 +213,9 @@ opshub/
 | PII マスキング | `HttpExceptionFilter` — `password`, `token`, `secret` フィールドをマスク |
 | エラー応答 | `HttpExceptionFilter` — 4xx は warn、5xx は error でログ出力 |
 | ThrottlerGuard | `@nestjs/throttler` — 3段階レート制限 (short/medium/long)。認証エンドポイントは厳格制限。ヘルスチェックは除外 |
+| Body size limit | `json({ limit: '1mb' })` + `urlencoded({ limit: '1mb' })` — DDoS 緩和 |
 | MailService | Nodemailer ベース。開発環境は MailHog (`localhost:1025`)。パスワードリセットメール送信に使用 |
+| `node:` protocol | Node.js 組み込みモジュールは `node:fs`, `node:path`, `node:crypto` 等の `node:` プレフィックス付き import に統一 |
 
 ### Web 側
 
@@ -286,16 +293,15 @@ opshub/
 
 ---
 
-## 9. 次フェーズ候補 (Phase 6)
+## 9. 完了済み: Phase 6
 
-| ID | 機能 | 工数 | 備考 |
-|---|---|---|---|
-| — | ドキュメント全面改訂 | 大 | reference/ の現行化 — 進行中 |
-| — | E2E テスト追加 | 中 | カバレッジ拡大 |
-| — | CI/CD パイプライン | 中 | GitHub Actions |
-| — | OpenAPI クライアント自動生成 | 中 | Swagger spec → Angular SDK |
-| — | BullMQ ジョブキュー | 中 | メール送信, レポート生成 |
-| D-5 | テナントデータエクスポート (GDPR) | 大 | — |
+| ID | 機能 | 状態 |
+|---|---|---|
+| TI-P6-05 | CI/CD パイプライン | ✅ GitHub Actions + Branch Protection |
+| NA-03 | OpenAPI クライアント自動生成 | ✅ `libs/api-client/` |
+| TI-INFRA-01 | BullMQ ジョブキュー | ✅ Redis resilience 含む |
+| D-5 | テナントデータエクスポート (GDPR) | ✅ tenant-settings に実装済み |
+| SEC-01~06 | Lint 修正 + セキュリティ強化 | ✅ 0 errors, 50 warnings, CI lint ステップ追加 |
 
 ---
 
