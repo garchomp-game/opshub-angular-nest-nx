@@ -10,6 +10,20 @@ export const APP_ROUTES: Routes = [
     loadComponent: () =>
       import('./core/auth/login/login.component').then((m) => m.LoginComponent),
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./core/auth/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./core/auth/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
 
   // ─── Protected ───
   {
@@ -39,9 +53,10 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'timesheets',
+        canActivate: [roleGuard],
         loadChildren: () =>
           import('./features/timesheets/timesheets.routes').then((m) => m.TIMESHEET_ROUTES),
-        data: { title: '工数' },
+        data: { roles: ['member', 'approver', 'pm', 'tenant_admin'], title: '工数' },
       },
       {
         path: 'expenses',
@@ -69,6 +84,12 @@ export const APP_ROUTES: Routes = [
         loadChildren: () =>
           import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
+      {
+        path: 'notifications',
+        data: { title: '通知' },
+        loadChildren: () =>
+          import('./features/notifications/notifications.routes').then((m) => m.NOTIFICATION_ROUTES),
+      },
 
       // ─── 404 inside protected shell ───
       {
@@ -80,7 +101,7 @@ export const APP_ROUTES: Routes = [
     ],
   },
 
-  // ─── Public 404 fallback ───
+  // ─── Public 404 fallback (実質到達不能: protected ** + authGuard が先にマッチ) ───
   {
     path: '**',
     loadComponent: () =>

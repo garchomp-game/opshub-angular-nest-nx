@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: opshub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/opshub?schema=public
+      JWT_SECRET: ci-test-jwt-secret
+      JWT_REFRESH_SECRET: ci-test-jwt-refresh-secret
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      MAIL_FROM: noreply@opshub.local
+      APP_URL: http://localhost:4200
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.cache
+          key: nx-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema=libs/prisma-db/prisma/schema.prisma
+
+      - name: Run Prisma Migrations
+        run: npx prisma migrate deploy --schema=libs/prisma-db/prisma/schema.prisma
+
+      - name: Generate API Client
+        run: pnpm generate:api-client
+
+      - name: Build API
+        run: pnpm nx build api
+
+      - name: Build Web
+        run: pnpm nx build web
+
+      - name: Test API
+        run: pnpm nx test api
+
+      - name: Test Web
+        run: pnpm nx test web
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Seed Database
+        run: npx prisma db seed --schema=libs/prisma-db/prisma/schema.prisma
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

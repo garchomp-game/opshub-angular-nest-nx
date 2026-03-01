@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { NotificationQueryDto } from './dto/notification-query.dto';
@@ -50,5 +50,17 @@ export class NotificationController {
     @HttpCode(HttpStatus.NO_CONTENT)
     async markAllAsRead(@CurrentUser() user: ICurrentUser) {
         await this.notificationService.markAllAsRead(user.tenantId, user.id);
+    }
+
+    /**
+     * DELETE /api/notifications/:id — 個別通知削除
+     */
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(
+        @Param('id') id: string,
+        @CurrentUser() user: ICurrentUser,
+    ) {
+        await this.notificationService.remove(user.tenantId, user.id, id);
     }
 }

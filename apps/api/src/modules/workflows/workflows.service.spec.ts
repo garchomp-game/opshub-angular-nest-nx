@@ -18,6 +18,15 @@ describe('WorkflowsService', () => {
             update: jest.fn(),
             count: jest.fn(),
         },
+        workflowAttachment: {
+            create: jest.fn(),
+            findMany: jest.fn(),
+            findUnique: jest.fn(),
+            delete: jest.fn(),
+        },
+        userRole: {
+            findFirst: jest.fn(),
+        },
         tenant: {
             update: jest.fn(),
         },
@@ -378,6 +387,140 @@ describe('WorkflowsService', () => {
             const result = await service.generateWorkflowNumber(tenantId);
 
             expect(result).toBe('WF-042');
+        });
+    });
+
+    // ─── getAttachments ───
+    describe('getAttachments', () => {
+        it('添付ファイル一覧を返すこと', async () => {
+            const mockAtt = { id: 'att-001', fileName: 'test.pdf' };
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findMany.mockResolvedValue([mockAtt]);
+
+            const result = await service.getAttachments(tenantId, 'wf-001');
+
+            expect(result).toEqual([mockAtt]);
+            expect(mockPrisma.workflowAttachment.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: { tenantId, workflowId: 'wf-001' },
+                }),
+            );
+        });
+    });
+
+    // ─── uploadAttachment ───
+    describe('uploadAttachment', () => {
+        it('DB レコードを作成すること', async () => {
+            const mockFile = {
+                originalname: 'test.pdf',
+                size: 1024,
+                mimetype: 'application/pdf',
+                filename: 'uuid-test.pdf',
+            } as Express.Multer.File;
+            const mockAtt = { id: 'att-001', fileName: 'test.pdf' };
+
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.create.mockResolvedValue(mockAtt);
+
+            const result = await service.uploadAttachment(tenantId, 'wf-001', mockFile, userId);
+
+            expect(result).toEqual(mockAtt);
+            expect(mockPrisma.workflowAttachment.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    data: expect.objectContaining({
+                        tenantId,
+                        workflowId: 'wf-001',
+                        fileName: 'test.pdf',
+                        fileSize: 1024,
+                        contentType: 'application/pdf',
+                        uploadedBy: userId,
+                    }),
+                }),
+            );
+        });
+    });
+
+    // ─── deleteAttachment ───
+    describe('deleteAttachment', () => {
+        const mockAtt = {
+            id: 'att-001',
+            tenantId,
+            workflowId: 'wf-001',
+            uploadedBy: userId,
+            storagePath: 'uploads/workflow-attachments/test.pdf',
+        };
+
+        it('本人が削除できること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(mockAtt);
+            mockPrisma.workflowAttachment.delete.mockResolvedValue(undefined);
+
+            // fs/promises mock
+            jest.spyOn(await import('fs/promises'), 'unlink').mockResolvedValue(undefined);
+
+            await service.deleteAttachment(tenantId, 'wf-001', 'att-001', userId);
+
+            expect(mockPrisma.workflowAttachment.delete).toHaveBeenCalledWith(
+                { where: { id: 'att-001' } },
+            );
+        });
+
+        it('他人による削除は ForbiddenException を投げること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(mockAtt);
+            mockPrisma.userRole.findFirst.mockResolvedValue(null);
+
+            await expect(service.deleteAttachment(tenantId, 'wf-001', 'att-001', 'other-user'))
+                .rejects.toThrow(ForbiddenException);
+        });
+
+        it('tenant_admin は他人のファイルも削除できること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(mockAtt);
+            mockPrisma.userRole.findFirst.mockResolvedValue({ role: 'tenant_admin' });
+            mockPrisma.workflowAttachment.delete.mockResolvedValue(undefined);
+
+            jest.spyOn(await import('fs/promises'), 'unlink').mockResolvedValue(undefined);
+
+            await service.deleteAttachment(tenantId, 'wf-001', 'att-001', 'admin-user');
+
+            expect(mockPrisma.workflowAttachment.delete).toHaveBeenCalled();
+        });
+
+        it('存在しない添付ファイルは NotFoundException を投げること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(null);
+
+            await expect(service.deleteAttachment(tenantId, 'wf-001', 'att-999', userId))
+                .rejects.toThrow(NotFoundException);
+        });
+    });
+
+    // ─── getAttachmentFile ───
+    describe('getAttachmentFile', () => {
+        it('添付ファイル情報を返すこと', async () => {
+            const mockAtt = {
+                id: 'att-001',
+                tenantId,
+                workflowId: 'wf-001',
+                fileName: 'test.pdf',
+                contentType: 'application/pdf',
+                storagePath: 'uploads/workflow-attachments/test.pdf',
+            };
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(mockAtt);
+
+            const result = await service.getAttachmentFile(tenantId, 'wf-001', 'att-001');
+
+            expect(result).toEqual(mockAtt);
+        });
+
+        it('存在しない場合 NotFoundException を投げること', async () => {
+            mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);
+            mockPrisma.workflowAttachment.findUnique.mockResolvedValue(null);
+
+            await expect(service.getAttachmentFile(tenantId, 'wf-001', 'att-999'))
+                .rejects.toThrow(NotFoundException);
         });
     });
 });

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -34,6 +35,10 @@ describe('AuthController', () => {
                         getProfile: jest.fn().mockResolvedValue(mockUser),
                     },
                 },
+                {
+                    provide: ThrottlerGuard,
+                    useValue: { canActivate: jest.fn().mockReturnValue(true) },
+                },
             ],
         }).compile();
 
@@ -42,6 +47,16 @@ describe('AuthController', () => {
     });
 
     afterEach(() => jest.clearAllMocks());
+
+    // ─── decorator verification ───
+
+    describe('throttle decorators', () => {
+        it('should have @SkipThrottle() at class level', () => {
+            // @SkipThrottle() defaults to { default: true }, setting key "THROTTLER:SKIP" + "default"
+            const metadata = Reflect.getMetadata('THROTTLER:SKIPdefault', AuthController);
+            expect(metadata).toBe(true);
+        });
+    });
 
     // ─── login ───
 

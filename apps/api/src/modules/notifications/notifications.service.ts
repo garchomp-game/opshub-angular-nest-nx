@@ -119,4 +119,25 @@ export class NotificationsService {
     getNotificationLink(resourceType: string | null, resourceId: string | null): string | null {
         return getNotificationLink(resourceType, resourceId);
     }
+
+    /**
+     * 個別通知削除（本人データのみ）
+     */
+    async remove(tenantId: string, userId: string, id: string): Promise<void> {
+        const notification = await this.prisma.notification.findFirst({
+            where: { id, tenantId, userId },
+        });
+
+        if (!notification) {
+            throw new NotFoundException({
+                code: 'ERR-SYS-002',
+                message: '通知が見つかりません',
+            });
+        }
+
+        await this.prisma.notification.delete({
+            where: { id },
+        });
+    }
 }
+

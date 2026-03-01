@@ -4,5 +4,5 @@ import { TimesheetReportComponent } from './timesheet-report.component';
 
 export const TIMESHEET_ROUTES: Routes = [
   { path: '', component: TimesheetWeeklyComponent },
-  { path: 'reports', component: TimesheetReportComponent },
+  { path: 'reports', component: TimesheetReportComponent, data: { title: '工数レポート' } },
 ];

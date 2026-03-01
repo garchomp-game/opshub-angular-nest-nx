@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,11 +9,13 @@ import { TimelineModule } from 'primeng/timeline';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { TextareaModule } from 'primeng/textarea';
-import { WorkflowService } from './workflow.service';
+import { FileUploadModule } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
+import { WorkflowService, WorkflowAttachment } from './workflow.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS } from '@shared/types';
-import { ModalService } from '../../shared/services/modal.service';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { WORKFLOW_STATUS_LABELS, WORKFLOW_STATUS_COLORS, ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@shared/types';
+import { ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
@@ -21,7 +23,9 @@ import { ToastService } from '../../shared/services/toast.service';
   standalone: true,
   imports: [
     CommonModule, RouterLink, FormsModule,
-    ButtonModule, CardModule, TagModule, TimelineModule, ProgressSpinnerModule, MessageModule, TextareaModule,
+    ButtonModule, CardModule, TagModule, TimelineModule,
+    ProgressSpinnerModule, MessageModule, TextareaModule,
+    FileUploadModule, TableModule, TooltipModule,
   ],
   template: `
     <div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -156,6 +160,92 @@ import { ToastService } from '../../shared/services/toast.service';
                 </div>
               </p-card>
             }
+
+            <!-- Attachments Section -->
+            <p-card data-testid="attachments-section">
+              <div class="flex justify-between items-center mb-4">
+                <span class="flex items-center gap-2 text-lg font-bold">
+                  <i class="pi pi-paperclip text-primary text-lg"></i>
+                  添付ファイル
+                  @if (attachments().length > 0) {
+                    <p-tag [value]="attachments().length + '件'" severity="info" [rounded]="true" />
+                  }
+                </span>
+              </div>
+
+              <!-- Upload Area -->
+              <div class="mb-4 p-4 border-2 border-dashed rounded-xl text-center transition-colors"
+                  style="border-color: var(--p-surface-border);"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)"
+                  [class.border-primary]="isDragging"
+                  data-testid="upload-area">
+                <i class="pi pi-cloud-upload text-4xl mb-3" [class.text-primary]="isDragging" style="opacity: 0.4;"></i>
+                <p class="text-sm opacity-60 mb-3">ファイルをドラッグ&ドロップ、またはクリックしてアップロード</p>
+                <p-button label="ファイルを選択" icon="pi pi-plus" [outlined]="true"
+                    (onClick)="fileInput.click()" data-testid="select-file-btn" />
+                <input #fileInput type="file" class="hidden"
+                    [accept]="acceptTypes"
+                    (change)="onFileSelected($event)"
+                    data-testid="file-input" />
+                <p class="text-xs opacity-40 mt-3">
+                  対応形式: PDF, 画像, Word, Excel, CSV, テキスト ／ 最大 10MB
+                </p>
+              </div>
+
+              @if (uploading()) {
+                <div class="flex items-center gap-2 mb-4 text-sm opacity-60">
+                  <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4" />
+                  アップロード中...
+                </div>
+              }
+
+              <!-- Attachment List -->
+              @if (attachments().length > 0) {
+                <p-table [value]="attachments()" [tableStyle]="{'min-width': '100%'}" data-testid="attachments-table">
+                  <ng-template #header>
+                    <tr>
+                      <th>ファイル名</th>
+                      <th style="width: 100px;">サイズ</th>
+                      <th style="width: 160px;">アップロード日時</th>
+                      <th style="width: 100px;">操作</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template #body let-att>
+                    <tr>
+                      <td>
+                        <div class="flex items-center gap-2">
+                          <i [class]="getFileIcon(att.contentType)" class="text-lg"></i>
+                          <span class="font-medium text-sm truncate" style="max-width: 250px;">{{ att.fileName }}</span>
+                        </div>
+                      </td>
+                      <td class="text-sm opacity-60">{{ formatFileSize(att.fileSize) }}</td>
+                      <td class="text-sm opacity-60">{{ att.createdAt | date:'MM/dd HH:mm' }}</td>
+                      <td>
+                        <div class="flex gap-1">
+                          <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="info"
+                              pTooltip="ダウンロード" tooltipPosition="top"
+                              (onClick)="onDownload(att)"
+                              [attr.data-testid]="'download-btn-' + att.id" />
+                          @if (canDeleteAttachment(att)) {
+                            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                pTooltip="削除" tooltipPosition="top"
+                                (onClick)="onDeleteAttachment(att)"
+                                [attr.data-testid]="'delete-att-btn-' + att.id" />
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              } @else {
+                <div class="text-center py-6 opacity-40 text-sm" data-testid="no-attachments">
+                  <i class="pi pi-inbox text-3xl mb-2 block"></i>
+                  添付ファイルはありません
+                </div>
+              }
+            </p-card>
           </div>
 
           <!-- Right Column: Approval Flow -->
@@ -198,11 +288,17 @@ export class WorkflowDetailComponent implements OnInit {
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private modalService = inject(ModalService);
+  private confirmationService = inject(ConfirmationService);
   private toast = inject(ToastService);
 
   showRejectInput = false;
   rejectReason = '';
+  isDragging = false;
+
+  attachments = signal<WorkflowAttachment[]>([]);
+  uploading = signal(false);
+
+  readonly acceptTypes = ALLOWED_MIME_TYPES.join(',');
 
   private readonly typeLabels: Record<string, string> = {
     expense: '経費', leave: '休暇', purchase: '購買', other: 'その他',
@@ -210,8 +306,120 @@ export class WorkflowDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.workflowService.loadOne(id);
+    if (id) {
+      this.workflowService.loadOne(id);
+      this.loadAttachments(id);
+    }
   }
+
+  // ─── Attachment Methods ───
+
+  private loadAttachments(workflowId: string): void {
+    this.workflowService.getAttachments(workflowId).subscribe({
+      next: (data) => this.attachments.set(Array.isArray(data) ? data : []),
+      error: () => this.attachments.set([]),
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.uploadFile(input.files[0]);
+      input.value = '';
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+    if (event.dataTransfer?.files.length) {
+      this.uploadFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  private uploadFile(file: File): void {
+    const wf = this.workflowService.currentWorkflow();
+    if (!wf) return;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      this.toast.error('ファイルサイズが10MBを超えています');
+      return;
+    }
+
+    this.uploading.set(true);
+    this.workflowService.uploadAttachment(wf.id, file).subscribe({
+      next: () => {
+        this.toast.success('アップロードしました');
+        this.loadAttachments(wf.id);
+        this.uploading.set(false);
+      },
+      error: () => {
+        this.toast.error('アップロードに失敗しました');
+        this.uploading.set(false);
+      },
+    });
+  }
+
+  onDownload(att: WorkflowAttachment): void {
+    const wf = this.workflowService.currentWorkflow();
+    if (!wf) return;
+    this.workflowService.downloadAttachment(wf.id, att.id, att.fileName);
+  }
+
+  onDeleteAttachment(att: WorkflowAttachment): void {
+    const wf = this.workflowService.currentWorkflow();
+    if (!wf) return;
+
+    this.confirmationService.confirm({
+      header: '削除確認',
+      message: `${att.fileName} を削除しますか？`,
+      acceptLabel: '削除',
+      rejectLabel: 'キャンセル',
+      accept: () => {
+        this.workflowService.deleteAttachment(wf.id, att.id).subscribe({
+          next: () => {
+            this.toast.success('削除しました');
+            this.loadAttachments(wf.id);
+          },
+          error: () => this.toast.error('削除に失敗しました'),
+        });
+      },
+    });
+  }
+
+  canDeleteAttachment(att: WorkflowAttachment): boolean {
+    const user = this.auth.currentUser();
+    return att.uploadedBy === user?.id || this.auth.isAdmin();
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'pi pi-image';
+    if (contentType === 'application/pdf') return 'pi pi-file-pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel') || contentType === 'text/csv') return 'pi pi-file-excel';
+    if (contentType.includes('word') || contentType.includes('document')) return 'pi pi-file-word';
+    return 'pi pi-file';
+  }
+
+  // ─── Status & Type Helpers ───
 
   getStatusLabel(status: string): string {
     return (WORKFLOW_STATUS_LABELS as any)[status] ?? status;
@@ -294,6 +502,8 @@ export class WorkflowDetailComponent implements OnInit {
     return steps;
   }
 
+  // ─── Workflow Actions ───
+
   canApprove(wf: any): boolean {
     return wf.status === 'submitted' && this.auth.canApprove();
   }
@@ -315,11 +525,12 @@ export class WorkflowDetailComponent implements OnInit {
   }
 
   onApprove(): void {
-    const ref = this.modalService.open(ConfirmDialogComponent, {
-      data: { title: '承認確認', message: 'この申請を承認しますか？', confirmText: '承認' },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
+    this.confirmationService.confirm({
+      header: '承認確認',
+      message: 'この申請を承認しますか？',
+      acceptLabel: '承認',
+      rejectLabel: 'キャンセル',
+      accept: () => {
         const wf = this.workflowService.currentWorkflow();
         if (!wf) return;
         this.workflowService.approve(wf.id).subscribe({
@@ -328,7 +539,7 @@ export class WorkflowDetailComponent implements OnInit {
             this.router.navigate(['/workflows']);
           },
         });
-      }
+      },
     });
   }
 
@@ -348,11 +559,12 @@ export class WorkflowDetailComponent implements OnInit {
   }
 
   onWithdraw(): void {
-    const ref = this.modalService.open(ConfirmDialogComponent, {
-      data: { title: '取下げ確認', message: 'この申請を取下げますか？' },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
+    this.confirmationService.confirm({
+      header: '取下げ確認',
+      message: 'この申請を取下げますか？',
+      acceptLabel: '取下げ',
+      rejectLabel: 'キャンセル',
+      accept: () => {
         const wf = this.workflowService.currentWorkflow();
         if (!wf) return;
         this.workflowService.withdraw(wf.id).subscribe({
@@ -361,7 +573,7 @@ export class WorkflowDetailComponent implements OnInit {
             this.router.navigate(['/workflows']);
           },
         });
-      }
+      },
     });
   }
 

@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { roleGuard } from '../../core/auth/role.guard';
 
 export const WORKFLOW_ROUTES: Routes = [
   {
@@ -11,22 +10,24 @@ export const WORKFLOW_ROUTES: Routes = [
     path: 'new',
     loadComponent: () =>
       import('./workflow-form.component').then((m) => m.WorkflowFormComponent),
+    data: { title: '新規申請' },
   },
   {
     path: 'pending',
-    canActivate: [roleGuard],
-    data: { roles: ['approver', 'tenant_admin'] },
     loadComponent: () =>
-      import('./workflow-pending.component').then((m) => m.WorkflowPendingComponent),
+      import('./workflow-list.component').then((m) => m.WorkflowListComponent),
+    data: { title: '承認待ち', defaultMode: 'pending' },
   },
   {
     path: ':id',
     loadComponent: () =>
       import('./workflow-detail.component').then((m) => m.WorkflowDetailComponent),
+    data: { title: '申請詳細' },
   },
   {
     path: ':id/edit',
     loadComponent: () =>
       import('./workflow-form.component').then((m) => m.WorkflowFormComponent),
+    data: { title: '申請編集' },
   },
 ];

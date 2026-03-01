@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
 import { HealthController } from '../health.controller';
 import { PrismaHealthIndicator } from '../indicators/prisma-health.indicator';
+import { RedisHealthIndicator } from '../indicators/redis-health.indicator';
 
 describe('HealthController', () => {
     let controller: HealthController;
@@ -9,9 +10,9 @@ describe('HealthController', () => {
 
     const mockHealthyResult: HealthCheckResult = {
         status: 'ok',
-        info: { database: { status: 'up' } },
+        info: { database: { status: 'up' }, redis: { status: 'up' } },
         error: {},
-        details: { database: { status: 'up' } },
+        details: { database: { status: 'up' }, redis: { status: 'up' } },
     };
 
     beforeEach(async () => {
@@ -30,6 +31,12 @@ describe('HealthController', () => {
                         isHealthy: jest.fn().mockResolvedValue({ database: { status: 'up' } }),
                     },
                 },
+                {
+                    provide: RedisHealthIndicator,
+                    useValue: {
+                        isHealthy: jest.fn().mockResolvedValue({ redis: { status: 'up' } }),
+                    },
+                },
             ],
         }).compile();
 
@@ -40,22 +47,23 @@ describe('HealthController', () => {
     afterEach(() => jest.clearAllMocks());
 
     describe('GET /health', () => {
-        it('should return healthy status when DB is up', async () => {
+        it('should return healthy status when DB and Redis are up', async () => {
             const result = await controller.check();
 
             expect(healthCheckService.check).toHaveBeenCalledWith([
+                expect.any(Function),
                 expect.any(Function),
             ]);
             expect(result).toEqual(mockHealthyResult);
         });
 
-        it('should call health check with database indicator', async () => {
+        it('should call health check with database and redis indicators', async () => {
             await controller.check();
 
-            // Verify the check function was called with an array of indicator functions
             const checkArg = healthCheckService.check.mock.calls[0][0];
-            expect(checkArg).toHaveLength(1);
+            expect(checkArg).toHaveLength(2);
             expect(typeof checkArg[0]).toBe('function');
+            expect(typeof checkArg[1]).toBe('function');
         });
     });
 });

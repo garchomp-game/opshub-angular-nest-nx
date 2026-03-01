@@ -145,7 +145,9 @@ export class WorkflowListComponent implements OnInit {
   ];
 
   modeOptions = [
+    { label: 'すべての申請', value: 'all' },
     { label: '自分の申請のみ', value: 'mine' },
+    { label: '承認待ち', value: 'pending' },
   ];
 
   private readonly typeLabels: Record<string, string> = {
@@ -168,8 +170,11 @@ export class WorkflowListComponent implements OnInit {
   ngOnInit(): void {
     // URL パラメータからフィルター初期値を取得 (ダッシュボードからの遷移用)
     const queryParams = this.route.snapshot.queryParams;
+    const routeData = this.route.snapshot.data;
     if (queryParams['mode']) {
       this.modeFilter = queryParams['mode'];
+    } else if (routeData['defaultMode']) {
+      this.modeFilter = routeData['defaultMode'];
     }
     if (queryParams['status']) {
       this.statusFilter = queryParams['status'];

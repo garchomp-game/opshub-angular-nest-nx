@@ -66,8 +66,8 @@ pnpm nx serve api          # API サーバー (http://localhost:3000)
 pnpm nx serve web          # Web サーバー (http://localhost:4200)
 
 # テスト
-pnpm nx test api           # API ユニットテスト (229 テスト)
-pnpm nx test web           # Web ユニットテスト (139 テスト)
+pnpm nx test api           # API ユニットテスト (249 テスト)
+pnpm nx test web           # Web ユニットテスト (185 テスト)
 npx playwright test        # E2E テスト (37 テスト)
 
 # ビルド
@@ -107,8 +107,9 @@ opshub/
 │   ├── api/                        ← NestJS バックエンド
 │   │   └── src/
 │   │       ├── common/             ← デコレータ、ガード、インターセプター、フィルタ
-│   │       └── modules/            ← 11 モジュール
+│   │       └── modules/            ← 12 モジュール
 │   │           ├── auth/           ← 認証 (JWT + Passport)
+│   │           ├── mail/           ← メール送信 (Nodemailer + MailHog)
 │   │           ├── workflows/      ← 申請管理
 │   │           ├── projects/       ← プロジェクト + タスク管理
 │   │           ├── timesheets/     ← 工数管理
@@ -116,7 +117,7 @@ opshub/
 │   │           ├── invoices/       ← 請求書管理
 │   │           ├── documents/      ← ファイル管理
 │   │           ├── notifications/  ← 通知
-│   │           ├── search/         ← 全文検索
+│   │           ├── search/         ← 全文検索 (GIN インデックス)
 │   │           ├── dashboard/      ← ダッシュボード KPI
 │   │           ├── admin/          ← 管理 (ユーザー/テナント/監査ログ)
 │   │           └── health/         ← ヘルスチェック
@@ -125,14 +126,17 @@ opshub/
 │       └── src/app/
 │           ├── core/               ← AuthService, Interceptors, Guards
 │           │   ├── auth/           ← AuthService, AuthGuard, RoleGuard
+│           │   │   ├── forgot-password/  ← パスワードリセット申請画面
+│           │   │   └── reset-password/   ← パスワードリセット画面
 │           │   ├── interceptors/   ← auth, error (HttpClient)
 │           │   └── services/       ← LoggerService, GlobalErrorHandler
 │           ├── shared/             ← AppShell, Breadcrumb, NotFound, 通知ベル, 検索バー
-│           │   ├── components/     ← app-shell, breadcrumb, header-search-bar, not-found, confirm-dialog
+│           │   ├── components/     ← app-shell, breadcrumb, header-search-bar, not-found
 │           │   ├── notification-bell/
 │           │   ├── pipes/          ← カスタムパイプ
 │           │   └── services/       ← ToastService, ModalService (PrimeNG ラッパー)
-│           ├── features/           ← 各機能モジュール (8 機能)
+│           ├── features/           ← 各機能モジュール (9 機能)
+│           │   ├── notifications/  ← 通知一覧ページ
 │           └── testing/            ← テスト用ヘルパー
 │
 ├── libs/
@@ -200,9 +204,11 @@ opshub/
 | ヘルスチェック | `GET /api/health` — `@Public()` デコレータで認証不要 |
 | 認可 | RLS 不使用。`@Roles()` デコレータ + `RolesGuard` でアプリ層制御 (ADR-0007) |
 | ロギング | nestjs-pino で構造化 JSON ログ (本番は JSON、開発は pino-pretty) |
-| 監査ログ | `AuditInterceptor` — POST/PATCH/PUT/DELETE を自動記録。`beforeData` + diff 付き |
+| 監査ログ | `AuditInterceptor` — POST/PATCH/PUT/DELETE を自動記録。`beforeData` + diff 付き。DB RULE で INSERT ONLY 制約 |
 | PII マスキング | `HttpExceptionFilter` — `password`, `token`, `secret` フィールドをマスク |
 | エラー応答 | `HttpExceptionFilter` — 4xx は warn、5xx は error でログ出力 |
+| ThrottlerGuard | `@nestjs/throttler` — 3段階レート制限 (short/medium/long)。認証エンドポイントは厳格制限。ヘルスチェックは除外 |
+| MailService | Nodemailer ベース。開発環境は MailHog (`localhost:1025`)。パスワードリセットメール送信に使用 |
 
 ### Web 側
 
@@ -267,21 +273,29 @@ opshub/
 - C3: バンドル上限 2MB → 1.5MB 引き戻し
 - C5: ロギング・可観測性強化 (構造化ログ, PII マスキング, 監査 diff)
 
+### Phase 4: 機能追加 (D-3, D-4, D-6)
+- D-3: 通知ページ (`/notifications`) — ポーリング + 通知ベル連携
+- D-4: パスワードリセット (メール基盤 + Web 画面 `forgot-password` / `reset-password`)
+- D-6: WF 添付ファイル (multer + PrimeNG FileUpload)
+
+### Phase 5: インフラ強化 + 技術的負債 (I-6, D-8, D-9)
+- I-6: 監査ログ INSERT ONLY 制約 (PostgreSQL RULE)
+- D-8: 検索 GIN インデックス (`pg_trgm` 拡張)
+- D-9: レート制限 (`@nestjs/throttler` — 3段階)
+- ConfirmDialogComponent 廃止 → `ConfirmationService` 直接利用に統一
+
 ---
 
-## 9. 次フェーズ候補 (先送り)
+## 9. 次フェーズ候補 (Phase 6)
 
 | ID | 機能 | 工数 | 備考 |
 |---|---|---|---|
-| D-3 | 通知ページ (/notifications) | 中 | ポーリング or WebSocket |
-| D-4 | パスワードリセット | 中 | メール送信基盤必要 |
-| D-6 | WF 添付ファイル | 中 | documents 基盤を活用 |
-| I-6 | 監査ログ INSERT ONLY 制約 | 小 | DB マイグレーション |
-| D-8 | 検索 GIN インデックス | 小 | PostgreSQL |
-| D-9 | レート制限 | 中 | @nestjs/throttler |
-| D-5 | テナントデータエクスポート (GDPR) | 大 | — |
+| — | ドキュメント全面改訂 | 大 | reference/ の現行化 — 進行中 |
+| — | E2E テスト追加 | 中 | カバレッジ拡大 |
+| — | CI/CD パイプライン | 中 | GitHub Actions |
 | — | OpenAPI クライアント自動生成 | 中 | Swagger spec → Angular SDK |
-| — | ドキュメント全面改訂 | 大 | reference/ の現行化 |
+| — | BullMQ ジョブキュー | 中 | メール送信, レポート生成 |
+| D-5 | テナントデータエクスポート (GDPR) | 大 | — |
 
 ---
 
@@ -309,6 +323,8 @@ opshub/
 
 | Hash | 内容 |
 |---|---|
+| — | Phase 5: I-6 監査ログ INSERT ONLY + D-8 GIN インデックス + D-9 レート制限 + ConfirmDialog 廃止 |
+| — | Phase 4: D-3 通知ページ + D-4 パスワードリセット + D-6 WF 添付ファイル |
 | `2de3ee0` | C2 + C5: DTO/Swagger + ロギング強化 |
 | `af7918a` | C3: バンドル上限 1.5MB |
 | `5af4f3b` | C1: shared/ui 削除 → shared/services 移動 |
@@ -327,13 +343,9 @@ opshub/
 
 ## 12. 技術的負債・ゴッチャ（次の PM が踏まないために）
 
-### ⚠️ 削除候補: `ConfirmDialogComponent`
+### ✅ 解決済み: `ConfirmDialogComponent`
 
-`shared/components/confirm-dialog.component.ts` は `@deprecated` だが、以下 2 ファイルがまだ import している:
-- `workflow-detail.component.ts` (2 箇所で `ModalService.open(ConfirmDialogComponent, ...)`)
-- `workflow-pending.component.ts` (1 箇所)
-
-**実際の確認ダイアログは PrimeNG `ConfirmationService` が処理**しており、`ConfirmDialogComponent` 自体は空テンプレート。import を `ConfirmationService` に直接置き換えれば完全削除可能。
+Phase 5 で `ConfirmDialogComponent` を廃止し、`ConfirmationService` 直接利用に統一。`workflow-detail.component.ts` と `workflow-pending.component.ts` から import を削除済み。
 
 ### ⚠️ 環境変数 (.env)
 

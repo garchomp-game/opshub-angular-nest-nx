@@ -39,6 +39,7 @@ describe('NotificationController', () => {
                         getUnreadCount: jest.fn().mockResolvedValue(3),
                         markAsRead: jest.fn().mockResolvedValue(undefined),
                         markAllAsRead: jest.fn().mockResolvedValue({ count: 3 }),
+                        remove: jest.fn().mockResolvedValue(undefined),
                     },
                 },
             ],
@@ -103,6 +104,20 @@ describe('NotificationController', () => {
             expect(service.markAllAsRead).toHaveBeenCalledWith(
                 mockUser.tenantId,
                 mockUser.id,
+            );
+        });
+    });
+
+    // ─── remove ───
+
+    describe('DELETE /notifications/:id', () => {
+        it('remove が Service に正しい引数を渡すこと', async () => {
+            await controller.remove('notif-001', mockUser as any);
+
+            expect(service.remove).toHaveBeenCalledWith(
+                mockUser.tenantId,
+                mockUser.id,
+                'notif-001',
             );
         });
     });

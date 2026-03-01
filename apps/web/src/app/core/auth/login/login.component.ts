@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -13,7 +13,7 @@ import { AuthService } from '../auth.service';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, MessageModule, CardModule, IconFieldModule, InputIconModule],
+    imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, ButtonModule, MessageModule, CardModule, IconFieldModule, InputIconModule],
     template: `
   <div class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, var(--p-surface-ground) 0%, var(--p-primary-100) 100%);">
    <p-card styleClass="max-w-md w-full shadow-lg" data-testid="login-card">
@@ -75,6 +75,10 @@ import { AuthService } from '../auth.service';
           styleClass="w-full"
           data-testid="login-button" />
      </form>
+
+      <div class="text-center mt-4">
+       <a routerLink="/forgot-password" class="text-sm" style="color: var(--p-primary-color);" data-testid="forgot-password-link">パスワードを忘れた場合</a>
+      </div>
 
      <div class="mt-6 pt-4 text-center text-xs" style="border-top: 1px solid var(--p-surface-border); color: var(--p-text-muted-color);">
       &copy; {{ currentYear }} OpsHub Inc. All rights reserved.

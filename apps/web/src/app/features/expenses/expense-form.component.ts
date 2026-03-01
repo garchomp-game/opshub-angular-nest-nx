@@ -65,6 +65,7 @@ interface ApproverItem {
                 <label for="expenseDate" class="font-medium text-sm">日付 <span class="text-red-500">*</span></label>
                 <p-datepicker formControlName="expenseDate" inputId="expenseDate"
                     dateFormat="yy/mm/dd" [showIcon]="true"
+                    [appendTo]="'body'"
                     styleClass="w-full" data-testid="input-date" />
                 @if (form.get('expenseDate')?.touched && form.get('expenseDate')?.hasError('required')) {
                   <small class="text-red-500">日付は必須です</small>
@@ -75,7 +76,9 @@ interface ApproverItem {
               <div class="flex flex-col gap-2">
                 <label for="category" class="font-medium text-sm">カテゴリ <span class="text-red-500">*</span></label>
                 <p-select formControlName="category" [options]="categoryOptions"
+                    optionLabel="label" optionValue="value"
                     placeholder="カテゴリを選択" inputId="category"
+                    [appendTo]="'body'"
                     styleClass="w-full" data-testid="select-category" />
                 @if (form.get('category')?.touched && form.get('category')?.hasError('required')) {
                   <small class="text-red-500">カテゴリを選択してください</small>
@@ -101,6 +104,7 @@ interface ApproverItem {
                 <p-select formControlName="projectId" [options]="projects"
                     optionLabel="name" optionValue="id"
                     placeholder="プロジェクトを選択" inputId="projectId"
+                    [appendTo]="'body'"
                     styleClass="w-full" data-testid="select-project" />
                 @if (form.get('projectId')?.touched && form.get('projectId')?.hasError('required')) {
                   <small class="text-red-500">プロジェクトを選択してください</small>
@@ -113,6 +117,7 @@ interface ApproverItem {
                 <p-select formControlName="approverId" [options]="approvers"
                     optionLabel="displayName" optionValue="id"
                     placeholder="承認者を選択" inputId="approverId"
+                    [appendTo]="'body'"
                     styleClass="w-full" data-testid="select-approver" />
                 @if (form.get('approverId')?.touched && form.get('approverId')?.hasError('required')) {
                   <small class="text-red-500">承認者を選択してください</small>
@@ -172,7 +177,7 @@ export class ExpenseFormComponent implements OnInit {
   private http = inject(HttpClient);
 
   categories = EXPENSE_CATEGORIES;
-  categoryOptions = EXPENSE_CATEGORIES.map(cat => cat);
+  categoryOptions = EXPENSE_CATEGORIES.map(cat => ({ label: cat, value: cat }));
   projects: SimpleItem[] = [];
   approvers: ApproverItem[] = [];
   submitting = false;
@@ -188,11 +193,27 @@ export class ExpenseFormComponent implements OnInit {
 
   ngOnInit(): void {
     // 補助データ取得
-    this.http.get<SimpleItem[]>('/api/projects').subscribe({
-      next: (items) => (this.projects = items),
+    this.http.get<any>('/api/projects').subscribe({
+      next: (res) => {
+        const list = Array.isArray(res) ? res
+          : Array.isArray(res.data) ? res.data : [];
+        this.projects = list.map((p: any) => ({ id: p.id, name: p.name }));
+      },
     });
-    this.http.get<ApproverItem[]>('/api/users?role=approver').subscribe({
-      next: (items) => (this.approvers = items),
+    this.http.get<any>('/api/admin/users').subscribe({
+      next: (res) => {
+        const list = Array.isArray(res) ? res
+          : Array.isArray(res.data) ? res.data : [];
+        this.approvers = list
+          .filter((u: any) => {
+            const roles: string[] = u.roles || [];
+            return roles.includes('approver') || roles.includes('tenant_admin');
+          })
+          .map((u: any) => ({
+            id: u.id,
+            displayName: u.displayName || u.email?.split('@')[0],
+          }));
+      },
     });
   }
 

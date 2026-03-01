@@ -128,18 +128,17 @@ export class WorkflowFormComponent implements OnInit {
   ngOnInit(): void {
     this.http.get<any>('/api/admin/users').subscribe({
       next: (res) => {
-        const list = Array.isArray(res.data) ? res.data
-          : Array.isArray(res.data?.data) ? res.data.data
-            : Array.isArray(res) ? res : [];
+        const list = Array.isArray(res) ? res
+          : Array.isArray(res.data) ? res.data : [];
         this.approvers.set(list
           .filter((u: any) => {
-            const role = u.role || u.userRole;
-            return role === 'approver' || role === 'tenant_admin';
+            const roles: string[] = u.roles || [];
+            return roles.includes('approver') || roles.includes('tenant_admin');
           })
           .map((u: any) => ({
-            id: u.userId || u.id,
+            id: u.id,
             email: u.email,
-            displayName: u.displayName || u.profile?.displayName || u.email?.split('@')[0],
+            displayName: u.displayName || u.email?.split('@')[0],
           })));
       },
       error: () => { },

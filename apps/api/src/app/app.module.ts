@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from '@prisma-db';
 
@@ -26,6 +28,9 @@ import { DashboardModule } from '../modules/dashboard/dashboard.module';
 // Operations
 import { HealthModule } from '../modules/health/health.module';
 
+// Mail
+import { MailModule } from '../modules/mail/mail.module';
+
 // Interceptors (for DI)
 import { TenantInterceptor } from '../common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
@@ -33,6 +38,36 @@ import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env['REDIS_HOST'] || 'localhost',
+        port: parseInt(process.env['REDIS_PORT'] || '6379', 10),
+        maxRetriesPerRequest: 3,
+        enableReadyCheck: false,
+        retryStrategy: (times: number) => Math.min(times * 200, 3000),
+      },
+    }),
+    ThrottlerModule.forRoot(
+      process.env['THROTTLE_SKIP'] === 'true'
+        ? [{ ttl: 60000, limit: 999999 }]
+        : [
+          {
+            name: 'short',
+            ttl: 1000,    // 1秒
+            limit: parseInt(process.env['THROTTLE_SHORT_LIMIT'] || '3', 10),
+          },
+          {
+            name: 'medium',
+            ttl: 10000,   // 10秒
+            limit: parseInt(process.env['THROTTLE_MEDIUM_LIMIT'] || '20', 10),
+          },
+          {
+            name: 'long',
+            ttl: 60000,   // 1分
+            limit: parseInt(process.env['THROTTLE_LONG_LIMIT'] || '100', 10),
+          },
+        ],
+    ),
     LoggerModule.forRoot({
       pinoHttp: {
         autoLogging: true,
@@ -55,11 +90,13 @@ import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
     SearchModule,
     DocumentsModule,
     DashboardModule,
+    MailModule,
   ],
   providers: [
     // Global Guards (全エンドポイントに適用)
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Interceptors registered as providers for DI in main.ts
     TenantInterceptor,
     AuditInterceptor,

@@ -1,11 +1,13 @@
-import { Injectable, ConflictException, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@prisma-db';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { TokenPair, AuthUser } from './types/auth.types';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,7 @@ export class AuthService {
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly mailService: MailService,
     ) { }
 
     async validateUser(email: string, password: string): Promise<any | null> {
@@ -132,5 +135,74 @@ export class AuthService {
             refreshToken,
             expiresIn: 900,
         };
+    }
+
+    /**
+     * パスワードリセットトークンを生成し、メールで送信する。
+     * セキュリティ上、メールが存在しなくてもエラーは返さない。
+     */
+    async forgotPassword(email: string): Promise<void> {
+        const user = await this.prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            this.logger.warn(`Password reset requested for non-existent email: ${email}`);
+            return; // タイミング攻撃対策: 存在有無を漏らさない
+        }
+
+        // ランダムトークン生成 + SHA-256ハッシュで保存
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1時間
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                resetToken: hashedToken,
+                resetTokenExpiresAt: expiresAt,
+            },
+        });
+
+        try {
+            await this.mailService.sendPasswordResetEmail(user.email, rawToken);
+            this.logger.log(`Password reset email sent to: ${email}`);
+        } catch (error) {
+            this.logger.error(
+                `Failed to queue password reset email for: ${email}`,
+                error instanceof Error ? error.stack : error,
+            );
+        }
+    }
+
+    /**
+     * トークンを検証し、パスワードをリセットする。
+     */
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        const user = await this.prisma.user.findFirst({
+            where: {
+                resetToken: hashedToken,
+                resetTokenExpiresAt: { gte: new Date() },
+            },
+        });
+
+        if (!user) {
+            throw new BadRequestException({
+                code: 'ERR-AUTH-010',
+                message: 'リセットトークンが無効または期限切れです',
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetToken: null,
+                resetTokenExpiresAt: null,
+            },
+        });
+
+        this.logger.log(`Password reset completed for user: ${user.email}`);
     }
 }

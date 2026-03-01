@@ -10,20 +10,24 @@ export const INVOICE_ROUTES: Routes = [
     path: 'new',
     loadComponent: () =>
       import('./invoice-form.component').then((m) => m.InvoiceFormComponent),
+    data: { title: '新規請求書' },
   },
   {
     path: ':id',
     loadComponent: () =>
       import('./invoice-detail.component').then((m) => m.InvoiceDetailComponent),
+    data: { title: '請求書詳細' },
   },
   {
     path: ':id/edit',
     loadComponent: () =>
       import('./invoice-form.component').then((m) => m.InvoiceFormComponent),
+    data: { title: '請求書編集' },
   },
   {
     path: ':id/print',
     loadComponent: () =>
       import('./invoice-print-view.component').then((m) => m.InvoicePrintViewComponent),
+    data: { title: '請求書印刷' },
   },
 ];
