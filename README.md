@@ -22,7 +22,7 @@
 ### 前提条件
 
 - Node.js 22.x LTS
-- pnpm 9.x
+- pnpm 10.x
 - Docker (PostgreSQL + Redis + MailHog)
 
 ### 手順
