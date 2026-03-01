@@ -49,3 +49,16 @@ __screenshots__/
 # Temporary files
 tmp/
 playwright_all.log
+
+# Uploaded files
+uploads/
+
+# Export files
+exports/
+
+# OpenAPI generated client
+libs/api-client/src/lib/
+!libs/api-client/src/lib/.gitkeep
+e2e/.auth/
+test-results/
+playwright-report/

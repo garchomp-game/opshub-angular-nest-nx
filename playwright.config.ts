@@ -4,9 +4,9 @@ declare const process: { env: Record<string, string | undefined> };
 
 export default defineConfig({
     testDir: './e2e',
-    fullyParallel: false,
+    fullyParallel: true,
     retries: 0,
-    workers: 1,
+    workers: 2,
     reporter: 'list',
     timeout: 30_000,
     use: {
@@ -20,6 +20,9 @@ export default defineConfig({
             url: 'http://localhost:3000/api/health',
             reuseExistingServer: !process.env['CI'],
             timeout: 30_000,
+            env: {
+                THROTTLE_SKIP: 'true',
+            },
         },
         {
             command: 'pnpm nx serve web',
@@ -33,10 +36,20 @@ export default defineConfig({
             name: 'api-smoke',
             testMatch: /api\.smoke\.spec\.ts/,
         },
+        // 認証セットアップ — 一度だけ実行してストレージを保存
+        {
+            name: 'setup',
+            testMatch: /auth\.setup\.ts/,
+        },
         {
             name: 'ui-smoke',
             testMatch: /ui\.smoke\.spec\.ts/,
-            use: { browserName: 'chromium', headless: true },
+            dependencies: ['setup'],
+            use: {
+                browserName: 'chromium',
+                headless: true,
+                storageState: 'e2e/.auth/user.json',
+            },
         },
     ],
 });

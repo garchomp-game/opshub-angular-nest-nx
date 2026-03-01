@@ -345,4 +345,107 @@ export class WorkflowsService {
             });
         }
     }
+
+    // ─── Attachment Methods ───
+
+    async uploadAttachment(
+        tenantId: string,
+        workflowId: string,
+        file: Express.Multer.File,
+        userId: string,
+    ) {
+        // Verify workflow exists
+        await this.findOne(tenantId, workflowId);
+
+        return this.prisma.workflowAttachment.create({
+            data: {
+                tenantId,
+                workflowId,
+                fileName: file.originalname,
+                fileSize: file.size,
+                contentType: file.mimetype,
+                storagePath: `uploads/workflow-attachments/${file.filename}`,
+                uploadedBy: userId,
+            },
+        });
+    }
+
+    async getAttachments(tenantId: string, workflowId: string) {
+        // Verify workflow exists
+        await this.findOne(tenantId, workflowId);
+
+        return this.prisma.workflowAttachment.findMany({
+            where: { tenantId, workflowId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    async deleteAttachment(
+        tenantId: string,
+        workflowId: string,
+        attachmentId: string,
+        userId: string,
+    ) {
+        await this.findOne(tenantId, workflowId);
+
+        const attachment = await this.prisma.workflowAttachment.findUnique({
+            where: { id: attachmentId },
+        });
+
+        if (!attachment || attachment.tenantId !== tenantId || attachment.workflowId !== workflowId) {
+            throw new NotFoundException({
+                code: 'ERR-WF-ATT-003',
+                message: '添付ファイルが見つかりません',
+            });
+        }
+
+        // 権限チェック: 本人 or tenant_admin
+        if (attachment.uploadedBy !== userId) {
+            const adminRole = await this.prisma.userRole.findFirst({
+                where: { userId, tenantId, role: 'tenant_admin' },
+            });
+            if (!adminRole) {
+                throw new ForbiddenException({
+                    code: 'ERR-WF-ATT-004',
+                    message: 'この添付ファイルを削除する権限がありません',
+                });
+            }
+        }
+
+        // ファイル削除
+        const { unlink } = await import('fs/promises');
+        const { join } = await import('path');
+        const filePath = join(process.cwd(), attachment.storagePath);
+        try {
+            await unlink(filePath);
+        } catch {
+            this.logger.warn(`Failed to delete file: ${filePath}`);
+        }
+
+        await this.prisma.workflowAttachment.delete({
+            where: { id: attachmentId },
+        });
+    }
+
+    async getAttachmentFile(
+        tenantId: string,
+        workflowId: string,
+        attachmentId: string,
+    ) {
+        await this.findOne(tenantId, workflowId);
+
+        const attachment = await this.prisma.workflowAttachment.findUnique({
+            where: { id: attachmentId },
+        });
+
+        if (!attachment || attachment.tenantId !== tenantId || attachment.workflowId !== workflowId) {
+            throw new NotFoundException({
+                code: 'ERR-WF-ATT-003',
+                message: '添付ファイルが見つかりません',
+            });
+        }
+
+        return attachment;
+    }
 }
+

@@ -1,4 +1,4 @@
-import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideZoneChangeDetection, APP_INITIALIZER, inject } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import {
     provideHttpClient, withInterceptors, withFetch,
@@ -15,6 +15,7 @@ import { APP_ROUTES } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { GlobalErrorHandler } from './core/services/global-error-handler';
+import { AuthService } from './core/auth/auth.service';
 
 registerLocaleData(ja);
 
@@ -38,5 +39,13 @@ export const appConfig: ApplicationConfig = {
         MessageService,
         ConfirmationService,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
+        {
+            provide: APP_INITIALIZER,
+            useFactory: () => {
+                const auth = inject(AuthService);
+                return () => auth.whenReady();
+            },
+            multi: true,
+        },
     ],
 };

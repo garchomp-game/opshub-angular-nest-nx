@@ -15,6 +15,7 @@ import { CurrentUser as ICurrentUser } from '@shared/types';
 import { UsersService } from '../services/users.service';
 import { InviteUserDto } from '../dto/invite-user.dto';
 import { UpdateUserRoleDto } from '../dto/update-user-role.dto';
+import { UpdateUserStatusDto } from '../dto/update-user-status.dto';
 
 @ApiTags('admin/users')
 @ApiBearerAuth()
@@ -58,8 +59,8 @@ export class UsersController {
     async updateStatus(
         @CurrentUser() user: ICurrentUser,
         @Param('id') id: string,
-        @Body() body: { active: boolean },
+        @Body() dto: UpdateUserStatusDto,
     ) {
-        return this.usersService.updateStatus(user.tenantId, id, body.active);
+        return this.usersService.updateStatus(user.tenantId, id, dto.active);
     }
 }

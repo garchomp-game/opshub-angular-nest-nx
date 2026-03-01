@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AdminUsersService } from './users.service';
 
@@ -15,7 +15,7 @@ describe('AdminUsersService', () => {
         AdminUsersService,
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        { provide: MessageService, useValue: { add: vi.fn() } },
       ],
     });
     service = TestBed.inject(AdminUsersService);

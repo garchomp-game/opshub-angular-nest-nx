@@ -114,4 +114,56 @@ describe('WorkflowService', () => {
       { status: 403, statusText: 'Forbidden' },
     );
   });
+
+  // ─── Attachment Methods ───
+
+  it('uploadAttachment が FormData で POST /api/workflows/:id/attachments を呼ぶこと', () => {
+    const file = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+    service.uploadAttachment('wf-001', file).subscribe((res) => {
+      expect(res).toBeDefined();
+    });
+
+    const req = httpMock.expectOne('/api/workflows/wf-001/attachments');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBe(true);
+    req.flush({ id: 'att-001', fileName: 'test.pdf' });
+  });
+
+  it('getAttachments が GET /api/workflows/:id/attachments を呼ぶこと', () => {
+    service.getAttachments('wf-001').subscribe((res) => {
+      expect(res).toEqual([]);
+    });
+
+    const req = httpMock.expectOne('/api/workflows/wf-001/attachments');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('deleteAttachment が DELETE /api/workflows/:id/attachments/:attId を呼ぶこと', () => {
+    service.deleteAttachment('wf-001', 'att-001').subscribe();
+
+    const req = httpMock.expectOne('/api/workflows/wf-001/attachments/att-001');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('downloadAttachment が GET /api/workflows/:id/attachments/:attId/download を Blob で呼ぶこと', () => {
+    // Mock URL.createObjectURL and document.createElement
+    const mockUrl = 'blob:test';
+    (URL as any).createObjectURL = vi.fn().mockReturnValue(mockUrl);
+    (URL as any).revokeObjectURL = vi.fn();
+    const mockClick = vi.fn();
+    vi.spyOn(document, 'createElement').mockReturnValue({
+      href: '', download: '', click: mockClick,
+    } as any);
+
+    service.downloadAttachment('wf-001', 'att-001', 'test.pdf');
+
+    const req = httpMock.expectOne('/api/workflows/wf-001/attachments/att-001/download');
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    req.flush(new Blob(['test']));
+
+    expect(mockClick).toHaveBeenCalled();
+  });
 });

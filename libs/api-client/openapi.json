@@ -1,0 +1,3779 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/admin/tenant": {
+      "get": {
+        "operationId": "TenantsController_findOne",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      },
+      "patch": {
+        "operationId": "TenantsController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      },
+      "delete": {
+        "operationId": "TenantsController_softDelete",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      }
+    },
+    "/api/admin/tenant/export": {
+      "post": {
+        "operationId": "TenantsController_exportData",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportTenantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      }
+    },
+    "/api/admin/tenant/export/{jobId}": {
+      "get": {
+        "operationId": "TenantsController_getExportStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      }
+    },
+    "/api/admin/tenant/export/{jobId}/download": {
+      "get": {
+        "operationId": "TenantsController_downloadExport",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/tenant"
+        ]
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/users"
+        ]
+      }
+    },
+    "/api/admin/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/users"
+        ]
+      }
+    },
+    "/api/admin/users/invite": {
+      "post": {
+        "operationId": "UsersController_invite",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/users"
+        ]
+      }
+    },
+    "/api/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "UsersController_updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/users"
+        ]
+      }
+    },
+    "/api/admin/users/{id}/status": {
+      "patch": {
+        "operationId": "UsersController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/users"
+        ]
+      }
+    },
+    "/api/admin/audit-logs": {
+      "get": {
+        "operationId": "AuditLogsController_findAll",
+        "parameters": [
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "アクション名",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "description": "リソースタイプ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "ユーザーID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "admin/audit-logs"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/timesheets/daily": {
+      "get": {
+        "operationId": "TimesheetsController_getDaily",
+        "parameters": [
+          {
+            "name": "workDate",
+            "required": true,
+            "in": "query",
+            "description": "作業日",
+            "schema": {
+              "example": "2026-01-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "ユーザーID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/weekly": {
+      "get": {
+        "operationId": "TimesheetsController_getWeekly",
+        "parameters": [
+          {
+            "name": "weekStart",
+            "required": true,
+            "in": "query",
+            "description": "週の開始日（月曜日）",
+            "schema": {
+              "example": "2026-01-13",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "ユーザーID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets": {
+      "post": {
+        "operationId": "TimesheetsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTimesheetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/bulk": {
+      "put": {
+        "operationId": "TimesheetsController_bulkUpsert",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkTimesheetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/{id}": {
+      "delete": {
+        "operationId": "TimesheetsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/summary/by-project": {
+      "get": {
+        "operationId": "TimesheetsController_projectSummary",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectIds",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID一覧",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "unit",
+            "required": false,
+            "in": "query",
+            "description": "集計単位",
+            "schema": {
+              "default": "month",
+              "type": "string",
+              "enum": [
+                "month",
+                "week",
+                "day"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/summary/by-member": {
+      "get": {
+        "operationId": "TimesheetsController_memberSummary",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectIds",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID一覧",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "unit",
+            "required": false,
+            "in": "query",
+            "description": "集計単位",
+            "schema": {
+              "default": "month",
+              "type": "string",
+              "enum": [
+                "month",
+                "week",
+                "day"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/timesheets/export": {
+      "get": {
+        "operationId": "TimesheetsController_exportCsv",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "timesheets"
+        ]
+      }
+    },
+    "/api/workflows": {
+      "get": {
+        "operationId": "WorkflowsController_findAll",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "ステータス",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "submitted",
+                "approved",
+                "rejected",
+                "withdrawn"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "申請タイプ",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "expense",
+                "leave",
+                "purchase",
+                "other"
+              ]
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "description": "モード",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mine",
+                "pending"
+              ]
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      },
+      "post": {
+        "operationId": "WorkflowsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkflowDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/pending": {
+      "get": {
+        "operationId": "WorkflowsController_findPending",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}": {
+      "get": {
+        "operationId": "WorkflowsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      },
+      "patch": {
+        "operationId": "WorkflowsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkflowDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/submit": {
+      "post": {
+        "operationId": "WorkflowsController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/approve": {
+      "post": {
+        "operationId": "WorkflowsController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/reject": {
+      "post": {
+        "operationId": "WorkflowsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectWorkflowDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/withdraw": {
+      "post": {
+        "operationId": "WorkflowsController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/attachments": {
+      "post": {
+        "operationId": "WorkflowsController_uploadAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      },
+      "get": {
+        "operationId": "WorkflowsController_getAttachments",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/attachments/{attachmentId}": {
+      "delete": {
+        "operationId": "WorkflowsController_deleteAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/workflows/{id}/attachments/{attachmentId}/download": {
+      "get": {
+        "operationId": "WorkflowsController_downloadAttachment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "operationId": "NotificationController_findAll",
+        "parameters": [
+          {
+            "name": "unreadOnly",
+            "required": false,
+            "in": "query",
+            "description": "未読のみ",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/unread-count": {
+      "get": {
+        "operationId": "NotificationController_getUnreadCount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/{id}/read": {
+      "patch": {
+        "operationId": "NotificationController_markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/read-all": {
+      "patch": {
+        "operationId": "NotificationController_markAllAsRead",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/notifications/{id}": {
+      "delete": {
+        "operationId": "NotificationController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/expenses": {
+      "get": {
+        "operationId": "ExpensesController_findAll",
+        "parameters": [
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "経費カテゴリ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "ステータス",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "submitted",
+                "approved",
+                "rejected"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      },
+      "post": {
+        "operationId": "ExpensesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/expenses/{id}": {
+      "get": {
+        "operationId": "ExpensesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/expenses/summary/by-category": {
+      "get": {
+        "operationId": "ExpensesController_summaryByCategory",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "経費カテゴリ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "approvedOnly",
+            "required": false,
+            "in": "query",
+            "description": "承認済みのみ",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/expenses/summary/by-project": {
+      "get": {
+        "operationId": "ExpensesController_summaryByProject",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "経費カテゴリ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "approvedOnly",
+            "required": false,
+            "in": "query",
+            "description": "承認済みのみ",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/expenses/summary/by-month": {
+      "get": {
+        "operationId": "ExpensesController_summaryByMonth",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "経費カテゴリ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "approvedOnly",
+            "required": false,
+            "in": "query",
+            "description": "承認済みのみ",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/expenses/summary/stats": {
+      "get": {
+        "operationId": "ExpensesController_summaryStats",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "description": "開始日",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "description": "終了日",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "経費カテゴリ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "approvedOnly",
+            "required": false,
+            "in": "query",
+            "description": "承認済みのみ",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "expenses"
+        ]
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "operationId": "ProjectsController_findAll",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "ステータス",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "planning",
+                "active",
+                "completed",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "検索キーワード",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{id}": {
+      "get": {
+        "operationId": "ProjectsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      },
+      "patch": {
+        "operationId": "ProjectsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{id}/members": {
+      "post": {
+        "operationId": "ProjectsController_addMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{id}/members/{userId}": {
+      "delete": {
+        "operationId": "ProjectsController_removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{projectId}/tasks": {
+      "get": {
+        "operationId": "TasksController_findByProject",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "tasks"
+        ]
+      },
+      "post": {
+        "operationId": "TasksController_create",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/api/tasks/{id}": {
+      "put": {
+        "operationId": "TasksController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "tasks"
+        ]
+      },
+      "delete": {
+        "operationId": "TasksController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/api/tasks/{id}/status": {
+      "patch": {
+        "operationId": "TasksController_changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeTaskStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "tasks"
+        ]
+      }
+    },
+    "/api/invoices": {
+      "get": {
+        "operationId": "InvoicesController_findAll",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "ステータス",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "sent",
+                "paid",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "clientName",
+            "required": false,
+            "in": "query",
+            "description": "クライアント名",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectId",
+            "required": false,
+            "in": "query",
+            "description": "プロジェクトID（UUID）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      },
+      "post": {
+        "operationId": "InvoicesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/api/invoices/{id}": {
+      "get": {
+        "operationId": "InvoicesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      },
+      "patch": {
+        "operationId": "InvoicesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      },
+      "delete": {
+        "operationId": "InvoicesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/api/invoices/{id}/status": {
+      "patch": {
+        "operationId": "InvoicesController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/api/search": {
+      "get": {
+        "operationId": "SearchController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "検索キーワード",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "検索カテゴリ",
+            "schema": {
+              "default": "all",
+              "type": "string",
+              "enum": [
+                "all",
+                "workflows",
+                "projects",
+                "tasks",
+                "expenses"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/projects/{projectId}/documents": {
+      "get": {
+        "operationId": "DocumentsController_findAll",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "ページ番号",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1ページの件数",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "documents"
+        ]
+      },
+      "post": {
+        "operationId": "DocumentsController_upload",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/documents/{id}/download": {
+      "get": {
+        "operationId": "DocumentsController_download",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/documents/{id}": {
+      "delete": {
+        "operationId": "DocumentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "operationId": "DashboardController_getDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/dashboard/kpi": {
+      "get": {
+        "operationId": "DashboardController_getKpi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/dashboard/project-progress": {
+      "get": {
+        "operationId": "DashboardController_getProjectProgress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "dashboard"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "OpsHub API",
+    "description": "OpsHub バックエンド API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "メールアドレス",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "パスワード（8文字以上）",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "メールアドレス",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "パスワード（大文字・小文字・数字を各1文字以上）",
+            "minLength": 8
+          },
+          "displayName": {
+            "type": "string",
+            "description": "表示名",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "displayName"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "リフレッシュトークン"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "パスワードリセット対象のメールアドレス",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "パスワードリセットトークン"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新しいパスワード (8文字以上、英数字混在)",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
+      },
+      "UpdateTenantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "テナント名",
+            "maxLength": 100
+          },
+          "settings": {
+            "type": "object",
+            "description": "テナント設定"
+          }
+        }
+      },
+      "ExportTenantDto": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "csv"
+            ],
+            "description": "エクスポート形式"
+          },
+          "include": {
+            "type": "array",
+            "description": "エクスポート対象テーブル",
+            "items": {
+              "type": "string",
+              "enum": [
+                "users",
+                "projects",
+                "workflows",
+                "timesheets",
+                "expenses"
+              ]
+            }
+          }
+        },
+        "required": [
+          "format",
+          "include"
+        ]
+      },
+      "InviteUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "招待先メールアドレス",
+            "example": "user@example.com"
+          },
+          "role": {
+            "type": "string",
+            "description": "付与するロール",
+            "enum": [
+              "member",
+              "approver",
+              "pm",
+              "accounting",
+              "it_admin",
+              "tenant_admin"
+            ]
+          },
+          "displayName": {
+            "type": "string",
+            "description": "表示名"
+          }
+        },
+        "required": [
+          "email",
+          "role"
+        ]
+      },
+      "UpdateUserRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "変更先ロール",
+            "enum": [
+              "member",
+              "approver",
+              "pm",
+              "accounting",
+              "it_admin",
+              "tenant_admin"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "UpdateUserStatusDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "有効/無効フラグ"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "CreateTimesheetDto": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "プロジェクトID（UUID）"
+          },
+          "taskId": {
+            "type": "string",
+            "description": "タスクID（UUID）"
+          },
+          "workDate": {
+            "type": "string",
+            "description": "作業日",
+            "example": "2026-01-15"
+          },
+          "hours": {
+            "type": "number",
+            "description": "作業時間",
+            "minimum": 0.25,
+            "maximum": 24
+          },
+          "note": {
+            "type": "string",
+            "description": "メモ"
+          }
+        },
+        "required": [
+          "projectId",
+          "workDate",
+          "hours"
+        ]
+      },
+      "BulkTimesheetEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "既存レコードID（UUID）"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "プロジェクトID（UUID）"
+          },
+          "taskId": {
+            "type": "string",
+            "description": "タスクID（UUID）"
+          },
+          "workDate": {
+            "type": "string",
+            "description": "作業日",
+            "example": "2026-01-15"
+          },
+          "hours": {
+            "type": "number",
+            "description": "作業時間",
+            "minimum": 0.25,
+            "maximum": 24
+          },
+          "note": {
+            "type": "string",
+            "description": "メモ"
+          }
+        },
+        "required": [
+          "projectId",
+          "workDate",
+          "hours"
+        ]
+      },
+      "BulkTimesheetDto": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "description": "工数エントリ一覧",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkTimesheetEntryDto"
+            }
+          },
+          "deletedIds": {
+            "description": "削除対象ID一覧",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "entries"
+        ]
+      },
+      "CreateWorkflowDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "申請タイプ",
+            "enum": [
+              "expense",
+              "leave",
+              "purchase",
+              "other"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "タイトル",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "説明",
+            "maxLength": 2000
+          },
+          "amount": {
+            "type": "number",
+            "description": "金額"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "開始日",
+            "example": "2026-01-01"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "終了日",
+            "example": "2026-01-31"
+          },
+          "approverId": {
+            "type": "string",
+            "description": "承認者ID（UUID）"
+          },
+          "action": {
+            "type": "string",
+            "description": "アクション",
+            "enum": [
+              "draft",
+              "submit"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "approverId",
+          "action"
+        ]
+      },
+      "UpdateWorkflowDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "タイトル",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "説明",
+            "maxLength": 2000
+          },
+          "amount": {
+            "type": "number",
+            "description": "金額"
+          },
+          "dateFrom": {
+            "type": "string",
+            "description": "開始日",
+            "example": "2026-01-01"
+          },
+          "dateTo": {
+            "type": "string",
+            "description": "終了日",
+            "example": "2026-01-31"
+          },
+          "approverId": {
+            "type": "string",
+            "description": "承認者ID（UUID）"
+          }
+        }
+      },
+      "RejectWorkflowDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "差戻し理由"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "CreateExpenseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "経費カテゴリ"
+          },
+          "amount": {
+            "type": "number",
+            "description": "金額",
+            "minimum": 1,
+            "maximum": 10000000
+          },
+          "expenseDate": {
+            "type": "string",
+            "description": "経費発生日",
+            "example": "2026-01-15"
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "プロジェクトID（UUID）"
+          },
+          "approverId": {
+            "type": "string",
+            "description": "承認者ID（UUID）"
+          },
+          "status": {
+            "type": "string",
+            "description": "ステータス",
+            "enum": [
+              "draft",
+              "submitted"
+            ],
+            "default": "draft"
+          }
+        },
+        "required": [
+          "category",
+          "amount",
+          "expenseDate",
+          "projectId",
+          "approverId"
+        ]
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "プロジェクト名",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "status": {
+            "type": "string",
+            "description": "ステータス",
+            "enum": [
+              "planning",
+              "active",
+              "completed",
+              "cancelled"
+            ],
+            "default": "planning"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "開始日",
+            "example": "2026-01-01"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "終了日",
+            "example": "2026-12-31"
+          },
+          "pmId": {
+            "type": "string",
+            "description": "PM（プロジェクトマネージャー）ID（UUID）"
+          }
+        },
+        "required": [
+          "name",
+          "pmId"
+        ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "プロジェクト名",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "status": {
+            "type": "string",
+            "description": "ステータス",
+            "enum": [
+              "planning",
+              "active",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "description": "開始日",
+            "example": "2026-01-01"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "終了日",
+            "example": "2026-12-31"
+          },
+          "pmId": {
+            "type": "string",
+            "description": "PM（プロジェクトマネージャー）ID（UUID）"
+          }
+        }
+      },
+      "AddMemberDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ユーザーID（UUID）"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "タスクタイトル",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "assigneeId": {
+            "type": "string",
+            "description": "担当者ID（UUID）"
+          },
+          "priority": {
+            "type": "string",
+            "description": "優先度",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "default": "medium"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "期限",
+            "example": "2026-03-31"
+          },
+          "estimatedHours": {
+            "type": "number",
+            "description": "見積工数（時間）",
+            "minimum": 0,
+            "maximum": 999
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "タスクタイトル",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "description": "説明"
+          },
+          "assigneeId": {
+            "type": "object",
+            "description": "担当者ID（UUID）",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "description": "優先度",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "dueDate": {
+            "type": "object",
+            "description": "期限",
+            "example": "2026-03-31",
+            "nullable": true
+          },
+          "estimatedHours": {
+            "type": "object",
+            "description": "見積工数（時間）",
+            "minimum": 0,
+            "maximum": 999,
+            "nullable": true
+          }
+        }
+      },
+      "ChangeTaskStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "タスクステータス",
+            "enum": [
+              "todo",
+              "in_progress",
+              "done"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "InvoiceItemDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "明細説明"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "数量",
+            "minimum": 0
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "単価",
+            "minimum": 0
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "並び順",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unitPrice"
+        ]
+      },
+      "CreateInvoiceDto": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "プロジェクトID（UUID）"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "クライアント名"
+          },
+          "issuedDate": {
+            "type": "string",
+            "description": "発行日",
+            "example": "2026-01-15"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "支払期限",
+            "example": "2026-02-15"
+          },
+          "taxRate": {
+            "type": "number",
+            "description": "税率（%）",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "notes": {
+            "type": "string",
+            "description": "備考"
+          },
+          "items": {
+            "description": "請求明細",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItemDto"
+            }
+          }
+        },
+        "required": [
+          "clientName",
+          "issuedDate",
+          "dueDate",
+          "taxRate",
+          "items"
+        ]
+      },
+      "UpdateInvoiceDto": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "プロジェクトID（UUID）"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "クライアント名"
+          },
+          "issuedDate": {
+            "type": "string",
+            "description": "発行日",
+            "example": "2026-01-15"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "支払期限",
+            "example": "2026-02-15"
+          },
+          "taxRate": {
+            "type": "number",
+            "description": "税率（%）",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "notes": {
+            "type": "string",
+            "description": "備考"
+          },
+          "items": {
+            "description": "請求明細",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItemDto"
+            }
+          }
+        }
+      },
+      "UpdateInvoiceStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "請求書ステータス",
+            "enum": [
+              "draft",
+              "sent",
+              "paid",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, switchMap, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, switchMap, of, timeout } from 'rxjs';
 import { CurrentUser, Role, ApiResponse } from '@shared/types';
 import { LoggerService } from '../services/logger.service';
 
@@ -29,6 +29,7 @@ export class AuthService {
   private _readyPromise = new Promise<void>((resolve) => {
     this._readyResolve = resolve;
   });
+  private _logoutChannel: BroadcastChannel | null = null;
 
   // ─── Public Signals (readonly) ───
   readonly currentUser = this._currentUser.asReadonly();
@@ -59,9 +60,35 @@ export class AuthService {
   readonly canApprove = computed(() => this.hasRole(Role.APPROVER, Role.TENANT_ADMIN));
 
   constructor() {
-    // 遅延実行: AuthService → HttpClient → authInterceptor → AuthService の循環依存を回避
-    // Promise.resolve() で次のマイクロタスクに延期することで、DI コンテナの登録を完了させる
+    // 遅延実行: constructor 完了前に this.http を使用すると
+    // インスタンスが未完成の状態でインターセプターが呼ばれる可能性がある
+    // Promise.resolve() で次のマイクロタスクに延期することで安全に実行する
     Promise.resolve().then(() => this.loadFromStorage());
+
+    // ─── NA-05: visibilitychange トークンチェック ───
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.isAuthenticated()) {
+          this.refreshToken().subscribe({
+            error: () => this.logout(),
+          });
+        }
+      });
+    }
+
+    // ─── NA-06: BroadcastChannel 複数タブ logout 同期 ───
+    try {
+      this._logoutChannel = new BroadcastChannel('opshub_auth');
+      this._logoutChannel.onmessage = (event) => {
+        if (event.data === 'logout') {
+          this.clearState();
+          this.router.navigate(['/login']);
+        }
+      };
+    } catch {
+      // BroadcastChannel 非対応ブラウザ (Safari < 15.4 など)
+      this.logger.warn('BroadcastChannel not supported');
+    }
   }
 
   // ─── Auth Operations ───
@@ -99,6 +126,7 @@ export class AuthService {
     this.logger.info('logging out');
     this.http.post('/api/auth/logout', {}).subscribe({ error: () => { /* ignore */ } });
     this.clearState();
+    this._logoutChannel?.postMessage('logout');
     this.router.navigate(['/login']);
   }
 
@@ -128,6 +156,16 @@ export class AuthService {
   getAccessToken(): string | null {
     // Signal 優先、fallback で sessionStorage 直接読み取り
     return this._accessToken() ?? sessionStorage.getItem(TOKEN_KEY);
+  }
+
+  // ─── Password Reset ───
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/reset-password', { token, newPassword });
   }
 
   // ─── Private ───
@@ -174,7 +212,9 @@ export class AuthService {
     if (token) {
       this._accessToken.set(token);
       this._initializing.set(true);
-      this.fetchProfile().subscribe({
+      this.fetchProfile().pipe(
+        timeout(10_000),
+      ).subscribe({
         next: (user) => {
           this.logger.debug('loadFromStorage: profile result', { email: user?.email ?? 'NULL' });
           if (!user) {
@@ -187,7 +227,7 @@ export class AuthService {
           this._readyResolve();
         },
         error: (err) => {
-          this.logger.error('loadFromStorage: failed', { error: err?.message });
+          this.logger.error('loadFromStorage: failed (possibly timed out)', { error: err?.message });
           this._initializing.set(false);
           this.clearState();
           this._readyResolve();

@@ -32,6 +32,7 @@ describe('NotificationsService', () => {
                 count: jest.fn(),
                 update: jest.fn(),
                 updateMany: jest.fn(),
+                delete: jest.fn(),
             },
         };
 
@@ -197,6 +198,37 @@ describe('NotificationsService', () => {
                     title: 'テスト',
                 }),
             ).resolves.toBeUndefined();
+        });
+    });
+
+    // ─── remove ───
+
+    describe('remove', () => {
+        it('通知を削除すること', async () => {
+            prisma.notification.findFirst.mockResolvedValue(mockNotification);
+            prisma.notification.delete.mockResolvedValue(mockNotification);
+
+            await service.remove(tenantId, userId, 'notif-001');
+
+            expect(prisma.notification.delete).toHaveBeenCalledWith({
+                where: { id: 'notif-001' },
+            });
+        });
+
+        it('存在しない通知の場合 NotFoundException を投げること', async () => {
+            prisma.notification.findFirst.mockResolvedValue(null);
+
+            await expect(
+                service.remove(tenantId, userId, 'nonexist'),
+            ).rejects.toThrow(NotFoundException);
+        });
+
+        it('他人の通知の場合 NotFoundException を投げること', async () => {
+            prisma.notification.findFirst.mockResolvedValue(null);
+
+            await expect(
+                service.remove(tenantId, 'other-user', 'notif-001'),
+            ).rejects.toThrow(NotFoundException);
         });
     });
 

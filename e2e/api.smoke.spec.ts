@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { test, expect, APIRequestContext } from '@playwright/test';
 
 const API_BASE = 'http://localhost:3000/api';
@@ -368,4 +369,137 @@ test('存在しない API エンドポイントが 404 を返すこと', async (
         headers: { Authorization: `Bearer ${token}` },
     });
     expect(res.status()).toBe(404);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Tier C: Phase 4-5 テスト
+// ═══════════════════════════════════════════════════════════════
+
+// ─── C-1: 通知 CRUD ───
+
+test('通知一覧が取得でき、既読化と削除が動作すること', async ({ request }) => {
+    const token = await login(request);
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // 通知一覧取得
+    const listRes = await request.get(`${API_BASE}/notifications`, { headers });
+    expect(listRes.ok()).toBe(true);
+    const listBody = await listRes.json();
+    expect(listBody.success).toBe(true);
+
+    // 通知が存在する場合、既読化と削除をテスト
+    const notifications = Array.isArray(listBody.data) ? listBody.data
+        : Array.isArray(listBody.data?.data) ? listBody.data.data : [];
+    if (notifications.length > 0) {
+        const notiId = notifications[0].id;
+
+        // 既読化 (204 No Content)
+        const readRes = await request.patch(`${API_BASE}/notifications/${notiId}/read`, { headers });
+        expect(readRes.status()).toBe(204);
+
+        // 削除 (204 No Content)
+        const deleteRes = await request.delete(`${API_BASE}/notifications/${notiId}`, { headers });
+        expect(deleteRes.status()).toBe(204);
+    }
+});
+
+// ─── C-2: パスワードリセット ───
+
+test('forgot-password が存在しないメールでも 200 を返すこと', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/auth/forgot-password`, {
+        data: { email: 'nonexistent@example.com' },
+    });
+    expect(res.ok()).toBe(true);  // セキュリティ: 存在有無を漏らさない
+});
+
+test('forgot-password がバリデーション違反で 400 を返すこと', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/auth/forgot-password`, {
+        data: { email: '' },
+    });
+    expect(res.status()).toBe(400);
+});
+
+test('reset-password が無効なトークンで 400 を返すこと', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/auth/reset-password`, {
+        data: { token: 'invalid-token', newPassword: 'NewPassword123' },
+    });
+    expect(res.status()).toBe(400);
+});
+
+// ─── C-3: WF 添付ファイル ───
+
+test('ワークフローに添付ファイルをアップロード・一覧・削除できること', async ({ request }) => {
+    const token = await login(request);
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // ワークフロー作成
+    const usersRes = await request.get(`${API_BASE}/admin/users`, { headers });
+    const usersBody = await usersRes.json();
+    const userList = Array.isArray(usersBody.data) ? usersBody.data
+        : Array.isArray(usersBody.data?.data) ? usersBody.data.data : [];
+    const approver = userList.find((u: any) => u.email === 'approver@demo.com');
+
+    const createRes = await request.post(`${API_BASE}/workflows`, {
+        headers,
+        data: {
+            type: 'expense',
+            title: 'E2E 添付ファイルテスト',
+            approverId: approver?.id || approver?.userId,
+            action: 'draft',
+        },
+    });
+    const wfId = (await createRes.json()).data.id;
+
+    // テキストファイルをアップロード
+    const uploadRes = await request.post(`${API_BASE}/workflows/${wfId}/attachments`, {
+        headers,
+        multipart: {
+            file: {
+                name: 'test.txt',
+                mimeType: 'text/plain',
+                buffer: Buffer.from('E2E テスト添付ファイル'),
+            },
+        },
+    });
+    expect(uploadRes.ok()).toBe(true);
+    const attachment = (await uploadRes.json()).data;
+    expect(attachment.fileName).toBe('test.txt');
+
+    // 一覧取得
+    const attListRes = await request.get(`${API_BASE}/workflows/${wfId}/attachments`, { headers });
+    expect(attListRes.ok()).toBe(true);
+    const attachments = (await attListRes.json()).data;
+    expect(attachments.length).toBeGreaterThanOrEqual(1);
+
+    // 削除
+    const deleteRes = await request.delete(
+        `${API_BASE}/workflows/${wfId}/attachments/${attachment.id}`, { headers }
+    );
+    expect(deleteRes.status()).toBe(204);
+});
+
+test('許可されていない MIME タイプのアップロードが拒否されること', async ({ request }) => {
+    const token = await login(request);
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // 既存のワークフローを取得 or 作成
+    const listRes = await request.get(`${API_BASE}/workflows`, { headers });
+    const workflows = (await listRes.json()).data;
+    const wfList = Array.isArray(workflows) ? workflows
+        : Array.isArray(workflows?.data) ? workflows.data : [];
+
+    if (wfList.length > 0) {
+        const wfId = wfList[0].id;
+        const uploadRes = await request.post(`${API_BASE}/workflows/${wfId}/attachments`, {
+            headers,
+            multipart: {
+                file: {
+                    name: 'test.exe',
+                    mimeType: 'application/x-msdownload',
+                    buffer: Buffer.from('fake EXE'),
+                },
+            },
+        });
+        expect(uploadRes.status()).toBe(400);
+    }
 });

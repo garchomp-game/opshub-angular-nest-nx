@@ -1,11 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { CardModule } from 'primeng/card';
 import { AvatarModule } from 'primeng/avatar';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import {
   TaskStatus, TASK_STATUS_LABELS, TASK_TRANSITIONS, canTransition,
 } from '@shared/types';
@@ -16,8 +18,8 @@ import { TaskService } from './task.service';
   selector: 'app-kanban-board',
   standalone: true,
   imports: [
-    RouterLink, DragDropModule, DatePipe, NgClass,
-    CardModule, AvatarModule, TooltipModule, ButtonModule,
+    RouterLink, DragDropModule, DatePipe, NgClass, FormsModule,
+    CardModule, AvatarModule, TooltipModule, ButtonModule, InputTextModule,
   ],
   template: `
     <div class="p-4 lg:p-6 max-w-[1600px] mx-auto space-y-6 flex flex-col h-[calc(100vh-64px)]">
@@ -38,10 +40,30 @@ import { TaskService } from './task.service';
               <div class="px-4 py-3 flex items-center justify-between border-b border-surface-200 rounded-t-xl shrink-0"
                  [ngClass]="getColumnHeaderClass(column.status)">
                 <h3 class="font-bold text-sm tracking-wide m-0">{{ column.label }}</h3>
-                <span class="bg-black/10 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
-                  {{ getTasksByStatus(column.status).length }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="bg-black/10 px-2 py-0.5 rounded-full text-xs font-bold font-mono">
+                    {{ getTasksByStatus(column.status).length }}
+                  </span>
+                  @if (column.status === 'todo') {
+                    <p-button icon="pi pi-plus" [rounded]="true" [text]="true" size="small"
+                        (onClick)="showAddForm.set(!showAddForm())" pTooltip="タスク追加"
+                        data-testid="add-task-btn" />
+                  }
+                </div>
               </div>
+
+              @if (column.status === 'todo' && showAddForm()) {
+                <div class="px-3 pt-3" data-testid="add-task-form">
+                  <div class="flex gap-2">
+                    <input pInputText [(ngModel)]="newTaskTitle" placeholder="タスク名を入力"
+                        class="w-full text-sm" (keyup.enter)="addTask()"
+                        data-testid="new-task-input" />
+                    <p-button icon="pi pi-check" [rounded]="true" size="small"
+                        [disabled]="!newTaskTitle.trim()"
+                        (onClick)="addTask()" data-testid="confirm-add-task-btn" />
+                  </div>
+                </div>
+              }
 
               <div class="p-3 flex-1 overflow-y-auto min-h-[150px]"
                  cdkDropList
@@ -117,6 +139,8 @@ export class KanbanBoardComponent implements OnInit {
   private toast = inject(ToastService);
 
   projectId = '';
+  showAddForm = signal(false);
+  newTaskTitle = '';
 
   columns = [
     { status: TaskStatus.TODO, label: TASK_STATUS_LABELS[TaskStatus.TODO] },
@@ -149,6 +173,19 @@ export class KanbanBoardComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return dueDate < today;
+  }
+
+  addTask(): void {
+    const title = this.newTaskTitle.trim();
+    if (!title) return;
+    this.taskService.create(this.projectId, { title }).subscribe({
+      next: () => {
+        this.newTaskTitle = '';
+        this.showAddForm.set(false);
+        this.toast.success('タスクを追加しました');
+      },
+      error: () => this.toast.error('タスクの追加に失敗しました'),
+    });
   }
 
   onDrop(event: CdkDragDrop<TaskStatus>) {

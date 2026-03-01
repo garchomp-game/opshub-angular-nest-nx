@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import * as fs from 'fs';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -44,14 +45,24 @@ async function bootstrap() {
     new ResponseInterceptor(),
   );
 
-  // Swagger (開発モードのみ)
+  // Swagger config (always available for spec generation)
+  const config = new DocumentBuilder()
+    .setTitle('OpsHub API')
+    .setDescription('OpsHub バックエンド API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const doc = SwaggerModule.createDocument(app, config);
+
+  // OpenAPI spec export mode
+  if (process.env['GENERATE_OPENAPI'] === 'true') {
+    fs.writeFileSync('libs/api-client/openapi.json', JSON.stringify(doc, null, 2));
+    console.log('OpenAPI spec written to libs/api-client/openapi.json');
+    process.exit(0);
+  }
+
+  // Swagger UI (開発モードのみ)
   if (process.env['NODE_ENV'] !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('OpsHub API')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
-    const doc = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, doc);
   }
 

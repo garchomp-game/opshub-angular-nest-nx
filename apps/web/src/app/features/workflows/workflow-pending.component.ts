@@ -7,8 +7,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { WorkflowService, Workflow } from './workflow.service';
 import { WORKFLOW_STATUS_LABELS } from '@shared/types';
-import { ModalService } from '../../shared/services/modal.service';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
@@ -81,7 +80,7 @@ import { ToastService } from '../../shared/services/toast.service';
 export class WorkflowPendingComponent implements OnInit {
   workflowService = inject(WorkflowService);
   private router = inject(Router);
-  private modalService = inject(ModalService);
+  private confirmationService = inject(ConfirmationService);
   private toast = inject(ToastService);
 
   displayedColumns = ['workflowNumber', 'title', 'creator', 'createdAt', 'actions'];
@@ -91,13 +90,14 @@ export class WorkflowPendingComponent implements OnInit {
   }
 
   onApproveClick(wf: Workflow): void {
-    const ref = this.modalService.open(ConfirmDialogComponent, {
-      data: { title: '承認確認', message: 'この申請を承認しますか？', confirmText: '承認' },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
+    this.confirmationService.confirm({
+      header: '承認確認',
+      message: 'この申請を承認しますか？',
+      acceptLabel: '承認',
+      rejectLabel: 'キャンセル',
+      accept: () => {
         this.onApproveConfirm(wf);
-      }
+      },
     });
   }
 

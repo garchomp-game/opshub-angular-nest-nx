@@ -125,4 +125,44 @@ export class NotificationService implements OnDestroy {
       this._unreadCount.set(0);
     });
   }
+
+  /**
+   * 個別通知削除
+   */
+  deleteNotification(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/notifications/${id}`);
+  }
+
+  /**
+   * 通知を削除してSignalを更新
+   */
+  deleteAndUpdate(id: string): Observable<void> {
+    return this.deleteNotification(id).pipe(
+      tap(() => {
+        const wasUnread = this._notifications().find((n) => n.id === id && !n.isRead);
+        this._notifications.update((list) => list.filter((n) => n.id !== id));
+        if (wasUnread) {
+          this._unreadCount.update((count) => Math.max(0, count - 1));
+        }
+      }),
+    );
+  }
+
+  /**
+   * ページネーション対応の通知一覧取得（Signal 更新付き）
+   */
+  loadNotificationsPage(page: number, limit: number, unreadOnly: boolean): Observable<NotificationListResponse> {
+    this._isLoading.set(true);
+    return this.getAll({ page, limit, unreadOnly }).pipe(
+      tap((res) => {
+        this._notifications.set(res.data);
+        this._isLoading.set(false);
+      }),
+      catchError((err) => {
+        this._isLoading.set(false);
+        return of({ data: [], total: 0 });
+      }),
+    );
+  }
 }
+

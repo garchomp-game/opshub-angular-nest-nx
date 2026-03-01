@@ -1,11 +1,11 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { catchError, throwError } from 'rxjs';
 import { LoggerService } from '../services/logger.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const snackBar = inject(MatSnackBar);
+  const messageService = inject(MessageService);
   const logger = inject(LoggerService).createChild('ErrorInterceptor');
 
   return next(req).pipe(
@@ -22,9 +22,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           retryable: true,
         });
 
-        snackBar.open('ネットワークに接続できません。接続を確認してください。', '閉じる', {
-          duration: 5000,
-          panelClass: ['error-snackbar'],
+        messageService.add({
+          severity: 'error',
+          summary: 'ネットワークに接続できません。接続を確認してください。',
+          life: 5000,
         });
 
         return throwError(() => error);
@@ -44,9 +45,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         ?? error.error?.message
         ?? 'サーバーエラーが発生しました';
 
-      snackBar.open(message, '閉じる', {
-        duration: 5000,
-        panelClass: error.status >= 500 ? ['error-snackbar'] : ['warn-snackbar'],
+      messageService.add({
+        severity: error.status >= 500 ? 'error' : 'warn',
+        summary: message,
+        life: 5000,
       });
 
       return throwError(() => error);

@@ -177,10 +177,11 @@ export class AppShellComponent {
       { path: '/dashboard', icon: 'pi pi-home', label: 'ダッシュボード', roles: ['*'] },
       { path: '/workflows', icon: 'pi pi-file', label: '申請', roles: ['*'] },
       { path: '/projects', icon: 'pi pi-briefcase', label: 'プロジェクト', roles: ['*'] },
-      { path: '/timesheets', icon: 'pi pi-clock', label: '工数', roles: ['member', 'pm'] },
+      { path: '/timesheets', icon: 'pi pi-clock', label: '工数', roles: ['*'] },
       { path: '/expenses', icon: 'pi pi-money-bill', label: '経費', roles: ['*'] },
       { path: '/invoices', icon: 'pi pi-copy', label: '請求書', roles: ['accounting', 'pm', 'tenant_admin'] },
       { path: '/search', icon: 'pi pi-search', label: '検索', roles: ['*'] },
+      { path: '/notifications', icon: 'pi pi-bell', label: '通知', roles: ['*'] },
       { path: '/admin', icon: 'pi pi-cog', label: '管理', roles: ['tenant_admin', 'it_admin'] },
     ];
     return items.filter((item) =>

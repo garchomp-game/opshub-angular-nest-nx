@@ -1,0 +1,5 @@
+{
+    "$schema": "https://raw.githubusercontent.com/cyclosproject/ng-openapi-gen/master/ng-openapi-gen-schema.json",
+    "input": "libs/api-client/openapi.json",
+    "output": "libs/api-client/src/lib"
+}

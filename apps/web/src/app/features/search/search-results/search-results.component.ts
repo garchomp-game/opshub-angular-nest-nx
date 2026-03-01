@@ -7,6 +7,8 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SearchService, SearchResult } from '../services/search.service';
 
@@ -15,21 +17,22 @@ import { SearchService, SearchResult } from '../services/search.service';
   standalone: true,
   imports: [
     CommonModule, RouterLink, FormsModule, DatePipe,
-    TabsModule, CardModule, TagModule, ButtonModule, InputTextModule, ProgressSpinnerModule,
+    TabsModule, CardModule, TagModule, ButtonModule, InputTextModule,
+    IconFieldModule, InputIconModule, ProgressSpinnerModule,
   ],
   template: `
   <div class="p-6 lg:p-8 max-w-4xl mx-auto space-y-6" data-testid="search-results-page">
     <!-- Search Input -->
     <p-card>
-      <div class="flex gap-2">
-        <div class="flex items-center gap-2 flex-1 relative">
-          <i class="pi pi-search absolute left-3" style="color: var(--p-text-muted-color)"></i>
-          <input pInputText class="w-full pl-10"
+      <div class="flex gap-3">
+        <p-iconfield class="flex-1">
+          <p-inputicon styleClass="pi pi-search" />
+          <input pInputText class="w-full"
               [(ngModel)]="searchQuery"
               (keyup.enter)="onSearch()"
               placeholder="キーワードを入力..."
-              data-testid="search-input">
-        </div>
+              data-testid="search-input" />
+        </p-iconfield>
         <p-button label="検索" (onClick)="onSearch()" />
       </div>
     </p-card>

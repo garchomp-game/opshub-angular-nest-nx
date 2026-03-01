@@ -24,6 +24,18 @@ describe('WorkflowsController', () => {
         meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
     };
 
+    const mockAttachment = {
+        id: 'att-001',
+        tenantId: 'tenant-001',
+        workflowId: 'wf-001',
+        fileName: 'test.pdf',
+        fileSize: 1024,
+        contentType: 'application/pdf',
+        storagePath: 'uploads/workflow-attachments/test.pdf',
+        uploadedBy: 'user-001',
+        createdAt: new Date(),
+    };
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [WorkflowsController],
@@ -40,6 +52,10 @@ describe('WorkflowsController', () => {
                         approve: jest.fn().mockResolvedValue({ ...mockWorkflow, status: 'approved' }),
                         reject: jest.fn().mockResolvedValue({ ...mockWorkflow, status: 'rejected' }),
                         withdraw: jest.fn().mockResolvedValue({ ...mockWorkflow, status: 'withdrawn' }),
+                        uploadAttachment: jest.fn().mockResolvedValue(mockAttachment),
+                        getAttachments: jest.fn().mockResolvedValue([mockAttachment]),
+                        deleteAttachment: jest.fn().mockResolvedValue(undefined),
+                        getAttachmentFile: jest.fn().mockResolvedValue(mockAttachment),
                     },
                 },
             ],
@@ -156,6 +172,59 @@ describe('WorkflowsController', () => {
 
             expect(service.withdraw).toHaveBeenCalledWith(
                 mockUser.tenantId, 'wf-001', mockUser.id,
+            );
+        });
+    });
+
+    // ─── POST /:id/attachments ───
+    describe('uploadAttachment', () => {
+        it('Service.uploadAttachment に委譲すること', async () => {
+            const mockFile = {
+                originalname: 'test.pdf',
+                mimetype: 'application/pdf',
+                size: 1024,
+                filename: 'uuid-test.pdf',
+            } as Express.Multer.File;
+
+            const result = await controller.uploadAttachment('wf-001', mockFile, mockUser);
+
+            expect(result).toEqual(mockAttachment);
+            expect(service.uploadAttachment).toHaveBeenCalledWith(
+                mockUser.tenantId, 'wf-001', mockFile, mockUser.id,
+            );
+        });
+    });
+
+    // ─── GET /:id/attachments ───
+    describe('getAttachments', () => {
+        it('Service.getAttachments に委譲すること', async () => {
+            const result = await controller.getAttachments('wf-001', mockUser);
+
+            expect(result).toEqual([mockAttachment]);
+            expect(service.getAttachments).toHaveBeenCalledWith(
+                mockUser.tenantId, 'wf-001',
+            );
+        });
+    });
+
+    // ─── DELETE /:id/attachments/:attachmentId ───
+    describe('deleteAttachment', () => {
+        it('Service.deleteAttachment に委譲すること', async () => {
+            await controller.deleteAttachment('wf-001', 'att-001', mockUser);
+
+            expect(service.deleteAttachment).toHaveBeenCalledWith(
+                mockUser.tenantId, 'wf-001', 'att-001', mockUser.id,
+            );
+        });
+    });
+
+    // ─── GET /:id/attachments/:attachmentId/download ───
+    describe('downloadAttachment', () => {
+        it('Service.getAttachmentFile を呼ぶこと', async () => {
+            await service.getAttachmentFile('tenant-001', 'wf-001', 'att-001');
+
+            expect(service.getAttachmentFile).toHaveBeenCalledWith(
+                'tenant-001', 'wf-001', 'att-001',
             );
         });
     });

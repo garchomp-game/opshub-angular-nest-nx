@@ -2,6 +2,17 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, finalize } from 'rxjs';
 
+export interface WorkflowAttachment {
+  id: string;
+  workflowId: string;
+  fileName: string;
+  fileSize: number;
+  contentType: string;
+  storagePath: string;
+  uploadedBy: string;
+  createdAt: string;
+}
+
 export interface Workflow {
   id: string;
   workflowNumber: string;
@@ -20,7 +31,7 @@ export interface Workflow {
   updatedAt: string;
   creator?: { id: string; profile?: { displayName: string } };
   approver?: { id: string; profile?: { displayName: string } };
-  attachments?: any[];
+  attachments?: WorkflowAttachment[];
 }
 
 export interface PaginatedWorkflows {
@@ -141,5 +152,34 @@ export class WorkflowService {
 
   withdraw(id: string): Observable<any> {
     return this.http.post<any>(`/api/workflows/${id}/withdraw`, {});
+  }
+
+  // ─── Attachment Methods ───
+
+  uploadAttachment(workflowId: string, file: File): Observable<WorkflowAttachment> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<WorkflowAttachment>(`/api/workflows/${workflowId}/attachments`, formData);
+  }
+
+  getAttachments(workflowId: string): Observable<WorkflowAttachment[]> {
+    return this.http.get<WorkflowAttachment[]>(`/api/workflows/${workflowId}/attachments`);
+  }
+
+  deleteAttachment(workflowId: string, attachmentId: string): Observable<void> {
+    return this.http.delete<void>(`/api/workflows/${workflowId}/attachments/${attachmentId}`);
+  }
+
+  downloadAttachment(workflowId: string, attachmentId: string, fileName: string): void {
+    this.http.get(`/api/workflows/${workflowId}/attachments/${attachmentId}/download`, {
+      responseType: 'blob',
+    }).subscribe((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   }
 }
