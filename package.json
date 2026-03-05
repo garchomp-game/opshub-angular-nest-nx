@@ -2,18 +2,18 @@
   "name": "@opshub/source",
   "version": "0.0.0",
   "license": "MIT",
-  "packageManager": "pnpm@10.30.1",
+  "packageManager": "bun@1.2.4",
   "scripts": {
-    "typecheck": "pnpm typecheck:api && pnpm typecheck:web",
+    "typecheck": "bun run typecheck:api && bun run typecheck:web",
     "typecheck:api": "tsc --noEmit --incremental --tsBuildInfoFile .tsbuildinfo-api -p apps/api/tsconfig.app.json",
     "typecheck:web": "nx build web --configuration=development",
-    "check": "pnpm typecheck && pnpm nx test api && pnpm nx test web",
-    "prisma:generate": "npx prisma generate --schema=libs/prisma-db/prisma/schema.prisma",
-    "generate:api-spec": "GENERATE_OPENAPI=true npx nx serve api --watch=false || true",
-    "generate:api-client": "pnpm generate:api-spec && ng-openapi-gen"
+    "check": "bun run typecheck && bunx nx test api && bunx nx test web",
+    "prisma:generate": "bunx prisma generate --schema=libs/prisma-db/prisma/schema.prisma",
+    "generate:api-spec": "GENERATE_OPENAPI=true bunx nx serve api --watch=false || true",
+    "generate:api-client": "bun run generate:api-spec && ng-openapi-gen"
   },
   "private": true,
-  "pnpm": {
+  "bun": {
     "onlyBuiltDependencies": [
       "@swc/core",
       "@prisma/client",
@@ -133,6 +133,6 @@
     "zone.js": "^0.16.1"
   },
   "prisma": {
-    "seed": "npx tsx libs/prisma-db/prisma/seed.ts"
+    "seed": "bunx tsx libs/prisma-db/prisma/seed.ts"
   }
 }

@@ -16,7 +16,7 @@ export default defineConfig({
     },
     webServer: [
         {
-            command: 'pnpm nx serve api',
+            command: 'bunx nx serve api',
             url: 'http://localhost:3000/api/health',
             reuseExistingServer: !process.env['CI'],
             timeout: 30_000,
@@ -25,7 +25,7 @@ export default defineConfig({
             },
         },
         {
-            command: 'pnpm nx serve web',
+            command: 'bunx nx serve web',
             url: 'http://localhost:4200',
             reuseExistingServer: !process.env['CI'],
             timeout: 60_000,
