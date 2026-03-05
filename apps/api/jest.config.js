@@ -21,7 +21,7 @@ module.exports = {
     },
     coverageDirectory: '../../coverage/apps/api',
     transformIgnorePatterns: [
-        '/node_modules/(?!(.pnpm|uuid))',
-        '/node_modules/.pnpm/(?!(uuid)@)',
+        '/node_modules/(?!(.bun|uuid))',
+        '/node_modules/.bun/(?!(uuid)@)',
     ],
 };

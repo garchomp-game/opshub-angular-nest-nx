@@ -22,14 +22,14 @@
 ### 前提条件
 
 - Node.js 22.x LTS
-- pnpm 10.x
+- bun 10.x
 - Docker (PostgreSQL + Redis + MailHog)
 
 ### 手順
 
 ```bash
 # 依存関係のインストール
-pnpm install
+bun install
 
 # Docker サービス起動
 docker compose up -d
@@ -39,8 +39,8 @@ npx prisma migrate deploy --schema=libs/prisma-db/prisma/schema.prisma
 npx prisma db seed --schema=libs/prisma-db/prisma/schema.prisma
 
 # 開発サーバー起動
-pnpm nx serve api   # http://localhost:3000
-pnpm nx serve web   # http://localhost:4200
+bun nx serve api   # http://localhost:3000
+bun nx serve web   # http://localhost:4200
 ```
 
 ### テストアカウント
@@ -58,24 +58,24 @@ pnpm nx serve web   # http://localhost:4200
 
 ```bash
 # ビルド
-pnpm nx build api
-pnpm nx build web
+bun nx build api
+bun nx build web
 
 # Lint
-pnpm nx lint web    # ESLint + eslint-plugin-security
-pnpm nx lint api
+bun nx lint web    # ESLint + eslint-plugin-security
+bun nx lint api
 
 # ユニットテスト
-pnpm nx test api    # 32 suites / 270 tests
-pnpm nx test web    # 28 suites / 200 tests
+bun nx test api    # 32 suites / 270 tests
+bun nx test web    # 28 suites / 200 tests
 
 # E2E テスト (Playwright)
-pnpm playwright test                       # 全テスト (37 tests)
-pnpm playwright test --project=ui-smoke    # UI スモーク (16 tests)
-pnpm playwright test --project=api-smoke   # API スモーク (21 tests)
+bun playwright test                       # 全テスト (37 tests)
+bun playwright test --project=ui-smoke    # UI スモーク (16 tests)
+bun playwright test --project=api-smoke   # API スモーク (21 tests)
 
 # OpenAPI クライアント生成
-pnpm generate:api-client
+bun generate:api-client
 
 # Swagger UI (開発モード)
 open http://localhost:3000/api/docs
@@ -119,6 +119,6 @@ opshub/
 
 ```bash
 cd ../nx-angular-nestjs-doc
-pnpm install
-pnpm dev   # http://localhost:4321
+bun install
+bun dev   # http://localhost:4321
 ```
