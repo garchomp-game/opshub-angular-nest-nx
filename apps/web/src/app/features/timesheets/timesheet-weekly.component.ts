@@ -1,4 +1,4 @@
-import {
+import { ChangeDetectionStrategy,
   Component,
   OnInit,
   inject,
@@ -36,6 +36,7 @@ interface ProjectOption {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-timesheet-weekly',
   standalone: true,
   imports: [

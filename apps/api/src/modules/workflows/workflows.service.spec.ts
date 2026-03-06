@@ -416,7 +416,7 @@ describe('WorkflowsService', () => {
                 size: 1024,
                 mimetype: 'application/pdf',
                 filename: 'uuid-test.pdf',
-            } as Express.Multer.File;
+            };
             const mockAtt = { id: 'att-001', fileName: 'test.pdf' };
 
             mockPrisma.workflow.findUnique.mockResolvedValue(mockWorkflow);

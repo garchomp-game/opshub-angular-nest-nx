@@ -351,7 +351,7 @@ export class WorkflowsService {
     async uploadAttachment(
         tenantId: string,
         workflowId: string,
-        file: Express.Multer.File,
+        file: { originalname: string; size: number; mimetype: string; filename: string },
         userId: string,
     ) {
         // Verify workflow exists

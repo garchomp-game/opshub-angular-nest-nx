@@ -95,14 +95,21 @@ describe('TenantsController', () => {
     });
 
     describe('downloadExport', () => {
-        it('ExportService.getExportFile を呼び res.download でファイルを返すこと', async () => {
+        it('ExportService.getExportFile を呼び reply でファイルを返すこと', async () => {
             mockExportService.getExportFile.mockResolvedValue('/exports/t/export.json');
-            const mockRes = { download: jest.fn() } as any;
+            const mockReply = {
+                header: jest.fn().mockReturnThis(),
+                send: jest.fn(),
+            } as any;
 
-            await controller.downloadExport('job-001', mockRes);
+            await controller.downloadExport('job-001', mockReply);
 
             expect(mockExportService.getExportFile).toHaveBeenCalledWith('job-001');
-            expect(mockRes.download).toHaveBeenCalledWith('/exports/t/export.json');
+            expect(mockReply.header).toHaveBeenCalledWith(
+                'Content-Disposition',
+                expect.stringContaining('export.json'),
+            );
+            expect(mockReply.send).toHaveBeenCalled();
         });
     });
 });

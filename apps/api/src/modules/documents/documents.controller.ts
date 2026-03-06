@@ -6,21 +6,21 @@ import {
     Param,
     Query,
     Res,
+    Req,
     HttpCode,
     HttpStatus,
     UseInterceptors,
-    UploadedFile,
     BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { DocumentsService } from './documents.service';
 import { QueryDocumentDto } from './dto/query-document.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthUser } from '../auth/types/auth.types';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@shared/types';
+import { FastifyFileInterceptor } from '../../common/interceptors/fastify-file.interceptor';
 
 @ApiTags('documents')
 @ApiBearerAuth()
@@ -47,35 +47,28 @@ export class DocumentsController {
     @Post('projects/:projectId/documents')
     @Roles('pm', 'tenant_admin')
     @HttpCode(HttpStatus.CREATED)
-    @UseInterceptors(
-        FileInterceptor('file', {
-            limits: { fileSize: MAX_FILE_SIZE_BYTES },
-            fileFilter: (_req, file, cb) => {
-                if (!ALLOWED_MIME_TYPES.includes(file.mimetype as any)) {
-                    cb(
-                        new BadRequestException({
-                            code: 'ERR-VAL-F03',
-                            message: '許可されていないファイル形式です',
-                        }),
-                        false,
-                    );
-                    return;
-                }
-                cb(null, true);
-            },
-        }),
-    )
+    @UseInterceptors(new FastifyFileInterceptor('file'))
     async upload(
         @Param('projectId') projectId: string,
-        @UploadedFile() file: any, // Multer File
+        @Req() req: FastifyRequest & { incomingFile?: any },
         @CurrentUser() user: AuthUser,
     ) {
+        const file = req.incomingFile;
         if (!file) {
             throw new BadRequestException({
                 code: 'ERR-VAL-F03',
                 message: 'ファイルが指定されていません',
             });
         }
+
+        // MIME タイプ検証
+        if (!ALLOWED_MIME_TYPES.includes(file.mimetype as any)) {
+            throw new BadRequestException({
+                code: 'ERR-VAL-F03',
+                message: '許可されていないファイル形式です',
+            });
+        }
+
         return this.documentsService.upload(
             user.tenantIds[0],
             projectId,
@@ -92,17 +85,16 @@ export class DocumentsController {
     async download(
         @Param('id') id: string,
         @CurrentUser() user: AuthUser,
-        @Res() res: Response,
+        @Res() reply: FastifyReply,
     ) {
         const { buffer, filename, mimeType } =
             await this.documentsService.getDownloadInfo(user.tenantIds[0], id);
 
-        res.set({
-            'Content-Type': mimeType,
-            'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
-            'Content-Length': buffer.length,
-        });
-        res.send(buffer);
+        reply
+            .header('Content-Type', mimeType)
+            .header('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`)
+            .header('Content-Length', buffer.length)
+            .send(buffer);
     }
 
     /**

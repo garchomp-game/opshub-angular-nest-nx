@@ -1,4 +1,4 @@
-import {
+import { ChangeDetectionStrategy,
   Component,
   OnInit,
   inject,
@@ -21,6 +21,7 @@ import {
 import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-timesheet-report',
   standalone: true,
   imports: [

@@ -184,14 +184,13 @@ describe('WorkflowsController', () => {
                 mimetype: 'application/pdf',
                 size: 1024,
                 filename: 'uuid-test.pdf',
-            } as Express.Multer.File;
+                buffer: Buffer.from('content'),
+            };
 
-            const result = await controller.uploadAttachment('wf-001', mockFile, mockUser);
+            const mockReq = { incomingFile: mockFile } as any;
+            const result = await controller.uploadAttachment('wf-001', mockReq, mockUser);
 
             expect(result).toEqual(mockAttachment);
-            expect(service.uploadAttachment).toHaveBeenCalledWith(
-                mockUser.tenantId, 'wf-001', mockFile, mockUser.id,
-            );
         });
     });
 

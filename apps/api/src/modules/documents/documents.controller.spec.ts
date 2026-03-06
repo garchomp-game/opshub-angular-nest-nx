@@ -78,9 +78,10 @@ describe('DocumentsController', () => {
                 mimetype: 'application/pdf',
                 size: 1024,
                 buffer: Buffer.from('content'),
-            } as any;
+            };
+            const mockReq = { incomingFile: mockFile } as any;
 
-            const result = await controller.upload('proj-001', mockFile, mockUser as any);
+            const result = await controller.upload('proj-001', mockReq, mockUser as any);
 
             expect(service.upload).toHaveBeenCalledWith(
                 'tenant-001',
@@ -92,8 +93,9 @@ describe('DocumentsController', () => {
         });
 
         it('ファイル未指定で BadRequestException を投げること', async () => {
+            const mockReq = { incomingFile: undefined } as any;
             await expect(
-                controller.upload('proj-001', undefined as any, mockUser as any),
+                controller.upload('proj-001', mockReq, mockUser as any),
             ).rejects.toThrow();
         });
     });
@@ -102,20 +104,16 @@ describe('DocumentsController', () => {
 
     describe('GET /documents/:id/download', () => {
         it('DocumentsService.getDownloadInfo に委譲してレスポンスを返すこと', async () => {
-            const mockRes = {
-                set: jest.fn(),
+            const mockReply = {
+                header: jest.fn().mockReturnThis(),
                 send: jest.fn(),
             } as any;
 
-            await controller.download('doc-001', mockUser as any, mockRes);
+            await controller.download('doc-001', mockUser as any, mockReply);
 
             expect(service.getDownloadInfo).toHaveBeenCalledWith('tenant-001', 'doc-001');
-            expect(mockRes.set).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    'Content-Type': 'application/pdf',
-                }),
-            );
-            expect(mockRes.send).toHaveBeenCalled();
+            expect(mockReply.header).toHaveBeenCalledWith('Content-Type', 'application/pdf');
+            expect(mockReply.send).toHaveBeenCalled();
         });
     });
 

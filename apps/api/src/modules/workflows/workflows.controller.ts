@@ -1,15 +1,13 @@
 import {
     Controller, Get, Post, Patch, Delete, Param, Body, Query,
-    HttpCode, HttpStatus, UseInterceptors, UploadedFile,
+    HttpCode, HttpStatus, UseInterceptors, Req,
     BadRequestException, StreamableFile, Res,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
 import { extname, join } from 'node:path';
-import { createReadStream } from 'node:fs';
+import { createReadStream, mkdirSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import type { Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { WorkflowsService } from './workflows.service';
@@ -18,6 +16,7 @@ import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { QueryWorkflowDto } from './dto/query-workflow.dto';
 import { RejectWorkflowDto } from './dto/reject-workflow.dto';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@shared/types';
+import { FastifyFileInterceptor, FastifyMultipartFile } from '../../common/interceptors/fastify-file.interceptor';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'workflow-attachments');
 
@@ -92,39 +91,57 @@ export class WorkflowsController {
 
     @Post(':id/attachments')
     @ApiConsumes('multipart/form-data')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: UPLOAD_DIR,
-            filename: (_req, file, cb) => {
-                const uniqueName = `${randomUUID()}${extname(file.originalname)}`;
-                cb(null, uniqueName);
-            },
-        }),
-        limits: { fileSize: MAX_FILE_SIZE_BYTES },
-        fileFilter: (_req, file, cb) => {
-            if ((ALLOWED_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
-                cb(null, true);
-            } else {
-                cb(new BadRequestException({
-                    code: 'ERR-WF-ATT-001',
-                    message: `許可されていないファイル形式です: ${file.mimetype}`,
-                }), false);
-            }
-        },
-    }))
+    @UseInterceptors(new FastifyFileInterceptor('file'))
     uploadAttachment(
         @Param('id') id: string,
-        @UploadedFile() file: Express.Multer.File,
+        @Req() req: FastifyRequest & { incomingFile?: FastifyMultipartFile },
         @CurrentUser() user: any,
     ) {
+        const file = req.incomingFile;
         if (!file) {
             throw new BadRequestException({
                 code: 'ERR-WF-ATT-002',
                 message: 'ファイルが指定されていません',
             });
         }
+
+        // MIME type check
+        if (!(ALLOWED_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
+            throw new BadRequestException({
+                code: 'ERR-WF-ATT-001',
+                message: `許可されていないファイル形式です: ${file.mimetype}`,
+            });
+        }
+
+        // Size check
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+            throw new BadRequestException({
+                code: 'ERR-WF-ATT-003',
+                message: 'ファイルサイズが上限を超えています',
+            });
+        }
+
+        // Save to disk (replaces Multer diskStorage)
+        mkdirSync(UPLOAD_DIR, { recursive: true });
+        const uniqueName = `${randomUUID()}${extname(file.originalname)}`;
+        const filePath = join(UPLOAD_DIR, uniqueName);
+        writeFileSync(filePath, file.buffer);
+
+        // Create a Multer-compatible file object for the service
+        const multerLikeFile = {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            encoding: file.encoding,
+            mimetype: file.mimetype,
+            size: file.size,
+            filename: uniqueName,
+            path: filePath,
+            destination: UPLOAD_DIR,
+            buffer: file.buffer,
+        };
+
         return this.workflowsService.uploadAttachment(
-            user.tenantId, id, file, user.id,
+            user.tenantId, id, multerLikeFile, user.id,
         );
     }
 
@@ -153,7 +170,7 @@ export class WorkflowsController {
         @Param('id') id: string,
         @Param('attachmentId') attachmentId: string,
         @CurrentUser() user: any,
-        @Res({ passthrough: true }) res: Response,
+        @Res({ passthrough: true }) reply: FastifyReply,
     ) {
         const attachment = await this.workflowsService.getAttachmentFile(
             user.tenantId, id, attachmentId,
@@ -162,10 +179,9 @@ export class WorkflowsController {
         const filePath = join(process.cwd(), attachment.storagePath);
         const stream = createReadStream(filePath);
 
-        res.set({
-            'Content-Type': attachment.contentType,
-            'Content-Disposition': `attachment; filename="${encodeURIComponent(attachment.fileName)}"`,
-        });
+        reply
+            .header('Content-Type', attachment.contentType)
+            .header('Content-Disposition', `attachment; filename="${encodeURIComponent(attachment.fileName)}"`);
 
         return new StreamableFile(stream);
     }

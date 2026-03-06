@@ -1,28 +1,41 @@
 import { NestFactory } from '@nestjs/core';
+import { NestFastifyApplication, FastifyAdapter } from '@nestjs/platform-fastify';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as cluster from 'node:cluster';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyMultipart from '@fastify/multipart';
 import { AppModule } from './app/app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import helmet from 'helmet';
-import { json, urlencoded } from 'express';
+import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({
+      bodyLimit: 1_048_576, // 1MB
+    }),
+    { bufferLogs: true },
+  );
 
   // nestjs-pino が NestJS 内部のロガーを置き換え
   app.useLogger(app.get(Logger));
 
-  // Security headers
-  app.use(helmet());
+  // Security headers (Fastify plugin)
+  await app.register(fastifyHelmet as any);
 
-  // Body size limits (nodebestpractices 6.14)
-  app.use(json({ limit: '1mb' }));
-  app.use(urlencoded({ extended: true, limit: '1mb' }));
+  // Multipart / file upload support
+  await app.register(fastifyMultipart as any, {
+    limits: {
+      fileSize: 10_485_760, // 10MB
+    },
+  });
 
   // Global prefix
   app.setGlobalPrefix('api');
@@ -47,14 +60,14 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global interceptors (順序重要: 上から順に実行)
-  // ※ nestjs-pino が HTTP リクエストログを自動記録するため LoggingInterceptor は不要
   app.useGlobalInterceptors(
+    new PerformanceInterceptor(),
     app.get(TenantInterceptor),
     app.get(AuditInterceptor),
     new ResponseInterceptor(),
   );
 
-  // Swagger config (always available for spec generation)
+  // Swagger config
   const config = new DocumentBuilder()
     .setTitle('OpsHub API')
     .setDescription('OpsHub バックエンド API')
@@ -76,10 +89,30 @@ async function bootstrap() {
   }
 
   const port = process.env['PORT'] ?? 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   const logger = app.get(Logger);
-  logger.log(`🚀 API running on http://localhost:${port}/api`);
+  logger.log(`🚀 API worker ${process.pid} running on http://localhost:${port}/api`);
 }
 
-bootstrap();
+// ─── Cluster Mode ───
+// CLUSTER_ENABLED=true かつ Node.js ランタイムの場合のみクラスタモードを有効化
+// Bun は cluster モジュール未対応のため、本番では PM2 を推奨
+const clusterEnabled =
+  process.env['CLUSTER_ENABLED'] === 'true' &&
+  typeof (cluster as any).isPrimary !== 'undefined';
 
+if (clusterEnabled && (cluster as any).isPrimary) {
+  const numWorkers = parseInt(process.env['CLUSTER_WORKERS'] || '', 10) || os.cpus().length;
+  console.log(`🔄 Primary ${process.pid} forking ${numWorkers} workers...`);
+
+  for (let i = 0; i < numWorkers; i++) {
+    (cluster as any).fork();
+  }
+
+  (cluster as any).on('exit', (worker: any, code: number) => {
+    console.warn(`⚠️ Worker ${worker.process.pid} exited (code: ${code}). Restarting...`);
+    (cluster as any).fork();
+  });
+} else {
+  bootstrap();
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
@@ -18,6 +18,7 @@ interface KpiCardConfig {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dashboard',
   standalone: true,
   imports: [DatePipe, KpiCardComponent, CardModule, ButtonModule, ProgressBarModule, ProgressSpinnerModule],
