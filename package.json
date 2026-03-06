@@ -42,7 +42,7 @@
     "@nestjs/testing": "^11.0.0",
     "@nx/angular": "^22.5.2",
     "@nx/eslint": "22.5.2",
-    "@nx/eslint-plugin": "22.5.2",
+    "@nx/eslint-plugin": "22.5.4",
     "@nx/jest": "^22.5.2",
     "@nx/js": "^22.5.2",
     "@nx/nest": "^22.5.2",
