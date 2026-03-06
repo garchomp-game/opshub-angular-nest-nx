@@ -71,7 +71,7 @@
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-security": "^4.0.0",
     "jest": "^30.2.0",
-    "jsdom": "^27.1.0",
+    "jsdom": "^28.1.0",
     "jsonc-eslint-parser": "^2.1.0",
     "ng-openapi-gen": "^1.0.5",
     "nx": "22.5.2",
