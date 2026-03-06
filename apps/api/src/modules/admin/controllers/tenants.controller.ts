@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Res, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
+import { createReadStream } from 'node:fs';
+import { basename } from 'node:path';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CurrentUser as ICurrentUser } from '@shared/types';
@@ -59,9 +61,15 @@ export class TenantsController {
     @Roles('tenant_admin', 'it_admin')
     async downloadExport(
         @Param('jobId') jobId: string,
-        @Res() res: Response,
+        @Res() reply: FastifyReply,
     ) {
         const filePath = await this.exportService.getExportFile(jobId);
-        res.download(filePath);
+        const fileName = basename(filePath);
+        const stream = createReadStream(filePath);
+        reply
+            .header('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`)
+            .header('Content-Type', 'application/octet-stream')
+            .send(stream);
     }
 }
+

@@ -3,6 +3,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { CacheModule } from '@nestjs/cache-manager';
+import { createKeyv } from '@keyv/redis';
 import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from '@prisma-db';
 
@@ -35,9 +37,26 @@ import { MailModule } from '../modules/mail/mail.module';
 import { TenantInterceptor } from '../common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
 
+// Cache
+import { CacheEvictService } from '../common/services/cache-evict.service';
+
+// Workers
+import { WorkerService } from '../common/workers/worker.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: () => {
+        const host = process.env['REDIS_HOST'] || 'localhost';
+        const port = process.env['REDIS_PORT'] || '6379';
+        return {
+          stores: [createKeyv(`redis://${host}:${port}`)],
+          ttl: 60_000, // default 60s
+        };
+      },
+    }),
     BullModule.forRoot({
       connection: {
         host: process.env['REDIS_HOST'] || 'localhost',
@@ -100,6 +119,11 @@ import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
     // Interceptors registered as providers for DI in main.ts
     TenantInterceptor,
     AuditInterceptor,
+    // Cache eviction service (global)
+    CacheEvictService,
+    // Worker thread service (global)
+    WorkerService,
   ],
+  exports: [CacheEvictService, WorkerService],
 })
 export class AppModule { }

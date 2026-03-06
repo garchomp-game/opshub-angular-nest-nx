@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CacheModule } from '@nestjs/cache-manager';
 import { SearchController } from '../search.controller';
 import { SearchService } from '../search.service';
 
@@ -46,6 +47,7 @@ describe('SearchController', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
+            imports: [CacheModule.register()],
             controllers: [SearchController],
             providers: [
                 {

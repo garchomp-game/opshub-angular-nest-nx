@@ -1,8 +1,10 @@
 import {
     Controller, Get, Post, Patch, Delete,
-    Param, Body, Query, HttpCode, HttpStatus,
+    Param, Body, Query, HttpCode, HttpStatus, UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { CacheTTL } from '@nestjs/cache-manager';
+import { TenantCacheInterceptor } from '../../common/interceptors/tenant-cache.interceptor';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -19,6 +21,8 @@ export class ProjectsController {
     constructor(private readonly projectsService: ProjectsService) { }
 
     @Get()
+    @UseInterceptors(TenantCacheInterceptor)
+    @CacheTTL(60_000)
     findAll(@CurrentUser() user: ICurrentUser, @Query() query: QueryProjectDto) {
         return this.projectsService.findAll(user.tenantId, user.id, query);
     }

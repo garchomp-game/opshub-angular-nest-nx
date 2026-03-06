@@ -1,8 +1,9 @@
-import { Component, input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kpi-card',
   standalone: true,
   imports: [CardModule],
