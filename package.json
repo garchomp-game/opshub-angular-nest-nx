@@ -48,7 +48,7 @@
     "@nx/nest": "^22.5.2",
     "@nx/node": "22.5.2",
     "@nx/web": "22.5.2",
-    "@nx/webpack": "22.5.2",
+    "@nx/webpack": "22.5.4",
     "@nx/workspace": "22.5.2",
     "@playwright/test": "^1.58.2",
     "@schematics/angular": "~21.1.0",
