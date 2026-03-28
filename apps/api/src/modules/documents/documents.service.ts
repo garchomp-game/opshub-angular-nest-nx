@@ -120,7 +120,7 @@ export class DocumentsService {
             });
         } catch (error) {
             // 3. DB 失敗時は Storage を削除（ロールバック）
-            await this.storage.delete(storagePath).catch(() => { });
+            await this.storage.delete(storagePath).catch(() => { /* rollback best-effort */ });
             throw error;
         }
     }

@@ -26,7 +26,7 @@ jest.mock('node:fs', () => {
 
 // archiver モック
 jest.mock('archiver', () => {
-    let resolveClose: (() => void) | null = null;
+    const resolveClose: (() => void) | null = null;
     return {
         create: jest.fn(() => ({
             pipe: jest.fn(),

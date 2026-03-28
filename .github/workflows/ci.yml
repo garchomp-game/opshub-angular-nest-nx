@@ -67,7 +67,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: node_modules/.cache
-          key: nx-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          key: nx-${{ runner.os }}-${{ hashFiles('bun.lock') }}
 
       - name: Derive NX affected base
         id: nx-base
