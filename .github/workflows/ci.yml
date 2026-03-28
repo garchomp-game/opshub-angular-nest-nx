@@ -88,7 +88,7 @@ jobs:
         run: bun run generate:api-client
 
       - name: Lint (affected)
-        run: bunx nx affected --target=lint --base=${{ steps.nx-base.outputs.base }} --max-warnings=50
+        run: bunx nx affected --target=lint --base=${{ steps.nx-base.outputs.base }}
 
       - name: Test (affected)
         run: bunx nx affected --target=test --base=${{ steps.nx-base.outputs.base }} --watch=false
